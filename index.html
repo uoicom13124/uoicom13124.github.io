@@ -78,6 +78,32 @@
             padding: 20px 0;
         }
 
+        /* Admin Button */
+        .admin-float-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
+            z-index: 999;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-float-btn:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 15px 40px rgba(239, 68, 68, 0.6);
+        }
+
         /* Navigation */
         nav {
             background: rgba(255, 255, 255, 0.95);
@@ -575,6 +601,13 @@
             .nav-links { display: none; }
             .portfolio-grid { grid-template-columns: 1fr; }
             .cta-buttons { flex-direction: column; }
+            .admin-float-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+                bottom: 20px;
+                right: 20px;
+            }
         }
 
         /* Scroll animations */
@@ -599,9 +632,14 @@
         </div>
     </div>
 
+    <!-- Admin Float Button -->
+    <a href="admin.html" class="admin-float-btn" title="เข้าสู่ระบบ Admin">
+        <i class="fas fa-cog"></i>
+    </a>
+
     <nav>
         <div class="container">
-            <div class="nav-brand">เมก้า 👨‍💻</div>
+            <div class="nav-brand" id="navBrand">เมก้า 👨‍💻</div>
             <ul class="nav-links">
                 <li><a href="#home">หน้าแรก</a></li>
                 <li><a href="#skills">ทักษะ</a></li>
@@ -614,10 +652,10 @@
 
     <div class="container">
         <section id="home" class="hero-section">
-            <img src="https://img2.pic.in.th/pic/IMG_20251114_110305.jpg" alt="รูปโปรไฟล์นักเรียน" class="profile-photo">
-            <h1>สวัสดีครับ, ผม เมก้า</h1>
-            <p class="tagline">✨ นักเรียนผู้หลงใหลในการเขียนโค้ด</p>
-            <p class="description">กำลังศึกษาและพัฒนาทักษะในโลกดิจิทัล พร้อมเรียนรู้เทคโนโลยีใหม่ๆ และสร้างสรรค์สิ่งที่น่าตื่นตาตื่นใจ 🚀</p>
+            <img id="profilePhoto" src="https://img2.pic.in.th/pic/IMG_20251114_110305.jpg" alt="รูปโปรไฟล์นักเรียน" class="profile-photo">
+            <h1 id="profileTitle">สวัสดีครับ, ผม เมก้า</h1>
+            <p class="tagline" id="profileTagline">✨ นักเรียนผู้หลงใหลในการเขียนโค้ด</p>
+            <p class="description" id="profileDescription">กำลังศึกษาและพัฒนาทักษะในโลกดิจิทัล พร้อมเรียนรู้เทคโนโลยีใหม่ๆ และสร้างสรรค์สิ่งที่น่าตื่นตาตื่นใจ 🚀</p>
             <div class="cta-buttons">
                 <a href="#portfolio" class="btn btn-primary">ดูผลงานของผม</a>
                 <a href="#contact" class="btn btn-secondary">ติดต่อผม</a>
@@ -626,38 +664,15 @@
 
         <section id="skills" class="skills-section fade-in">
             <h2 class="section-title">💻 ทักษะการเขียนโค้ด</h2>
-            <div class="skill-list">
-                <div class="skill-item">HTML5</div>
-                <div class="skill-item">CSS3 & Animation</div>
-                <div class="skill-item">JavaScript</div>
-                <div class="skill-item">Python</div>
-                <div class="skill-item">Git & GitHub</div>
-                <div class="skill-item">Responsive Design</div>
-                <div class="skill-item">UI/UX Design</div>
-                <div class="skill-item">AI Integration</div>
+            <div class="skill-list" id="skillList">
+                <!-- Skills will be loaded here -->
             </div>
         </section>
 
         <section id="portfolio" class="portfolio-section fade-in">
             <h2 class="section-title">✨ ผลงานของผม</h2>
-            <div class="portfolio-grid">
-                <div class="project-card">
-                    <img src="https://img2.pic.in.th/pic/Gemini_Generated_Image_kas7wskas7wskas70fa0f75ef4f13073.png" alt="รูปจาก AI สไตล์ Chibi">
-                    <div class="project-card-content">
-                        <h3>🎨 ตัวละครสไตล์ Chibi</h3>
-                        <p>สร้างสรรค์ภาพตัวละครน่ารักด้วย AI และเทคนิคการออกแบบ ที่ทำให้ตัวผมกลายเป็นตัวการ์ตูนสุดน่ารัก</p>
-                    </div>
-                    <a href="https://img2.pic.in.th/pic/Gemini_Generated_Image_kas7wskas7wskas70fa0f75ef4f13073.png" target="_blank">ดูรูปเต็ม →</a>
-                </div>
-                
-                <div class="project-card">
-                    <img src="https://img2.pic.in.th/pic/1763093613326.jpg" alt="รูปจาก AI แขนหุ่นยนต์">
-                    <div class="project-card-content">
-                        <h3>🤖 แขนหุ่นยนต์ไซเบอร์พังก์</h3>
-                        <p>ผลงานการปรับแต่งภาพด้วย AI พร้อมการออกแบบแขนกลที่ดูล้ำสมัย เต็มไปด้วยรายละเอียดทางเทคโนโลยี</p>
-                    </div>
-                    <a href="https://img2.pic.in.th/pic/1763093613326.jpg" target="_blank">ดูรูปเต็ม →</a>
-                </div>
+            <div class="portfolio-grid" id="portfolioGrid">
+                <!-- Projects will be loaded here -->
             </div>
         </section>
 
@@ -688,7 +703,7 @@
         <section id="contact" class="contact-section fade-in">
             <h2 class="section-title">📮 ติดต่อผม</h2>
             <p>สนใจติดต่อเพื่อแลกเปลี่ยนความรู้ ร่วมงาน หรือโอกาสทางการศึกษา</p>
-            <a href="mailto:uoicom01@gmail.com" class="email-button">
+            <a href="mailto:uoicom01@gmail.com" class="email-button" id="emailButton">
                 <i class="fas fa-envelope"></i> ส่งอีเมลหาผม
             </a>
             <div class="social-links">
@@ -700,15 +715,109 @@
     </div>
 
     <footer>
-        <p>&copy; 2024 เมก้า | Student Developer Portfolio | Made with ❤️</p>
+        <p>&copy; 2024 <span id="footerName">เมก้า</span> | Student Developer Portfolio | Made with ❤️</p>
     </footer>
 
     <script>
-        // Google Apps Script Web App URL - แทนที่ด้วย URL ของคุณ
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwCANOGos05cnO06GAYqymLd_2MNN2yAWh9GpGD9ypf2UJ5TXM099H3FR-26oRpL2Sbdw/exec';
 
-        // Load comments on page load
-        document.addEventListener('DOMContentLoaded', loadComments);
+        // Load data from localStorage
+        function loadProfileData() {
+            const profile = JSON.parse(localStorage.getItem('siteProfile') || '{}');
+            
+            if (profile.image) {
+                document.getElementById('profilePhoto').src = profile.image;
+            }
+            if (profile.name) {
+                document.getElementById('profileTitle').textContent = `สวัสดีครับ, ผม ${profile.name}`;
+                document.getElementById('navBrand').textContent = `${profile.name} 👨‍💻`;
+                document.getElementById('footerName').textContent = profile.name;
+            }
+            if (profile.tagline) {
+                document.getElementById('profileTagline').textContent = profile.tagline;
+            }
+            if (profile.description) {
+                document.getElementById('profileDescription').textContent = profile.description;
+            }
+            if (profile.email) {
+                document.getElementById('emailButton').href = `mailto:${profile.email}`;
+            }
+            
+            // Apply theme colors
+            if (profile.primaryColor || profile.secondaryColor) {
+                const root = document.documentElement;
+                if (profile.primaryColor) {
+                    root.style.setProperty('--primary-color', profile.primaryColor);
+                }
+                if (profile.secondaryColor) {
+                    root.style.setProperty('--secondary-color', profile.secondaryColor);
+                }
+            }
+        }
+
+        function loadSkills() {
+            const skills = JSON.parse(localStorage.getItem('siteSkills') || '[]');
+            const skillList = document.getElementById('skillList');
+            
+            if (skills.length === 0) {
+                // Default skills
+                const defaultSkills = ['HTML5', 'CSS3 & Animation', 'JavaScript', 'Python', 'Git & GitHub', 'Responsive Design', 'UI/UX Design', 'AI Integration'];
+                skillList.innerHTML = defaultSkills.map(skill => 
+                    `<div class="skill-item">${skill}</div>`
+                ).join('');
+            } else {
+                skillList.innerHTML = skills.map(skill => 
+                    `<div class="skill-item">${skill}</div>`
+                ).join('');
+            }
+        }
+
+        function loadProjects() {
+            const projects = JSON.parse(localStorage.getItem('siteProjects') || '[]');
+            const portfolioGrid = document.getElementById('portfolioGrid');
+            
+            if (projects.length === 0) {
+                // Default projects
+                const defaultProjects = [
+                    {
+                        image: 'https://img2.pic.in.th/pic/Gemini_Generated_Image_kas7wskas7wskas70fa0f75ef4f13073.png',
+                        title: '🎨 ตัวละครสไตล์ Chibi',
+                        description: 'สร้างสรรค์ภาพตัวละครน่ารักด้วย AI และเทคนิคการออกแบบ ที่ทำให้ตัวผมกลายเป็นตัวการ์ตูนสุดน่ารัก',
+                        link: 'https://img2.pic.in.th/pic/Gemini_Generated_Image_kas7wskas7wskas70fa0f75ef4f13073.png'
+                    },
+                    {
+                        image: 'https://img2.pic.in.th/pic/1763093613326.jpg',
+                        title: '🤖 แขนหุ่นยนต์ไซเบอร์พังก์',
+                        description: 'ผลงานการปรับแต่งภาพด้วย AI พร้อมการออกแบบแขนกลที่ดูล้ำสมัย เต็มไปด้วยรายละเอียดทางเทคโนโลยี',
+                        link: 'https://img2.pic.in.th/pic/1763093613326.jpg'
+                    }
+                ];
+                portfolioGrid.innerHTML = defaultProjects.map(project => createProjectCard(project)).join('');
+            } else {
+                portfolioGrid.innerHTML = projects.map(project => createProjectCard(project)).join('');
+            }
+        }
+
+        function createProjectCard(project) {
+            return `
+                <div class="project-card">
+                    <img src="${project.image}" alt="${project.title}">
+                    <div class="project-card-content">
+                        <h3>${project.title}</h3>
+                        <p>${project.description}</p>
+                    </div>
+                    <a href="${project.link}" target="_blank">ดูรูปเต็ม →</a>
+                </div>
+            `;
+        }
+
+        // Load all data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProfileData();
+            loadSkills();
+            loadProjects();
+            loadComments();
+        });
 
         // Handle form submission
         document.getElementById('commentForm').addEventListener('submit', async (e) => {
