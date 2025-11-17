@@ -719,64 +719,75 @@
     </footer>
 
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2BcLAUNJpRYPtUOFtllQFNGCMMW8l-oRXphtucfoCP6bWMeA9niVa_5gHOHwnNpTz3A/exec';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwCANOGos05cnO06GAYqymLd_2MNN2yAWh9GpGD9ypf2UJ5TXM099H3FR-26oRpL2Sbdw/exec';
 
-        // Load data from localStorage
-        function loadProfileData() {
-            const profile = JSON.parse(localStorage.getItem('siteProfile') || '{}');
-            
-            if (profile.image) {
-                document.getElementById('profilePhoto').src = profile.image;
-            }
-            if (profile.name) {
-                document.getElementById('profileTitle').textContent = `สวัสดีครับ, ผม ${profile.name}`;
-                document.getElementById('navBrand').textContent = `${profile.name} 👨‍💻`;
-                document.getElementById('footerName').textContent = profile.name;
-            }
-            if (profile.tagline) {
-                document.getElementById('profileTagline').textContent = profile.tagline;
-            }
-            if (profile.description) {
-                document.getElementById('profileDescription').textContent = profile.description;
-            }
-            if (profile.email) {
-                document.getElementById('emailButton').href = `mailto:${profile.email}`;
-            }
-            
-            // Apply theme colors
-            if (profile.primaryColor || profile.secondaryColor) {
-                const root = document.documentElement;
-                if (profile.primaryColor) {
-                    root.style.setProperty('--primary-color', profile.primaryColor);
+        // Load data from PHP API
+        async function loadProfileData() {
+            try {
+                const response = await fetch('api.php?action=getProfile');
+                const profile = await response.json();
+                
+                if (profile.image) {
+                    document.getElementById('profilePhoto').src = profile.image;
                 }
-                if (profile.secondaryColor) {
-                    root.style.setProperty('--secondary-color', profile.secondaryColor);
+                if (profile.name) {
+                    document.getElementById('profileTitle').textContent = `สวัสดีครับ, ผม ${profile.name}`;
+                    document.getElementById('navBrand').textContent = `${profile.name} 👨‍💻`;
+                    document.getElementById('footerName').textContent = profile.name;
                 }
+                if (profile.tagline) {
+                    document.getElementById('profileTagline').textContent = profile.tagline;
+                }
+                if (profile.description) {
+                    document.getElementById('profileDescription').textContent = profile.description;
+                }
+                if (profile.email) {
+                    document.getElementById('emailButton').href = `mailto:${profile.email}`;
+                }
+                
+                // Apply theme colors
+                if (profile.primaryColor || profile.secondaryColor) {
+                    const root = document.documentElement;
+                    if (profile.primaryColor) {
+                        root.style.setProperty('--primary-color', profile.primaryColor);
+                    }
+                    if (profile.secondaryColor) {
+                        root.style.setProperty('--secondary-color', profile.secondaryColor);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
             }
         }
 
-        function loadSkills() {
-            const skills = JSON.parse(localStorage.getItem('siteSkills') || '[]');
-            const skillList = document.getElementById('skillList');
-            
-            if (skills.length === 0) {
-                // Default skills
-                const defaultSkills = ['HTML5', 'CSS3 & Animation', 'JavaScript', 'Python', 'Git & GitHub', 'Responsive Design', 'UI/UX Design', 'AI Integration'];
-                skillList.innerHTML = defaultSkills.map(skill => 
-                    `<div class="skill-item">${skill}</div>`
-                ).join('');
-            } else {
+        async function loadSkills() {
+            try {
+                const response = await fetch('api.php?action=getSkills');
+                const skills = await response.json();
+                const skillList = document.getElementById('skillList');
+                
                 skillList.innerHTML = skills.map(skill => 
                     `<div class="skill-item">${skill}</div>`
                 ).join('');
+            } catch (error) {
+                console.error('Error loading skills:', error);
+                // Default skills
+                const defaultSkills = ['HTML5', 'CSS3 & Animation', 'JavaScript', 'Python', 'Git & GitHub', 'Responsive Design', 'UI/UX Design', 'AI Integration'];
+                document.getElementById('skillList').innerHTML = defaultSkills.map(skill => 
+                    `<div class="skill-item">${skill}</div>`
+                ).join('');
             }
         }
 
-        function loadProjects() {
-            const projects = JSON.parse(localStorage.getItem('siteProjects') || '[]');
-            const portfolioGrid = document.getElementById('portfolioGrid');
-            
-            if (projects.length === 0) {
+        async function loadProjects() {
+            try {
+                const response = await fetch('api.php?action=getProjects');
+                const projects = await response.json();
+                const portfolioGrid = document.getElementById('portfolioGrid');
+                
+                portfolioGrid.innerHTML = projects.map(project => createProjectCard(project)).join('');
+            } catch (error) {
+                console.error('Error loading projects:', error);
                 // Default projects
                 const defaultProjects = [
                     {
@@ -792,9 +803,7 @@
                         link: 'https://img2.pic.in.th/pic/1763093613326.jpg'
                     }
                 ];
-                portfolioGrid.innerHTML = defaultProjects.map(project => createProjectCard(project)).join('');
-            } else {
-                portfolioGrid.innerHTML = projects.map(project => createProjectCard(project)).join('');
+                document.getElementById('portfolioGrid').innerHTML = defaultProjects.map(project => createProjectCard(project)).join('');
             }
         }
 
