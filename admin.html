@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - จัดการเว็บไซต์</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #2563EB;
+            --danger: #EF4444;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --dark: #1F2937;
+            --light: #F9FAFB;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-box {
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-box h1 {
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #E5E7EB;
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            font-family: 'Kanit', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .login-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .error-msg {
+            color: var(--danger);
+            margin-top: 15px;
+            display: none;
+        }
+
+        .admin-container {
+            display: none;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .admin-header {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h1 {
+            color: var(--primary);
+            font-size: 2rem;
+        }
+
+        .logout-btn {
+            background: var(--danger);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 20px;
+            background: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #E5E7EB;
+            border-radius: 8px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .save-btn {
+            background: var(--success);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .save-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .delete-btn {
+            background: var(--danger);
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-left: 10px;
+        }
+
+        .delete-btn:hover {
+            background: #DC2626;
+            transform: scale(1.05);
+        }
+
+        .project-list, .skill-list-admin {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .project-item, .skill-item-admin {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .project-item img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-right: 20px;
+        }
+
+        .project-info {
+            flex: 1;
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .add-new-btn {
+            background: var(--primary);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .add-new-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-header h2 {
+            color: var(--primary);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--dark);
+            cursor: pointer;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .stat-card i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            opacity: 0.8;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 8px;
+        }
+
+        .back-home-btn {
+            display: inline-block;
+            background: white;
+            color: var(--primary);
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .back-home-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .comment-admin-item {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .comment-info {
+            flex: 1;
+        }
+
+        .color-picker-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .color-picker-group input[type="color"] {
+            width: 80px;
+            height: 50px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .project-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .project-item img {
+                margin: 0 0 15px 0;
+            }
+
+            .project-actions {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-container" id="loginScreen">
+        <div class="login-box">
+            <h1><i class="fas fa-lock"></i> Admin Login</h1>
+            <p style="color: #6B7280; margin-bottom: 30px;">กรุณาใส่รหัสผ่านเพื่อเข้าสู่ระบบ</p>
+            <input type="password" id="passwordInput" placeholder="รหัสผ่าน">
+            <button class="login-btn" onclick="login()">
+                <i class="fas fa-sign-in-alt"></i> เข้าสู่ระบบ
+            </button>
+            <p class="error-msg" id="errorMsg">
+                <i class="fas fa-exclamation-circle"></i> รหัสผ่านไม่ถูกต้อง!
+            </p>
+            <a href="index.html" class="back-home-btn">
+                <i class="fas fa-home"></i> กลับหน้าหลัก
+            </a>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-container" id="adminPanel">
+        <div class="admin-header">
+            <div>
+                <h1><i class="fas fa-cog"></i> Admin Panel</h1>
+                <p style="color: #6B7280;">จัดการเว็บไซต์ของคุณ</p>
+            </div>
+            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <a href="index.html" class="back-home-btn">
+                    <i class="fas fa-home"></i> หน้าหลัก
+                </a>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <i class="fas fa-user"></i>
+                <h3>1</h3>
+                <p>โปรไฟล์</p>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #10B981, #059669);">
+                <i class="fas fa-folder"></i>
+                <h3 id="projectCount">0</h3>
+                <p>ผลงาน</p>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #F59E0B, #D97706);">
+                <i class="fas fa-code"></i>
+                <h3 id="skillCount">0</h3>
+                <p>ทักษะ</p>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #EF4444, #DC2626);">
+                <i class="fas fa-comments"></i>
+                <h3 id="commentCount">0</h3>
+                <p>ความคิดเห็น</p>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="openTab('profile')">
+                <i class="fas fa-user"></i> โปรไฟล์
+            </button>
+            <button class="tab-btn" onclick="openTab('projects')">
+                <i class="fas fa-folder"></i> ผลงาน
+            </button>
+            <button class="tab-btn" onclick="openTab('skills')">
+                <i class="fas fa-code"></i> ทักษะ
+            </button>
+            <button class="tab-btn" onclick="openTab('comments')">
+                <i class="fas fa-comments"></i> คอมเม้นต์
+            </button>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="profileTab" class="tab-content active">
+            <h2 class="section-title"><i class="fas fa-user"></i> แก้ไขโปรไฟล์</h2>
+            
+            <div class="form-group">
+                <label>รูปโปรไฟล์ (URL)</label>
+                <input type="text" id="profileImage" placeholder="https://...">
+                <img id="profilePreview" class="preview-image" style="display: none;">
+            </div>
+
+            <div class="form-group">
+                <label>ชื่อ</label>
+                <input type="text" id="profileName" placeholder="เมก้า">
+            </div>
+
+            <div class="form-group">
+                <label>คำบรรยาย</label>
+                <input type="text" id="profileTagline" placeholder="นักเรียนผู้หลงใหลในการเขียนโค้ด">
+            </div>
+
+            <div class="form-group">
+                <label>รายละเอียด</label>
+                <textarea id="profileDescription" placeholder="กำลังศึกษาและพัฒนาทักษะ..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>อีเมล</label>
+                <input type="email" id="profileEmail" placeholder="your@email.com">
+            </div>
+
+            <div class="form-group">
+                <label>สีหลัก</label>
+                <div class="color-picker-group">
+                    <input type="color" id="primaryColor" value="#3B82F6">
+                    <span id="primaryColorValue">#3B82F6</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>สีรอง</label>
+                <div class="color-picker-group">
+                    <input type="color" id="secondaryColor" value="#10B981">
+                    <span id="secondaryColorValue">#10B981</span>
+                </div>
+            </div>
+
+            <button class="save-btn" onclick="saveProfile()">
+                <i class="fas fa-save"></i> บันทึกโปรไฟล์
+            </button>
+        </div>
+
+        <!-- Projects Tab -->
+        <div id="projectsTab" class="tab-content">
+            <h2 class="section-title"><i class="fas fa-folder"></i> จัดการผลงาน</h2>
+            
+            <button class="add-new-btn" onclick="openProjectModal()">
+                <i class="fas fa-plus"></i> เพิ่มผลงานใหม่
+            </button>
+
+            <div class="project-list" id="projectList"></div>
+        </div>
+
+        <!-- Skills Tab -->
+        <div id="skillsTab" class="tab-content">
+            <h2 class="section-title"><i class="fas fa-code"></i> จัดการทักษะ</h2>
+            
+            <button class="add-new-btn" onclick="openSkillModal()">
+                <i class="fas fa-plus"></i> เพิ่มทักษะใหม่
+            </button>
+
+            <div class="skill-list-admin" id="skillList"></div>
+        </div>
+
+        <!-- Comments Tab -->
+        <div id="commentsTab" class="tab-content">
+            <h2 class="section-title"><i class="fas fa-comments"></i> จัดการความคิดเห็น</h2>
+            <div class="comments-list" id="commentsList"></div>
+        </div>
+    </div>
+
+    <!-- Project Modal -->
+    <div class="modal" id="projectModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-folder-plus"></i> <span id="projectModalTitle">เพิ่มผลงาน</span></h2>
+                <button class="close-modal" onclick="closeProjectModal()">&times;</button>
+            </div>
+
+            <input type="hidden" id="projectEditIndex">
+
+            <div class="form-group">
+                <label>รูปภาพ (URL)</label>
+                <input type="text" id="projectImage" placeholder="https://...">
+                <img id="projectImagePreview" class="preview-image" style="display: none;">
+            </div>
+
+            <div class="form-group">
+                <label>ชื่อผลงาน</label>
+                <input type="text" id="projectTitle" placeholder="ชื่อโปรเจค">
+            </div>
+
+            <div class="form-group">
+                <label>รายละเอียด</label>
+                <textarea id="projectDescription" placeholder="อธิบายผลงานของคุณ..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>ลิงก์</label>
+                <input type="text" id="projectLink" placeholder="https://...">
+            </div>
+
+            <button class="save-btn" onclick="saveProject()">
+                <i class="fas fa-save"></i> บันทึก
+            </button>
+        </div>
+    </div>
+
+    <!-- Skill Modal -->
+    <div class="modal" id="skillModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-code"></i> เพิ่มทักษะ</h2>
+                <button class="close-modal" onclick="closeSkillModal()">&times;</button>
+            </div>
+
+            <div class="form-group">
+                <label>ชื่อทักษะ</label>
+                <input type="text" id="skillName" placeholder="เช่น HTML5, Python, React">
+            </div>
+
+            <button class="save-btn" onclick="saveSkill()">
+                <i class="fas fa-save"></i> บันทึก
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASSWORD = 'sans13124';
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwCANOGos05cnO06GAYqymLd_2MNN2yAWh9GpGD9ypf2UJ5TXM099H3FR-26oRpL2Sbdw/exec';
+
+        // ตรวจสอบการล็อกอิน
+        if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+            showAdminPanel();
+        }
+
+        // Login
+        function login() {
+            const password = document.getElementById('passwordInput').value;
+            if (password === ADMIN_PASSWORD) {
+                sessionStorage.setItem('adminLoggedIn', 'true');
+                showAdminPanel();
+            } else {
+                const errorMsg = document.getElementById('errorMsg');
+                errorMsg.style.display = 'block';
+                setTimeout(() => errorMsg.style.display = 'none', 3000);
+            }
+        }
+
+        document.getElementById('passwordInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') login();
+        });
+
+        function showAdminPanel() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            loadAllData();
+        }
+
+        function logout() {
+            if (confirm('ต้องการออกจากระบบ?')) {
+                sessionStorage.clear();
+                location.reload();
+            }
+        }
+
+        // Tab Management
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabName + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Load All Data
+        async function loadAllData() {
+            loadProfile();
+            loadProjects();
+            loadSkills();
+            loadComments();
+        }
+
+        // Profile Management
+        function loadProfile() {
+            const profile = JSON.parse(localStorage.getItem('siteProfile') || '{}');
+            document.getElementById('profileImage').value = profile.image || 'https://img2.pic.in.th/pic/IMG_20251114_110305.jpg';
+            document.getElementById('profileName').value = profile.name || 'เมก้า';
+            document.getElementById('profileTagline').value = profile.tagline || '✨ นักเรียนผู้หลงใหลในการเขียนโค้ด';
+            document.getElementById('profileDescription').value = profile.description || 'กำลังศึกษาและพัฒนาทักษะในโลกดิจิทัล';
+            document.getElementById('profileEmail').value = profile.email || 'uoicom01@gmail.com';
+            document.getElementById('primaryColor').value = profile.primaryColor || '#3B82F6';
+            document.getElementById('secondaryColor').value = profile.secondaryColor || '#10B981';
+            
+            updateColorDisplay();
+            previewProfileImage();
+        }
+
+        function saveProfile() {
+            const profile = {
+                image: document.getElementById('profileImage').value,
+                name: document.getElementById('profileName').value,
+                tagline: document.getElementById('profileTagline').value,
+                description: document.getElementById('profileDescription').value,
+                email: document.getElementById('profileEmail').value,
+                primaryColor: document.getElementById('primaryColor').value,
+                secondaryColor: document.getElementById('secondaryColor').value
+            };
+            
+            localStorage.setItem('siteProfile', JSON.stringify(profile));
+            alert('✅ บันทึกโปรไฟล์สำเร็จ!');
+        }
+
+        // Preview Images
+        document.getElementById('profileImage').addEventListener('input', previewProfileImage);
+        document.getElementById('projectImage').addEventListener('input', previewProjectImage);
+
+        function previewProfileImage() {
+            const url = document.getElementById('profileImage').value;
+            const preview = document.getElementById('profilePreview');
+            if (url) {
+                preview.src = url;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+
+        function previewProjectImage() {
+            const url = document.getElementById('projectImage').value;
+            const preview = document.getElementById('projectImagePreview');
+            if (url) {
+                preview.src = url;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+
+        // Color Picker
+        document.getElementById('primaryColor').addEventListener('input', updateColorDisplay);
+        document.getElementById('secondaryColor').addEventListener('input', updateColorDisplay);
+
+        function updateColorDisplay() {
+            document.getElementById('primaryColorValue').textContent = document.getElementById('primaryColor').value;
+            document.getElementById('secondaryColorValue').textContent = document.getElementById('secondaryColor').value;
+        }
+
+        // Projects Management
+        function loadProjects() {
+            const projects = JSON.parse(localStorage.getItem('siteProjects') || '[]');
+            const projectList = document.getElementById('projectList');
+            document.getElementById('projectCount').textContent = projects.length;
+
+            if (projects.length === 0) {
+                projectList.innerHTML = '<p style="text-align: center; color: #6B7280;">ยังไม่มีผลงาน</p>';
+                return;
+            }
+
+            projectList.innerHTML = projects.map((p, i) => `
+                <div class="project-item">
+                    <img src="${p.image}" alt="${p.title}">
+                    <div class="project-info">
+                        <h3>${p.title}</h3>
+                        <p>${p.description}</p>
+                        <small>${p.link}</small>
+                    </div>
+                    <div class="project-actions">
+                        <button class="save-btn" onclick="editProject(${i})">
+                            <i class="fas fa-edit"></i> แก้ไข
+                        </button>
+                        <button class="delete-btn" onclick="deleteProject(${i})">
+                            <i class="fas fa-trash"></i> ลบ
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openProjectModal(index = null) {
+            document.getElementById('projectModal').classList.add('active');
+            document.getElementById('projectEditIndex').value = index !== null ? index : '';
+            
+            if (index !== null) {
+                const projects = JSON.parse(localStorage.getItem('siteProjects') || '[]');
+                const p = projects[index];
+                document.getElementById('projectModalTitle').textContent = 'แก้ไขผลงาน';
+                document.getElementById('projectImage').value = p.image;
+                document.getElementById('projectTitle').value = p.title;
+                document.getElementById('projectDescription').value = p.description;
+                document.getElementById('projectLink').value = p.link;
+                previewProjectImage();
+            } else {
+                document.getElementById('projectModalTitle').textContent = 'เพิ่มผลงาน';
+                document.getElementById('projectImage').value = '';
+                document.getElementById('projectTitle').value = '';
+                document.getElementById('projectDescription').value = '';
+                document.getElementById('projectLink').value = '';
+                document.getElementById('projectImagePreview').style.display = 'none';
+            }
+        }
+
+        function editProject(index) {
+            openProjectModal(index);
+        }
+
+        function closeProjectModal() {
+            document.getElementById('projectModal').classList.remove('active');
+        }
+
+        function saveProject() {
+            const projects = JSON.parse(localStorage.getItem('siteProjects') || '[]');
+            const indexValue = document.getElementById('projectEditIndex').value;
+            
+            const project = {
+                image: document.getElementById('projectImage').value,
+                title: document.getElementById('projectTitle').value,
+                description: document.getElementById('projectDescription').value,
+                link: document.getElementById('projectLink').value
+            };
+
+            if (!project.title || !project.description) {
+                alert('❌ กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+
+            if (indexValue !== '') {
+                projects[parseInt(indexValue)] = project;
+            } else {
+                projects.push(project);
+            }
+
+            localStorage.setItem('siteProjects', JSON.stringify(projects));
+            closeProjectModal();
+            loadProjects();
+            alert('✅ บันทึกผลงานสำเร็จ!');
+        }
+
+        function deleteProject(index) {
+            if (!confirm('ต้องการลบผลงานนี้?')) return;
+            
+            const projects = JSON.parse(localStorage.getItem('siteProjects') || '[]');
+            projects.splice(index, 1);
+            localStorage.setItem('siteProjects', JSON.stringify(projects));
+            loadProjects();
+            alert('✅ ลบผลงานสำเร็จ!');
+        }
+
+        // Skills Management
+        function loadSkills() {
+            const skills = JSON.parse(localStorage.getItem('siteSkills') || '[]');
+            const skillList = document.getElementById('skillList');
+            document.getElementById('skillCount').textContent = skills.length;
+
+            if (skills.length === 0) {
+                skillList.innerHTML = '<p style="text-align: center; color: #6B7280;">ยังไม่มีทักษะ</p>';
+                return;
+            }
+
+            skillList.innerHTML = skills.map((skill, i) => `
+                <div class="skill-item-admin">
+                    <div style="flex: 1;">
+                        <strong>${skill}</strong>
+                    </div>
+                    <button class="delete-btn" onclick="deleteSkill(${i})">
+                        <i class="fas fa-trash"></i> ลบ
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function openSkillModal() {
+            document.getElementById('skillModal').classList.add('active');
+            document.getElementById('skillName').value = '';
+        }
+
+        function closeSkillModal() {
+            document.getElementById('skillModal').classList.remove('active');
+        }
+
+        function saveSkill() {
+            const skills = JSON.parse(localStorage.getItem('siteSkills') || '[]');
+            const skillName = document.getElementById('skillName').value.trim();
+
+            if (!skillName) {
+                alert('❌ กรุณากรอกชื่อทักษะ');
+                return;
+            }
+
+            skills.push(skillName);
+            localStorage.setItem('siteSkills', JSON.stringify(skills));
+            closeSkillModal();
+            loadSkills();
+            alert('✅ เพิ่มทักษะสำเร็จ!');
+        }
+
+        function deleteSkill(index) {
+            if (!confirm('ต้องการลบทักษะนี้?')) return;
+            
+            const skills = JSON.parse(localStorage.getItem('siteSkills') || '[]');
+            skills.splice(index, 1);
+            localStorage.setItem('siteSkills', JSON.stringify(skills));
+            loadSkills();
+            alert('✅ ลบทักษะสำเร็จ!');
+        }
+
+        // Comments Management
+        async function loadComments() {
+            const commentsList = document.getElementById('commentsList');
+            commentsList.innerHTML = '<p style="text-align: center; color: #6B7280;">กำลังโหลด...</p>';
+
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+                
+                document.getElementById('commentCount').textContent = data.comments?.length || 0;
+
+                if (data.comments && data.comments.length > 0) {
+                    commentsList.innerHTML = data.comments.map((c, i) => `
+                        <div class="comment-admin-item">
+                            <div class="comment-info">
+                                <strong style="color: var(--primary);">${c.name}</strong>
+                                <p style="margin: 10px 0;">${c.comment}</p>
+                                <small style="color: #6B7280;">${formatDate(c.timestamp)}</small>
+                            </div>
+                            <button class="delete-btn" onclick="alert('ฟีเจอร์ลบคอมเม้นต์ต้องการการตั้งค่า Google Apps Script เพิ่มเติม')">
+                                <i class="fas fa-trash"></i> ลบ
+                            </button>
+                        </div>
+                    `).join('');
+                } else {
+                    commentsList.innerHTML = '<p style="text-align: center; color: #6B7280;">ยังไม่มีความคิดเห็น</p>';
+                }
+            } catch (error) {
+                commentsList.innerHTML = '<p style="text-align: center; color: var(--danger);">⚠️ ไม่สามารถโหลดความคิดเห็นได้</p>';
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('th-TH', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Initialize default data if empty
+        if (!localStorage.getItem('siteProjects')) {
+            const defaultProjects = [
+                {
+                    image: 'https://img2.pic.in.th/pic/Gemini_Generated_Image_kas7wskas7wskas70fa0f75ef4f13073.png',
+                    title: '🎨 ตัวละครสไตล์ Chibi',
+                    description: 'สร้างสรรค์ภาพตัวละครน่ารักด้วย AI และเทคนิคการออกแบบ ที่ทำให้ตัวผมกลายเป็นตัวการ์ตูนสุดน่ารัก',
+                    link: 'https://img2.pic.in.th/pic/Gemini_Generated_Image_kas7wskas7wskas70fa0f75ef4f13073.png'
+                },
+                {
+                    image: 'https://img2.pic.in.th/pic/1763093613326.jpg',
+                    title: '🤖 แขนหุ่นยนต์ไซเบอร์พังก์',
+                    description: 'ผลงานการปรับแต่งภาพด้วย AI พร้อมการออกแบบแขนกลที่ดูล้ำสมัย เต็มไปด้วยรายละเอียดทางเทคโนโลยี',
+                    link: 'https://img2.pic.in.th/pic/1763093613326.jpg'
+                }
+            ];
+            localStorage.setItem('siteProjects', JSON.stringify(defaultProjects));
+        }
+
+        if (!localStorage.getItem('siteSkills')) {
+            const defaultSkills = ['HTML5', 'CSS3 & Animation', 'JavaScript', 'Python', 'Git & GitHub', 'Responsive Design', 'UI/UX Design', 'AI Integration'];
+            localStorage.setItem('siteSkills', JSON.stringify(defaultSkills));
+        }
+    </script>
+</body>
+</html>
