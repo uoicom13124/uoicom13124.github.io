@@ -2,10 +2,837 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>สวัสดีจาก GitHub Pages</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เมก้า - นักเรียนเขียนโค้ด</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #3B82F6;
+            --primary-dark: #2563EB;
+            --secondary-color: #10B981;
+            --secondary-dark: #059669;
+            --accent-color: #F59E0B;
+            --text-color: #1F2937;
+            --text-light: #6B7280;
+            --bg-light: #F9FAFB;
+            --bg-dark: #FFFFFF;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-lg: rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Kanit', 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+
+        .shape:nth-child(1) { width: 80px; height: 80px; left: 10%; animation-delay: 0s; }
+        .shape:nth-child(2) { width: 120px; height: 120px; left: 70%; animation-delay: 2s; }
+        .shape:nth-child(3) { width: 60px; height: 60px; left: 40%; animation-delay: 4s; }
+        .shape:nth-child(4) { width: 100px; height: 100px; left: 80%; animation-delay: 6s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
+            50% { transform: translateY(-100px) rotate(180deg); opacity: 0.6; }
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 100px 0 60px;
+            margin-top: 30px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px var(--shadow-lg);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .profile-photo {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 6px solid var(--primary-color);
+            box-shadow: 0 10px 30px var(--shadow-lg);
+            margin-bottom: 30px;
+            animation: scaleIn 0.6s ease;
+            transition: transform 0.3s;
+        }
+
+        .profile-photo:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        .hero-section h1 {
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .hero-section .tagline {
+            font-size: 1.4rem;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .hero-section .description {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        /* Skills Section */
+        .skills-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 60px 0;
+            margin-top: 30px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px var(--shadow-lg);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            color: var(--text-color);
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .skill-item {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px var(--shadow);
+            cursor: pointer;
+        }
+
+        .skill-item:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 30px var(--shadow-lg);
+        }
+
+        /* Portfolio Section */
+        .portfolio-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 60px 0;
+            margin-top: 30px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px var(--shadow-lg);
+        }
+
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px var(--shadow);
+            transition: all 0.4s;
+            position: relative;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: 1;
+        }
+
+        .project-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .project-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 20px 50px var(--shadow-lg);
+        }
+
+        .project-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.4s;
+        }
+
+        .project-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .project-card-content {
+            padding: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .project-card-content h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-size: 1.4rem;
+        }
+
+        .project-card-content p {
+            font-size: 1rem;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        .project-card a {
+            display: block;
+            text-align: center;
+            color: white;
+            background: linear-gradient(135deg, var(--secondary-color), var(--secondary-dark));
+            padding: 15px 0;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .project-card a:hover {
+            background: linear-gradient(135deg, var(--secondary-dark), var(--secondary-color));
+        }
+
+        /* Comments Section */
+        .comments-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 60px 0;
+            margin-top: 30px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px var(--shadow-lg);
+        }
+
+        .comment-form {
+            max-width: 700px;
+            margin: 0 auto 40px;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #E5E7EB;
+            border-radius: 10px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 12px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px var(--shadow-lg);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .comments-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .comment-item {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px var(--shadow);
+            animation: slideInLeft 0.5s ease;
+            text-align: left;
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .comment-author {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+        }
+
+        .comment-date {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .comment-text {
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-light);
+        }
+
+        /* Contact Section */
+        .contact-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 60px 0;
+            margin-top: 30px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px var(--shadow-lg);
+        }
+
+        .contact-section p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: var(--text-color);
+        }
+
+        .email-button {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--secondary-color), var(--secondary-dark));
+            color: white;
+            padding: 15px 40px;
+            text-decoration: none;
+            border-radius: 50px;
+            margin-bottom: 30px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .email-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px var(--shadow-lg);
+        }
+
+        .social-links a {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin: 0 15px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .social-links a:hover {
+            color: var(--secondary-color);
+            transform: translateY(-5px) rotate(10deg);
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(31, 41, 55, 0.95);
+            backdrop-filter: blur(10px);
+            color: #9CA3AF;
+            padding: 30px 0;
+            margin-top: 30px;
+            border-radius: 30px 30px 0 0;
+        }
+
+        footer p {
+            font-size: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-section h1 { font-size: 2.5rem; }
+            .nav-links { display: none; }
+            .portfolio-grid { grid-template-columns: 1fr; }
+            .cta-buttons { flex-direction: column; }
+        }
+
+        /* Scroll animations */
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+    </style>
 </head>
 <body>
-    <h1>ยินดีต้อนรับ!</h1>
-    <p>หน้านี้ถูกสร้างด้วย GitHub Pages แบบฟรี</p>
+    
+    <div class="bg-animation">
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="container">
+            <div class="nav-brand">เมก้า 👨‍💻</div>
+            <ul class="nav-links">
+                <li><a href="#home">หน้าแรก</a></li>
+                <li><a href="#skills">ทักษะ</a></li>
+                <li><a href="#portfolio">ผลงาน</a></li>
+                <li><a href="#comments">คอมเม้นต์</a></li>
+                <li><a href="#contact">ติดต่อ</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section id="home" class="hero-section">
+            <img src="https://img2.pic.in.th/pic/IMG_20251114_110305.jpg" alt="รูปโปรไฟล์นักเรียน" class="profile-photo">
+            <h1>สวัสดีครับ, ผม เมก้า</h1>
+            <p class="tagline">✨ นักเรียนผู้หลงใหลในการเขียนโค้ด</p>
+            <p class="description">กำลังศึกษาและพัฒนาทักษะในโลกดิจิทัล พร้อมเรียนรู้เทคโนโลยีใหม่ๆ และสร้างสรรค์สิ่งที่น่าตื่นตาตื่นใจ 🚀</p>
+            <div class="cta-buttons">
+                <a href="#portfolio" class="btn btn-primary">ดูผลงานของผม</a>
+                <a href="#contact" class="btn btn-secondary">ติดต่อผม</a>
+            </div>
+        </section>
+
+        <section id="skills" class="skills-section fade-in">
+            <h2 class="section-title">💻 ทักษะการเขียนโค้ด</h2>
+            <div class="skill-list">
+                <div class="skill-item">HTML5</div>
+                <div class="skill-item">CSS3 & Animation</div>
+                <div class="skill-item">JavaScript</div>
+                <div class="skill-item">Python</div>
+                <div class="skill-item">Git & GitHub</div>
+                <div class="skill-item">Responsive Design</div>
+                <div class="skill-item">UI/UX Design</div>
+                <div class="skill-item">AI Integration</div>
+            </div>
+        </section>
+
+        <section id="portfolio" class="portfolio-section fade-in">
+            <h2 class="section-title">✨ ผลงานของผม</h2>
+            <div class="portfolio-grid">
+                <div class="project-card">
+                    <img src="https://img2.pic.in.th/pic/Gemini_Generated_Image_kas7wskas7wskas70fa0f75ef4f13073.png" alt="รูปจาก AI สไตล์ Chibi">
+                    <div class="project-card-content">
+                        <h3>🎨 ตัวละครสไตล์ Chibi</h3>
+                        <p>สร้างสรรค์ภาพตัวละครน่ารักด้วย AI และเทคนิคการออกแบบ ที่ทำให้ตัวผมกลายเป็นตัวการ์ตูนสุดน่ารัก</p>
+                    </div>
+                    <a href="https://img2.pic.in.th/pic/Gemini_Generated_Image_kas7wskas7wskas70fa0f75ef4f13073.png" target="_blank">ดูรูปเต็ม →</a>
+                </div>
+                
+                <div class="project-card">
+                    <img src="https://img2.pic.in.th/pic/1763093613326.jpg" alt="รูปจาก AI แขนหุ่นยนต์">
+                    <div class="project-card-content">
+                        <h3>🤖 แขนหุ่นยนต์ไซเบอร์พังก์</h3>
+                        <p>ผลงานการปรับแต่งภาพด้วย AI พร้อมการออกแบบแขนกลที่ดูล้ำสมัย เต็มไปด้วยรายละเอียดทางเทคโนโลยี</p>
+                    </div>
+                    <a href="https://img2.pic.in.th/pic/1763093613326.jpg" target="_blank">ดูรูปเต็ม →</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="comments" class="comments-section fade-in">
+            <h2 class="section-title">💬 ฝากความคิดเห็น</h2>
+            
+            <form class="comment-form" id="commentForm">
+                <div class="form-group">
+                    <label for="name">ชื่อของคุณ *</label>
+                    <input type="text" id="name" name="name" required placeholder="กรอกชื่อของคุณ">
+                </div>
+                
+                <div class="form-group">
+                    <label for="comment">ความคิดเห็น *</label>
+                    <textarea id="comment" name="comment" required placeholder="แบ่งปันความคิดเห็นของคุณที่นี่..."></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> ส่งความคิดเห็น
+                </button>
+            </form>
+
+            <div class="comments-list" id="commentsList">
+                <div class="loading">กำลังโหลดความคิดเห็น...</div>
+            </div>
+        </section>
+
+        <section id="contact" class="contact-section fade-in">
+            <h2 class="section-title">📮 ติดต่อผม</h2>
+            <p>สนใจติดต่อเพื่อแลกเปลี่ยนความรู้ ร่วมงาน หรือโอกาสทางการศึกษา</p>
+            <a href="mailto:uoicom01@gmail.com" class="email-button">
+                <i class="fas fa-envelope"></i> ส่งอีเมลหาผม
+            </a>
+            <div class="social-links">
+                <a href="#" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+                <a href="#" target="_blank" title="Facebook"><i class="fab fa-facebook"></i></a>
+                <a href="#" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 เมก้า | Student Developer Portfolio | Made with ❤️</p>
+    </footer>
+
+    <script>
+        // Google Apps Script Web App URL - แทนที่ด้วย URL ของคุณ
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwCANOGos05cnO06GAYqymLd_2MNN2yAWh9GpGD9ypf2UJ5TXM099H3FR-26oRpL2Sbdw/exec';
+
+        // Load comments on page load
+        document.addEventListener('DOMContentLoaded', loadComments);
+
+        // Handle form submission
+        document.getElementById('commentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('.submit-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังส่ง...';
+            submitBtn.disabled = true;
+
+            const formData = {
+                name: document.getElementById('name').value,
+                comment: document.getElementById('comment').value,
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    document.getElementById('commentForm').reset();
+                    loadComments();
+                    alert('✅ ส่งความคิดเห็นสำเร็จ! ขอบคุณครับ');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+            }
+
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+
+        // Load comments from Google Sheets
+        async function loadComments() {
+            const commentsList = document.getElementById('commentsList');
+            
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+                
+                if (data.comments && data.comments.length > 0) {
+                    commentsList.innerHTML = data.comments.map(comment => `
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <span class="comment-author">
+                                    <i class="fas fa-user-circle"></i> ${comment.name}
+                                </span>
+                                <span class="comment-date">${formatDate(comment.timestamp)}</span>
+                            </div>
+                            <p class="comment-text">${comment.comment}</p>
+                        </div>
+                    `).join('');
+                } else {
+                    commentsList.innerHTML = '<p class="loading">ยังไม่มีความคิดเห็น เป็นคนแรกที่แสดงความคิดเห็นสิ!</p>';
+                }
+            } catch (error) {
+                console.error('Error loading comments:', error);
+                commentsList.innerHTML = '<p class="loading">⚠️ ไม่สามารถโหลดความคิดเห็นได้ในขณะนี้</p>';
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMins < 1) return 'เมื่อสักครู่';
+            if (diffMins < 60) return `${diffMins} นาทีที่แล้ว`;
+            if (diffHours < 24) return `${diffHours} ชั่วโมงที่แล้ว`;
+            if (diffDays < 7) return `${diffDays} วันที่แล้ว`;
+            
+            return date.toLocaleDateString('th-TH', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeInUp 0.8s ease forwards';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Parallax effect for floating shapes
+        document.addEventListener('mousemove', (e) => {
+            const shapes = document.querySelectorAll('.shape');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+
+            shapes.forEach((shape, index) => {
+                const speed = (index + 1) * 20;
+                shape.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+            });
+        });
+    </script>
+
 </body>
 </html>
