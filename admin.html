@@ -675,14 +675,12 @@
 
     <script>
         const ADMIN_PASSWORD = 'sans13124';
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwCANOGos05cnO06GAYqymLd_2MNN2yAWh9GpGD9ypf2UJ5TXM099H3FR-26oRpL2Sbdw/exec';
-
-        // ตรวจสอบการล็อกอิน
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2BcLAUNJpRYPtUOFtllQFNGCMMW8l-oRXphtucfoCP6bWMeA9niVa_5gHOHwnNpTz3A/exec';
+        // Login
         if (sessionStorage.getItem('adminLoggedIn') === 'true') {
             showAdminPanel();
         }
 
-        // Login
         function login() {
             const password = document.getElementById('passwordInput').value;
             if (password === ADMIN_PASSWORD) {
@@ -712,7 +710,6 @@
             }
         }
 
-        // Tab Management
         function openTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -721,30 +718,35 @@
             event.target.classList.add('active');
         }
 
-        // Load All Data
         async function loadAllData() {
-            loadProfile();
-            loadProjects();
-            loadSkills();
+            await loadProfileFromPHP();
+            await loadProjectsFromPHP();
+            await loadSkillsFromPHP();
             loadComments();
         }
 
         // Profile Management
-        function loadProfile() {
-            const profile = JSON.parse(localStorage.getItem('siteProfile') || '{}');
-            document.getElementById('profileImage').value = profile.image || 'https://img2.pic.in.th/pic/IMG_20251114_110305.jpg';
-            document.getElementById('profileName').value = profile.name || 'เมก้า';
-            document.getElementById('profileTagline').value = profile.tagline || '✨ นักเรียนผู้หลงใหลในการเขียนโค้ด';
-            document.getElementById('profileDescription').value = profile.description || 'กำลังศึกษาและพัฒนาทักษะในโลกดิจิทัล';
-            document.getElementById('profileEmail').value = profile.email || 'uoicom01@gmail.com';
-            document.getElementById('primaryColor').value = profile.primaryColor || '#3B82F6';
-            document.getElementById('secondaryColor').value = profile.secondaryColor || '#10B981';
-            
-            updateColorDisplay();
-            previewProfileImage();
+        async function loadProfileFromPHP() {
+            try {
+                const response = await fetch('api.php?action=getProfile');
+                const profile = await response.json();
+                
+                document.getElementById('profileImage').value = profile.image || '';
+                document.getElementById('profileName').value = profile.name || '';
+                document.getElementById('profileTagline').value = profile.tagline || '';
+                document.getElementById('profileDescription').value = profile.description || '';
+                document.getElementById('profileEmail').value = profile.email || '';
+                document.getElementById('primaryColor').value = profile.primaryColor || '#3B82F6';
+                document.getElementById('secondaryColor').value = profile.secondaryColor || '#10B981';
+                
+                updateColorDisplay();
+                previewProfileImage();
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
         }
 
-        function saveProfile() {
+        async function saveProfile() {
             const profile = {
                 image: document.getElementById('profileImage').value,
                 name: document.getElementById('profileName').value,
@@ -755,8 +757,19 @@
                 secondaryColor: document.getElementById('secondaryColor').value
             };
             
-            localStorage.setItem('siteProfile', JSON.stringify(profile));
-            alert('✅ บันทึกโปรไฟล์สำเร็จ!');
+            try {
+                const response = await fetch('api.php?action=saveProfile', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(profile)
+                });
+                
+                if (response.ok) {
+                    alert('✅ บันทึกโปรไฟล์สำเร็จ!');
+                }
+            } catch (error) {
+                alert('❌ เกิดข้อผิดพลาด: ' + error.message);
+            }
         }
 
         // Preview Images
@@ -795,34 +808,40 @@
         }
 
         // Projects Management
-        function loadProjects() {
-            const projects = JSON.parse(localStorage.getItem('siteProjects') || '[]');
-            const projectList = document.getElementById('projectList');
-            document.getElementById('projectCount').textContent = projects.length;
+        async function loadProjectsFromPHP() {
+            try {
+                const response = await fetch('api.php?action=getProjects');
+                const projects = await response.json();
+                const projectList = document.getElementById('projectList');
+                
+                document.getElementById('projectCount').textContent = projects.length;
 
-            if (projects.length === 0) {
-                projectList.innerHTML = '<p style="text-align: center; color: #6B7280;">ยังไม่มีผลงาน</p>';
-                return;
+                if (projects.length === 0) {
+                    projectList.innerHTML = '<p style="text-align: center; color: #6B7280;">ยังไม่มีผลงาน</p>';
+                    return;
+                }
+
+                projectList.innerHTML = projects.map((p, i) => `
+                    <div class="project-item">
+                        <img src="${p.image}" alt="${p.title}">
+                        <div class="project-info">
+                            <h3>${p.title}</h3>
+                            <p>${p.description}</p>
+                            <small>${p.link}</small>
+                        </div>
+                        <div class="project-actions">
+                            <button class="save-btn" onclick="editProject(${i})">
+                                <i class="fas fa-edit"></i> แก้ไข
+                            </button>
+                            <button class="delete-btn" onclick="deleteProject(${i})">
+                                <i class="fas fa-trash"></i> ลบ
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading projects:', error);
             }
-
-            projectList.innerHTML = projects.map((p, i) => `
-                <div class="project-item">
-                    <img src="${p.image}" alt="${p.title}">
-                    <div class="project-info">
-                        <h3>${p.title}</h3>
-                        <p>${p.description}</p>
-                        <small>${p.link}</small>
-                    </div>
-                    <div class="project-actions">
-                        <button class="save-btn" onclick="editProject(${i})">
-                            <i class="fas fa-edit"></i> แก้ไข
-                        </button>
-                        <button class="delete-btn" onclick="deleteProject(${i})">
-                            <i class="fas fa-trash"></i> ลบ
-                        </button>
-                    </div>
-                </div>
-            `).join('');
         }
 
         function openProjectModal(index = null) {
@@ -830,14 +849,17 @@
             document.getElementById('projectEditIndex').value = index !== null ? index : '';
             
             if (index !== null) {
-                const projects = JSON.parse(localStorage.getItem('siteProjects') || '[]');
-                const p = projects[index];
-                document.getElementById('projectModalTitle').textContent = 'แก้ไขผลงาน';
-                document.getElementById('projectImage').value = p.image;
-                document.getElementById('projectTitle').value = p.title;
-                document.getElementById('projectDescription').value = p.description;
-                document.getElementById('projectLink').value = p.link;
-                previewProjectImage();
+                fetch('api.php?action=getProjects')
+                    .then(r => r.json())
+                    .then(projects => {
+                        const p = projects[index];
+                        document.getElementById('projectModalTitle').textContent = 'แก้ไขผลงาน';
+                        document.getElementById('projectImage').value = p.image;
+                        document.getElementById('projectTitle').value = p.title;
+                        document.getElementById('projectDescription').value = p.description;
+                        document.getElementById('projectLink').value = p.link;
+                        previewProjectImage();
+                    });
             } else {
                 document.getElementById('projectModalTitle').textContent = 'เพิ่มผลงาน';
                 document.getElementById('projectImage').value = '';
@@ -856,8 +878,7 @@
             document.getElementById('projectModal').classList.remove('active');
         }
 
-        function saveProject() {
-            const projects = JSON.parse(localStorage.getItem('siteProjects') || '[]');
+        async function saveProject() {
             const indexValue = document.getElementById('projectEditIndex').value;
             
             const project = {
@@ -872,49 +893,72 @@
                 return;
             }
 
-            if (indexValue !== '') {
-                projects[parseInt(indexValue)] = project;
-            } else {
-                projects.push(project);
-            }
+            try {
+                const action = indexValue !== '' ? 'updateProject' : 'addProject';
+                const data = indexValue !== '' ? {...project, index: parseInt(indexValue)} : project;
+                
+                const response = await fetch(`api.php?action=${action}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
 
-            localStorage.setItem('siteProjects', JSON.stringify(projects));
-            closeProjectModal();
-            loadProjects();
-            alert('✅ บันทึกผลงานสำเร็จ!');
+                if (response.ok) {
+                    closeProjectModal();
+                    loadProjectsFromPHP();
+                    alert('✅ บันทึกผลงานสำเร็จ!');
+                }
+            } catch (error) {
+                alert('❌ เกิดข้อผิดพลาด: ' + error.message);
+            }
         }
 
-        function deleteProject(index) {
+        async function deleteProject(index) {
             if (!confirm('ต้องการลบผลงานนี้?')) return;
             
-            const projects = JSON.parse(localStorage.getItem('siteProjects') || '[]');
-            projects.splice(index, 1);
-            localStorage.setItem('siteProjects', JSON.stringify(projects));
-            loadProjects();
-            alert('✅ ลบผลงานสำเร็จ!');
+            try {
+                const response = await fetch(`api.php?action=deleteProject`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({index})
+                });
+
+                if (response.ok) {
+                    loadProjectsFromPHP();
+                    alert('✅ ลบผลงานสำเร็จ!');
+                }
+            } catch (error) {
+                alert('❌ เกิดข้อผิดพลาด: ' + error.message);
+            }
         }
 
         // Skills Management
-        function loadSkills() {
-            const skills = JSON.parse(localStorage.getItem('siteSkills') || '[]');
-            const skillList = document.getElementById('skillList');
-            document.getElementById('skillCount').textContent = skills.length;
+        async function loadSkillsFromPHP() {
+            try {
+                const response = await fetch('api.php?action=getSkills');
+                const skills = await response.json();
+                const skillList = document.getElementById('skillList');
+                
+                document.getElementById('skillCount').textContent = skills.length;
 
-            if (skills.length === 0) {
-                skillList.innerHTML = '<p style="text-align: center; color: #6B7280;">ยังไม่มีทักษะ</p>';
-                return;
-            }
+                if (skills.length === 0) {
+                    skillList.innerHTML = '<p style="text-align: center; color: #6B7280;">ยังไม่มีทักษะ</p>';
+                    return;
+                }
 
-            skillList.innerHTML = skills.map((skill, i) => `
-                <div class="skill-item-admin">
-                    <div style="flex: 1;">
-                        <strong>${skill}</strong>
+                skillList.innerHTML = skills.map((skill, i) => `
+                    <div class="skill-item-admin">
+                        <div style="flex: 1;">
+                            <strong>${skill}</strong>
+                        </div>
+                        <button class="delete-btn" onclick="deleteSkill(${i})">
+                            <i class="fas fa-trash"></i> ลบ
+                        </button>
                     </div>
-                    <button class="delete-btn" onclick="deleteSkill(${i})">
-                        <i class="fas fa-trash"></i> ลบ
-                    </button>
-                </div>
-            `).join('');
+                `).join('');
+            } catch (error) {
+                console.error('Error loading skills:', error);
+            }
         }
 
         function openSkillModal() {
@@ -926,8 +970,7 @@
             document.getElementById('skillModal').classList.remove('active');
         }
 
-        function saveSkill() {
-            const skills = JSON.parse(localStorage.getItem('siteSkills') || '[]');
+        async function saveSkill() {
             const skillName = document.getElementById('skillName').value.trim();
 
             if (!skillName) {
@@ -935,24 +978,43 @@
                 return;
             }
 
-            skills.push(skillName);
-            localStorage.setItem('siteSkills', JSON.stringify(skills));
-            closeSkillModal();
-            loadSkills();
-            alert('✅ เพิ่มทักษะสำเร็จ!');
+            try {
+                const response = await fetch('api.php?action=addSkill', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({skill: skillName})
+                });
+
+                if (response.ok) {
+                    closeSkillModal();
+                    loadSkillsFromPHP();
+                    alert('✅ เพิ่มทักษะสำเร็จ!');
+                }
+            } catch (error) {
+                alert('❌ เกิดข้อผิดพลาด: ' + error.message);
+            }
         }
 
-        function deleteSkill(index) {
+        async function deleteSkill(index) {
             if (!confirm('ต้องการลบทักษะนี้?')) return;
             
-            const skills = JSON.parse(localStorage.getItem('siteSkills') || '[]');
-            skills.splice(index, 1);
-            localStorage.setItem('siteSkills', JSON.stringify(skills));
-            loadSkills();
-            alert('✅ ลบทักษะสำเร็จ!');
+            try {
+                const response = await fetch('api.php?action=deleteSkill', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({index})
+                });
+
+                if (response.ok) {
+                    loadSkillsFromPHP();
+                    alert('✅ ลบทักษะสำเร็จ!');
+                }
+            } catch (error) {
+                alert('❌ เกิดข้อผิดพลาด: ' + error.message);
+            }
         }
 
-        // Comments Management
+        // Comments Management (ใช้ Google Sheets แบบเดิม)
         async function loadComments() {
             const commentsList = document.getElementById('commentsList');
             commentsList.innerHTML = '<p style="text-align: center; color: #6B7280;">กำลังโหลด...</p>';
@@ -971,9 +1033,6 @@
                                 <p style="margin: 10px 0;">${c.comment}</p>
                                 <small style="color: #6B7280;">${formatDate(c.timestamp)}</small>
                             </div>
-                            <button class="delete-btn" onclick="alert('ฟีเจอร์ลบคอมเม้นต์ต้องการการตั้งค่า Google Apps Script เพิ่มเติม')">
-                                <i class="fas fa-trash"></i> ลบ
-                            </button>
                         </div>
                     `).join('');
                 } else {
@@ -993,30 +1052,6 @@
                 hour: '2-digit',
                 minute: '2-digit'
             });
-        }
-
-        // Initialize default data if empty
-        if (!localStorage.getItem('siteProjects')) {
-            const defaultProjects = [
-                {
-                    image: 'https://img2.pic.in.th/pic/Gemini_Generated_Image_kas7wskas7wskas70fa0f75ef4f13073.png',
-                    title: '🎨 ตัวละครสไตล์ Chibi',
-                    description: 'สร้างสรรค์ภาพตัวละครน่ารักด้วย AI และเทคนิคการออกแบบ ที่ทำให้ตัวผมกลายเป็นตัวการ์ตูนสุดน่ารัก',
-                    link: 'https://img2.pic.in.th/pic/Gemini_Generated_Image_kas7wskas7wskas70fa0f75ef4f13073.png'
-                },
-                {
-                    image: 'https://img2.pic.in.th/pic/1763093613326.jpg',
-                    title: '🤖 แขนหุ่นยนต์ไซเบอร์พังก์',
-                    description: 'ผลงานการปรับแต่งภาพด้วย AI พร้อมการออกแบบแขนกลที่ดูล้ำสมัย เต็มไปด้วยรายละเอียดทางเทคโนโลยี',
-                    link: 'https://img2.pic.in.th/pic/1763093613326.jpg'
-                }
-            ];
-            localStorage.setItem('siteProjects', JSON.stringify(defaultProjects));
-        }
-
-        if (!localStorage.getItem('siteSkills')) {
-            const defaultSkills = ['HTML5', 'CSS3 & Animation', 'JavaScript', 'Python', 'Git & GitHub', 'Responsive Design', 'UI/UX Design', 'AI Integration'];
-            localStorage.setItem('siteSkills', JSON.stringify(defaultSkills));
         }
     </script>
 </body>
