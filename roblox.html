@@ -1,147 +1,227 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,requiresActiveX=true">
+    <title>ลงชื่อเข้าใช้ Roblox</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="author" content="Roblox Corporation">
-    <meta name="description" content="ลงชื่อเข้าใช้บัญชี Roblox หรือลงทะเบียนเพื่อสร้างบัญชีใหม่">
-    <meta name="keywords" content="เกมฟรี, เกมออนไลน์, การสร้างเกม, โลกเสมือน, mmo ฟรี, คลาวด์เกมมิ่ง, physics engine">
-    <title>ลงชื่อเข้าใช้ Roblox</title>
-
+    
     <style>
-        /* CSS พื้นฐานเพื่อจำลองรูปลักษณ์ของหน้าล็อกอิน Roblox */
+        /* Base / Theme */
+        :root {
+            --dark-background: #111;
+            --main-background: #1e1e1e;
+            --text-color: #fff;
+            --link-color: #1b85ff;
+            --card-background: #2b2b2b;
+            --input-background: #3c3c3c;
+            --input-border: #4c4c4c;
+            --button-primary: #1b85ff;
+            --button-hover: #156ac2;
+            --button-text: #fff;
+        }
+
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: #f5f5f5; /* สีพื้นหลังของหน้าเว็บโดยทั่วไป */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            background-color: var(--dark-background);
+            color: var(--text-color);
+            font-family: Arial, Helvetica, sans-serif;
             margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
+            padding-top: 50px; /* Space for fixed header */
+        }
+        
+        a {
+            color: var(--link-color);
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
         }
 
-        .login-container {
-            background-color: #ffffff;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 40px;
+        /* Header (rbx-header) - Simplified */
+        .rbx-header {
+            background-color: var(--main-background);
+            border-bottom: 1px solid #333;
+            height: 50px;
+            position: fixed;
+            top: 0;
             width: 100%;
-            max-width: 400px; /* จำกัดความกว้างของฟอร์ม */
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
+        .navbar-brand {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
         }
 
-        .header h1 {
-            color: #000;
+        .icon-logo {
+            /* จำลองโลโก้เป็นข้อความง่ายๆ หรือใช้สี */
+            color: #fff; /* White R */
             font-size: 24px;
+            margin-right: 5px;
+        }
+        .icon-logo-r {
+            color: #00a2ff; /* Blue for 'ROBLOX' text/part of logo */
             font-weight: 700;
         }
 
+        /* Main Content & Login Card */
+        .container-main {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: calc(100vh - 50px); /* Fill screen height minus header */
+        }
+        
+        .login-card-container {
+            width: 100%;
+            max-width: 380px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .login-card {
+            background-color: var(--card-background);
+            border-radius: 8px;
+            padding: 30px 40px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 25px;
+            font-weight: 400;
+        }
+        
+        /* Form Elements */
         .form-group {
             margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
-            font-size: 14px;
-            color: #333;
             margin-bottom: 8px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 700;
         }
 
         .form-control {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 10px 12px;
             font-size: 16px;
-            box-sizing: border-box; /* เพื่อให้ padding ไม่ขยายขนาด element เกิน width */
+            line-height: 1.42857143;
+            color: var(--text-color);
+            background-color: var(--input-background);
+            border: 1px solid var(--input-border);
+            border-radius: 4px;
+            box-sizing: border-box; /* สำคัญสำหรับการกำหนด width */
         }
-
-        .btn-login {
+        
+        /* Button */
+        .btn {
+            display: block;
             width: 100%;
-            padding: 12px;
-            background-color: #00a2ff; /* สีฟ้า Roblox */
-            color: #fff;
-            border: none;
-            border-radius: 4px;
+            padding: 10px 15px;
             font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-login:hover {
-            background-color: #007bb6;
-        }
-
-        .forgot-password {
+            font-weight: bold;
+            line-height: 1.42857143;
             text-align: center;
+            cursor: pointer;
+            border-radius: 4px;
+            border: none;
+            transition: background-color 0.15s ease;
+        }
+
+        .btn-primary {
+            color: var(--button-text);
+            background-color: var(--button-primary);
+            margin-top: 10px;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--button-hover);
+        }
+
+        /* Links */
+        .link-group {
             margin-top: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .signup-link {
+            padding-top: 15px;
+            border-top: 1px solid #3c3c3c;
+            margin-top: 25px;
+        }
+        
+        .signup-link p {
+            margin: 0;
             font-size: 14px;
         }
 
-        .forgot-password a {
-            color: #00a2ff;
-            text-decoration: none;
-        }
-
-        .forgot-password a:hover {
-            text-decoration: underline;
-        }
-
-        .signup-link {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            font-size: 15px;
-        }
-
-        .signup-link a {
-            color: #00a2ff;
-            text-decoration: none;
-            font-weight: 600;
-        }
     </style>
 </head>
-<body>
+<body id="rbx-body" dir="ltr" class="rbx-body dark-theme builder-font">
+    
+    <div id="wrap" class="wrap logged-out">
 
-    <div class="login-container">
-        <div class="header">
-            <h1>ลงชื่อเข้าใช้</h1>
+        <div id="navigation-container">
+            <div id="header" class="rbx-header" role="navigation">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">
+                        <span class="icon-logo">R</span><span class="icon-logo-r">OBLOX</span>
+                    </a>
+                </div>
+                </div>
         </div>
 
-        <form>
-            <div class="form-group">
-                <label for="username">ชื่อผู้ใช้ / อีเมล / โทรศัพท์</label>
-                <input type="text" id="username" class="form-control" placeholder="" value="">
+        <main class="container-main" id="container-main">
+            
+            <div class="login-card-container">
+                <div class="login-card">
+                    <h1 class="text-center">ลงชื่อเข้าใช้</h1>
+                    
+                    <form>
+                        <div class="form-group">
+                            <label for="username">ชื่อผู้ใช้, โทรศัพท์, หรืออีเมล</label>
+                            <input type="text" class="form-control" id="username" value="" placeholder="ชื่อผู้ใช้/โทรศัพท์/อีเมล">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">รหัสผ่าน</label>
+                            <input type="password" class="form-control" id="password" value="" placeholder="รหัสผ่าน">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" disabled>
+                            ลงชื่อเข้าใช้
+                        </button>
+                        
+                        <div class="text-center link-group">
+                            <a href="#">ลืมรหัสผ่านใช่ไหม</a>
+                        </div>
+                        
+                        <div class="text-center signup-link">
+                            <p>ไม่มีบัญชีใช่ไหม? <a href="#">ลงทะเบียน</a></p>
+                        </div>
+                    </form>
+                </div>
             </div>
+        </main>
 
-            <div class="form-group">
-                <label for="password">รหัสผ่าน</label>
-                <input type="password" id="password" class="form-control" placeholder="" value="">
+        <footer id="footer" style="height: 100px; background-color: var(--main-background); border-top: 1px solid #333;">
+            <div class="text-center" style="padding-top: 20px; font-size: 12px; color: #999;">
+                &copy; Roblox Corporation. สงวนลิขสิทธิ์.
             </div>
-
-            <button type="submit" class="btn-login">
-                ลงชื่อเข้าใช้
-            </button>
-        </form>
-
-        <div class="forgot-password">
-            <a href="#">ลืมรหัสผ่านหรือชื่อผู้ใช้หรือไม่?</a>
-        </div>
-
-        <div class="signup-link">
-            ยังไม่มีบัญชีใช่หรือไม่? <a href="#">ลงทะเบียน</a>
-        </div>
+        </footer>
     </div>
 
 </body>
