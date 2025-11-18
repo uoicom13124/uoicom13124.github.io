@@ -1,228 +1,111 @@
-<!DOCTYPE html>
 <html lang="th">
 <head>
     <title>ลงชื่อเข้าใช้ Roblox</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,requiresActiveX=true">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <style>
-        /* Base / Theme */
-        :root {
-            --dark-background: #111;
-            --main-background: #1e1e1e;
-            --text-color: #fff;
-            --link-color: #1b85ff;
-            --card-background: #2b2b2b;
-            --input-background: #3c3c3c;
-            --input-border: #4c4c4c;
-            --button-primary: #1b85ff;
-            --button-hover: #156ac2;
-            --button-text: #fff;
-        }
+    <meta name="author" content="Roblox Corporation">
+    <meta name="description" content="ลงชื่อเข้าใช้บัญชี Roblox หรือลงทะเบียนเพื่อสร้างบัญชีใหม่">
+    <meta name="keywords" content="เกมฟรี, เกมออนไลน์, การสร้างเกม, โลกเสมือน, mmo ฟรี, คลาวด์เกมมิ่ง, physics engine">
+    <meta name="apple-itunes-app" content="app-id=431946152">
 
-        body {
-            background-color: var(--dark-background);
-            color: var(--text-color);
-            font-family: Arial, Helvetica, sans-serif;
-            margin: 0;
-            padding-top: 50px; /* Space for fixed header */
-        }
-        
-        a {
-            color: var(--link-color);
-            text-decoration: none;
-        }
-        
-        a:hover {
-            text-decoration: underline;
-        }
+    <link rel="apple-touch-icon" href="https://images.rbxcdn.com/7c5fe83dffa97250aaddd54178900ea7.png">
 
-        /* Header (rbx-header) - Simplified */
-        .rbx-header {
-            background-color: var(--main-background);
-            border-bottom: 1px solid #333;
-            height: 50px;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-        }
+    <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"Organization","name":"Roblox","email":"info@roblox.com","url":"https://www.roblox.com/","image":"https://images.rbxcdn.com/fc3f3e3158fc20ebb5ccc972064ebfe6.png","logo":"https://images.rbxcdn.com/fc3f3e3158fc20ebb5ccc972064ebfe6.png","sameAs":["https://www.facebook.com/roblox/","https://twitter.com/roblox","https://www.linkedin.com/company/147977","https://www.instagram.com/roblox/","https://www.youtube.com/user/roblox","https://www.twitch.tv/roblox"]}
+    </script>
 
-        .navbar-brand {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: var(--text-color);
-            display: flex;
-            align-items: center;
-        }
+    <meta name="locale-data" data-language-code="th_th" data-language-name="ภาษาไทย" data-url-locale="th" data-override-language-header="true">
+    <meta name="device-meta" data-device-type="computer" data-is-in-app="false" data-is-desktop="true" data-is-phone="false" data-is-tablet="false" data-is-console="false" data-is-android-app="false" data-is-ios-app="false" data-is-uwp-app="false" data-is-xbox-app="false" data-is-amazon-app="false" data-is-win32-app="false" data-is-studio="false" data-is-game-client-browser="false" data-is-ios-device="false" data-is-android-device="false" data-is-universal-app="false" data-app-type="unknown" data-is-chrome-os="false" data-is-pcgdk-app="false" data-is-samsung-galaxy-store-app="false">
+    <meta name="environment-meta" data-domain="roblox.com" data-is-testing-site="false">
+    <meta name="page-meta" data-internal-page-name="Login">
 
-        .icon-logo {
-            /* จำลองโลโก้เป็นข้อความง่ายๆ หรือใช้สี */
-            color: #fff; /* White R */
-            font-size: 24px;
-            margin-right: 5px;
-        }
-        .icon-logo-r {
-            color: #00a2ff; /* Blue for 'ROBLOX' text/part of logo */
-            font-weight: 700;
-        }
+    <link href="https://images.rbxcdn.com/e854eb7b2951ac03edba9a2681032bba.ico" rel="icon">
 
-        /* Main Content & Login Card */
-        .container-main {
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            min-height: calc(100vh - 50px); /* Fill screen height minus header */
-        }
-        
-        .login-card-container {
-            width: 100%;
-            max-width: 380px;
-            margin: 50px auto;
-            padding: 20px;
-        }
+    <link rel="stylesheet" href="https://css.rbxcdn.com/56f6868ec13cefb471ad86176c7b9642571d05082c86ac6300ddfeb028617d4e.css" data-bundlename="FoundationCss">
+    <link rel="stylesheet" href="https://css.rbxcdn.com/775b823f59a8320ea56172866de0ce918df6fc9cbd9db2ceffaa64ac5b771597.css" data-bundlename="StyleGuide">
+    <link rel="stylesheet" href="https://css.rbxcdn.com/ce113720f4c1602bb4db7e35d0a4fd637f223e8936fe5779650bda23074663f2.css" data-bundlename="Builder">
+    <link rel="stylesheet" href="https://css.rbxcdn.com/d7d4183c8033d692e0ca8ad5222b943fe27879f9a771c9bd98165ccc4e270d7b.css" data-bundlename="Thumbnails">
+    <link rel="stylesheet" href="https://css.rbxcdn.com/03a5c1b93d8909e738d129f5ccafb1d522231b3a03b0a30fc30ed5338a5562ba.css" data-bundlename="Navigation">
+    <link rel="stylesheet" href="https://css.rbxcdn.com/7e348738266e9ea2bae9314a2d26b33618c6f4cf3c527b11023620d973c6e7fc.css" data-bundlename="CookieBannerV3">
+    <link rel="stylesheet" href="https://css.rbxcdn.com/602cce8e7af3d72b25f82efd5c7c55774ceecf48aecb960489d771066cf92476.css" data-bundlename="Footer">
+    <link rel="stylesheet" href="https://static.rbxcdn.com/css/leanbase___80400f5d6146e08bcf1e66a17ee0554e_m.css/fetch">
 
-        .login-card {
-            background-color: var(--card-background);
-            border-radius: 8px;
-            padding: 30px 40px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-        }
+    <link rel="canonical" href="https://www.roblox.com/th/login">
 
-        .text-center {
-            text-align: center;
-        }
+    <link rel="alternate" href="https://www.roblox.com/login" hreflang="x-default">
+    <link rel="alternate" href="https://www.roblox.com/login" hreflang="en">
+    <link rel="alternate" href="https://www.roblox.com/de/login" hreflang="de">
+    <link rel="alternate" href="https://www.roblox.com/es/login" hreflang="es">
+    <link rel="alternate" href="https://www.roblox.com/fr/login" hreflang="fr">
+    <link rel="alternate" href="https://www.roblox.com/id/login" hreflang="id">
+    <link rel="alternate" href="https://www.roblox.com/it/login" hreflang="it">
+    <link rel="alternate" href="https://www.roblox.com/ja/login" hreflang="ja">
+    <link rel="alternate" href="https://www.roblox.com/ko/login" hreflang="ko">
+    <link rel="alternate" href="https://www.roblox.com/pl/login" hreflang="pl">
+    <link rel="alternate" href="https://www.roblox.com/pt/login" hreflang="pt">
+    <link rel="alternate" href="https://www.roblox.com/th/login" hreflang="th">
+    <link rel="alternate" href="https://www.roblox.com/tr/login" hreflang="tr">
+    <link rel="alternate" href="https://www.roblox.com/vi/login" hreflang="vi">
+    <link rel="alternate" href="https://www.roblox.com/ar/login" hreflang="ar">
 
-        h1 {
-            font-size: 24px;
-            margin-bottom: 25px;
-            font-weight: 400;
-        }
-        
-        /* Form Elements */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 700;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 10px 12px;
-            font-size: 16px;
-            line-height: 1.42857143;
-            color: var(--text-color);
-            background-color: var(--input-background);
-            border: 1px solid var(--input-border);
-            border-radius: 4px;
-            box-sizing: border-box; /* สำคัญสำหรับการกำหนด width */
-        }
-        
-        /* Button */
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 10px 15px;
-            font-size: 16px;
-            font-weight: bold;
-            line-height: 1.42857143;
-            text-align: center;
-            cursor: pointer;
-            border-radius: 4px;
-            border: none;
-            transition: background-color 0.15s ease;
-        }
-
-        .btn-primary {
-            color: var(--button-text);
-            background-color: var(--button-primary);
-            margin-top: 10px;
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--button-hover);
-        }
-
-        /* Links */
-        .link-group {
-            margin-top: 15px;
-            margin-bottom: 10px;
-        }
-        
-        .signup-link {
-            padding-top: 15px;
-            border-top: 1px solid #3c3c3c;
-            margin-top: 25px;
-        }
-        
-        .signup-link p {
-            margin: 0;
-            font-size: 14px;
-        }
-
-    </style>
 </head>
 <body id="rbx-body" dir="ltr" class="rbx-body dark-theme builder-font">
-    
-    <div id="wrap" class="wrap logged-out">
 
-        <div id="navigation-container">
-            <div id="header" class="rbx-header" role="navigation">
-                <div class="navbar-header">
-                    <a class="navbar-brand" href="#">
-                        <span class="icon-logo">R</span><span class="icon-logo-r">OBLOX</span>
-                    </a>
+    <div id="wrap" class="wrap no-gutter-ads logged-out">
+
+        <div id="navigation-container" class="builder-font">
+            <div id="header" class="navbar-fixed-top rbx-header" role="navigation">
+                <div class="container-fluid">
+                    <div class="rbx-navbar-header">
+                        <div id="header-menu-icon" class="rbx-nav-collapse">
+                            <button type="button" class="btn-navigation-nav-menu-md menu-button">
+                                <span class="icon-nav-menu"></span>
+                            </button>
+                        </div>
+                        <div class="navbar-header">
+                            <a class="navbar-brand" href="/home">
+                                <span class="icon-logo"></span><span class="icon-logo-r"></span>
+                            </a>
+                        </div>
+                    </div>
+                    <ul class="nav rbx-navbar hidden-xs hidden-sm col-md-5 col-lg-4">
+                        <li> <a class="font-header-2 nav-menu-title text-header" href="/charts">อันดับ</a> </li>
+                        <li> <a class="font-header-2 nav-menu-title text-header" href="/catalog">มาร์เก็ตเพลส</a> </li>
+                        <li> <a id="header-develop-md-link" class="font-header-2 nav-menu-title text-header" href="/develop">สร้างสรรค์</a> </li>
+                        <li id="navigation-robux-container"></li>
+                    </ul>
+                    <ul class="nav rbx-navbar hidden-md hidden-lg col-xs-12">
+                        <li> <a class="font-header-2 nav-menu-title text-header" href="/charts">อันดับ</a> </li>
+                        <li> <a class="font-header-2 nav-menu-title text-header" href="/catalog">มาร์เก็ตเพลส</a> </li>
+                        <li> <a id="header-develop-sm-link" class="font-header-2 nav-menu-title text-header" href="/develop">สร้างสรรค์</a> </li>
+                        <li id="navigation-robux-mobile-container"></li>
+                    </ul>
+                    <div id="right-navigation-header"></div>
                 </div>
-                </div>
+            </div>
+            <div id="left-navigation-container"></div>
+            <div id="verificationUpsell-container">
+                <div verificationUpsell-container=""></div>
+            </div>
+            <div id="phoneVerificationUpsell-container">
+                <div phoneVerificationUpsell-container=""></div>
+            </div>
+            <div id="contactMethodPrompt-container">
+                <div contactMethodPrompt-container=""></div>
+            </div>
+            <div id="navigation-account-switcher-container">
+                <div navigation-account-switcher-container=""></div>
+            </div>
         </div>
+        <main class="container-main content-no-ads" id="container-main" tabindex="-1">
 
-        <main class="container-main" id="container-main">
-            
-            <div class="login-card-container">
-                <div class="login-card">
-                    <h1 class="text-center">ลงชื่อเข้าใช้</h1>
-                    
-                    <form>
-                        <div class="form-group">
-                            <label for="username">ชื่อผู้ใช้, โทรศัพท์, หรืออีเมล</label>
-                            <input type="text" class="form-control" id="username" value="" placeholder="ชื่อผู้ใช้/โทรศัพท์/อีเมล">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="password">รหัสผ่าน</label>
-                            <input type="password" class="form-control" id="password" value="" placeholder="รหัสผ่าน">
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary" disabled>
-                            ลงชื่อเข้าใช้
-                        </button>
-                        
-                        <div class="text-center link-group">
-                            <a href="#">ลืมรหัสผ่านใช่ไหม</a>
-                        </div>
-                        
-                        <div class="text-center signup-link">
-                            <p>ไม่มีบัญชีใช่ไหม? <a href="#">ลงทะเบียน</a></p>
-                        </div>
-                    </form>
+            <div class="alert-container">
+                <noscript><div><div class="alert-info" role="alert">Please enable Javascript to use all the features on this site.</div></div></noscript>
+
                 </div>
-            </div>
-        </main>
-
-        <footer id="footer" style="height: 100px; background-color: var(--main-background); border-top: 1px solid #333;">
-            <div class="text-center" style="padding-top: 20px; font-size: 12px; color: #999;">
-                &copy; Roblox Corporation. สงวนลิขสิทธิ์.
-            </div>
-        </footer>
+            </main>
     </div>
-
 </body>
 </html>
