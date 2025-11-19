@@ -11,7 +11,6 @@
             --primary: #3B82F6;
             --primary-dark: #2563EB;
             --secondary: #10B981;
-            --secondary-dark: #059669;
             --accent: #F59E0B;
             --text: #1F2937;
             --text-light: #6B7280;
@@ -54,46 +53,36 @@
             animation: float 20s infinite;
         }
 
-        .shape:nth-child(1) { width: 80px; height: 80px; left: 10%; animation-delay: 0s; }
-        .shape:nth-child(2) { width: 120px; height: 120px; left: 70%; animation-delay: 2s; }
-        .shape:nth-child(3) { width: 60px; height: 60px; left: 40%; animation-delay: 4s; }
-        .shape:nth-child(4) { width: 100px; height: 100px; left: 80%; animation-delay: 6s; }
+        .shape:nth-child(1) { width: 60px; height: 60px; left: 10%; animation-delay: 0s; }
+        .shape:nth-child(2) { width: 80px; height: 80px; left: 70%; animation-delay: 2s; }
+        .shape:nth-child(3) { width: 40px; height: 40px; left: 40%; animation-delay: 4s; }
+        .shape:nth-child(4) { width: 70px; height: 70px; left: 80%; animation-delay: 6s; }
 
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.3; }
-            50% { transform: translateY(-100px) rotate(180deg); opacity: 0.6; }
+            50% { transform: translateY(-80px) rotate(180deg); opacity: 0.6; }
         }
 
-        .container { width: 90%; max-width: 1200px; margin: 0 auto; padding: 20px 0; }
+        .container { 
+            width: 95%; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 10px 0; 
+        }
+
         .page { display: none; }
-        .page.active { display: block; }
+        .page.active { display: block; animation: fadeInUp 0.5s ease; }
 
-        .admin-float-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #EF4444, #DC2626);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4);
-            z-index: 999;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .admin-float-btn:hover { transform: scale(1.1) rotate(90deg); }
-
+        /* Mobile Navigation */
         nav {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 20px var(--shadow);
+            box-shadow: 0 2px 10px var(--shadow);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -103,20 +92,31 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 0;
+            padding: 12px 0;
         }
 
         .nav-brand {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 700;
             color: var(--primary);
             cursor: pointer;
         }
 
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 5px;
+        }
+
         .nav-links {
             display: flex;
-            gap: 25px;
+            gap: 20px;
             list-style: none;
+            transition: all 0.3s ease;
         }
 
         .nav-links a {
@@ -124,64 +124,73 @@
             text-decoration: none;
             font-weight: 500;
             transition: color 0.3s;
-            position: relative;
             cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
         }
 
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--primary);
-            transition: width 0.3s;
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
         }
 
-        .nav-links a:hover::after, .nav-links a.active::after { width: 100%; }
-        .nav-links a.active { color: var(--primary); }
+        /* Admin Button */
+        .admin-float-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+            z-index: 999;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
+        .admin-float-btn:hover { transform: scale(1.1) rotate(90deg); }
+
+        /* Content Sections */
         .hero-section, .content-section {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            padding: 60px 40px;
-            margin-top: 30px;
-            border-radius: 30px;
-            box-shadow: 0 20px 60px var(--shadow-lg);
-            animation: fadeInUp 0.8s ease;
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            padding: 30px 20px;
+            margin-top: 15px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow-lg);
         }
 
         .profile-photo {
-            width: 180px;
-            height: 180px;
+            width: 140px;
+            height: 140px;
             object-fit: cover;
             border-radius: 50%;
-            border: 6px solid var(--primary);
-            box-shadow: 0 10px 30px var(--shadow-lg);
-            margin-bottom: 30px;
+            border: 5px solid var(--primary);
+            box-shadow: 0 8px 20px var(--shadow-lg);
+            margin-bottom: 20px;
             transition: transform 0.3s;
         }
 
-        .profile-photo:hover { transform: scale(1.1) rotate(5deg); }
+        .profile-photo:hover { transform: scale(1.05); }
 
         h1 {
-            font-size: 3rem;
+            font-size: 2rem;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .section-title {
-            font-size: 2.5rem;
-            margin-bottom: 40px;
+            font-size: 1.8rem;
+            margin-bottom: 30px;
             color: var(--text);
             position: relative;
             display: inline-block;
@@ -190,17 +199,18 @@
         .section-title::after {
             content: '';
             position: absolute;
-            bottom: -10px;
+            bottom: -8px;
             left: 50%;
             transform: translateX(-50%);
-            width: 80px;
-            height: 4px;
+            width: 60px;
+            height: 3px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             border-radius: 2px;
         }
 
+        /* Buttons */
         .btn {
-            padding: 12px 35px;
+            padding: 10px 25px;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 600;
@@ -210,7 +220,8 @@
             cursor: pointer;
             border: none;
             font-family: 'Kanit', sans-serif;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            margin: 5px;
         }
 
         .btn-primary {
@@ -218,7 +229,7 @@
             color: white;
         }
 
-        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px var(--shadow-lg); }
+        .btn-primary:hover { transform: translateY(-2px); }
 
         .btn-secondary {
             background: white;
@@ -228,86 +239,72 @@
 
         .btn-secondary:hover { background: var(--primary); color: white; }
 
-        /* AI Section Styles */
+        /* AI Cards */
         .ai-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin: 40px 0;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin: 30px 0;
         }
 
         .ai-card {
             background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px var(--shadow);
-            transition: all 0.4s;
-            border-top: 5px solid var(--primary);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+            transition: all 0.3s;
+            border-top: 4px solid var(--primary);
         }
 
-        .ai-card:hover { transform: translateY(-10px); box-shadow: 0 20px 50px var(--shadow-lg); }
+        .ai-card:active { transform: scale(0.98); }
 
         .ai-card i {
-            font-size: 3rem;
+            font-size: 2.5rem;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .ai-card h3 {
             color: var(--text);
-            font-size: 1.5rem;
-            margin-bottom: 15px;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
         }
 
-        .ai-card p { color: var(--text-light); line-height: 1.8; }
+        .ai-card p { 
+            color: var(--text-light); 
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
 
+        /* Chat Container */
         .chat-container {
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px var(--shadow);
-            max-width: 800px;
-            margin: 40px auto;
-        }
-
-        .api-key-input {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .api-key-input input {
-            flex: 1;
-            padding: 12px 20px;
-            border: 2px solid #E5E7EB;
-            border-radius: 10px;
-            font-family: 'Kanit', sans-serif;
-            font-size: 1rem;
-        }
-
-        .api-key-input input:focus {
-            outline: none;
-            border-color: var(--primary);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 20px var(--shadow);
+            margin: 30px auto;
         }
 
         .chat-messages {
-            height: 400px;
+            height: 300px;
             overflow-y: auto;
             border: 2px solid #E5E7EB;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
             background: #F9FAFB;
         }
 
         .message {
-            padding: 12px 20px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            max-width: 85%;
             animation: slideIn 0.3s ease;
+            font-size: 0.95rem;
+            word-wrap: break-word;
         }
 
         @keyframes slideIn {
@@ -325,21 +322,21 @@
         .message.ai {
             background: white;
             color: var(--text);
-            box-shadow: 0 2px 10px var(--shadow);
+            box-shadow: 0 2px 8px var(--shadow);
         }
 
         .chat-input {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .chat-input input {
             flex: 1;
-            padding: 12px 20px;
+            padding: 12px 15px;
             border: 2px solid #E5E7EB;
-            border-radius: 50px;
+            border-radius: 25px;
             font-family: 'Kanit', sans-serif;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
         .chat-input input:focus {
@@ -348,82 +345,87 @@
         }
 
         .chat-input button {
-            padding: 12px 30px;
-            border-radius: 50px;
+            padding: 12px 20px;
+            border-radius: 25px;
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s;
+            font-size: 0.9rem;
         }
 
-        .chat-input button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px var(--shadow-lg); }
-        .chat-input button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .chat-input button:active { transform: scale(0.95); }
+        .chat-input button:disabled { opacity: 0.6; }
 
+        /* Skills */
         .skill-list {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 20px;
-            max-width: 800px;
-            margin: 0 auto;
+            gap: 12px;
         }
 
         .skill-item {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
-            padding: 15px 30px;
-            border-radius: 50px;
+            padding: 10px 20px;
+            border-radius: 25px;
             font-weight: 600;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px var(--shadow);
-            cursor: pointer;
+            box-shadow: 0 3px 10px var(--shadow);
+            font-size: 0.9rem;
         }
 
-        .skill-item:hover { transform: translateY(-5px) scale(1.05); }
+        .skill-item:active { transform: scale(0.95); }
 
+        /* Portfolio */
         .portfolio-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 40px;
-            margin-top: 40px;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            margin-top: 30px;
         }
 
         .project-card {
             background: white;
-            border-radius: 20px;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 10px 30px var(--shadow);
-            transition: all 0.4s;
+            box-shadow: 0 5px 20px var(--shadow);
+            transition: all 0.3s;
         }
 
-        .project-card:hover { transform: translateY(-15px) scale(1.02); }
-        .project-card img { width: 100%; height: 250px; object-fit: cover; transition: transform 0.4s; }
-        .project-card:hover img { transform: scale(1.1); }
-        .project-card-content { padding: 25px; }
-        .project-card h3 { margin-bottom: 15px; color: var(--primary); font-size: 1.4rem; }
-        .project-card p { color: var(--text-light); }
+        .project-card:active { transform: scale(0.98); }
+        .project-card img { width: 100%; height: 200px; object-fit: cover; }
+        .project-card-content { padding: 20px; }
+        .project-card h3 { margin-bottom: 10px; color: var(--primary); font-size: 1.2rem; }
+        .project-card p { color: var(--text-light); font-size: 0.95rem; }
 
+        /* Comments */
         .comment-form {
-            max-width: 700px;
-            margin: 0 auto 40px;
             background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px var(--shadow);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px var(--shadow);
+            margin-bottom: 30px;
         }
 
-        .form-group { margin-bottom: 20px; text-align: left; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        .form-group label { 
+            display: block; 
+            margin-bottom: 6px; 
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
 
         .form-group input, .form-group textarea {
             width: 100%;
-            padding: 12px 20px;
+            padding: 10px 15px;
             border: 2px solid #E5E7EB;
             border-radius: 10px;
             font-family: 'Kanit', sans-serif;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
 
         .form-group input:focus, .form-group textarea:focus {
@@ -431,38 +433,133 @@
             border-color: var(--primary);
         }
 
-        .form-group textarea { min-height: 120px; resize: vertical; }
+        .form-group textarea { min-height: 100px; resize: vertical; }
 
         .comment-item {
             background: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px var(--shadow);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 12px var(--shadow);
             text-align: left;
         }
 
         .comment-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 5px;
         }
 
-        .comment-author { font-weight: 700; color: var(--primary); font-size: 1.1rem; }
-        .comment-date { font-size: 0.85rem; color: var(--text-light); }
+        .comment-author { 
+            font-weight: 700; 
+            color: var(--primary); 
+            font-size: 1rem;
+        }
 
+        .comment-date { 
+            font-size: 0.8rem; 
+            color: var(--text-light); 
+        }
+
+        /* Footer */
         footer {
             background: rgba(31, 41, 55, 0.95);
             color: #9CA3AF;
-            padding: 30px 0;
-            margin-top: 30px;
-            border-radius: 30px 30px 0 0;
+            padding: 20px 0;
+            margin-top: 20px;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+            font-size: 0.9rem;
         }
 
+        /* Mobile Styles */
         @media (max-width: 768px) {
-            h1 { font-size: 2rem; }
-            .nav-links { display: none; }
-            .portfolio-grid, .ai-grid { grid-template-columns: 1fr; }
+            .menu-toggle { display: block; }
+            
+            .nav-links {
+                position: fixed;
+                top: 60px;
+                left: -100%;
+                width: 80%;
+                max-width: 300px;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: blur(10px);
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 2px 0 10px var(--shadow);
+                border-radius: 0 15px 15px 0;
+                height: calc(100vh - 60px);
+                overflow-y: auto;
+            }
+
+            .nav-links.active { left: 0; }
+
+            .nav-links a {
+                width: 100%;
+                padding: 12px;
+                border-radius: 8px;
+                text-align: left;
+            }
+
+            h1 { font-size: 1.6rem; }
+            .section-title { font-size: 1.5rem; }
+            
+            .ai-grid { gap: 15px; }
+            
+            .hero-section, .content-section {
+                padding: 20px 15px;
+                margin-top: 10px;
+            }
+
+            .profile-photo { 
+                width: 120px; 
+                height: 120px; 
+            }
+
+            .admin-float-btn {
+                bottom: 15px;
+                right: 15px;
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+
+            .chat-input button {
+                padding: 12px 15px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .ai-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .portfolio-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .ai-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Touch Improvements */
+        @media (hover: none) {
+            .btn:active { transform: scale(0.95); }
+            .skill-item:active { transform: scale(0.95); }
+            .nav-links a:active { background: rgba(59, 130, 246, 0.2); }
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-light);
+            font-size: 0.95rem;
         }
     </style>
 </head>
@@ -483,7 +580,10 @@
     <nav>
         <div class="container">
             <div class="nav-brand" onclick="navigateTo('home')">เมก้า Portfolio</div>
-            <ul class="nav-links">
+            <button class="menu-toggle" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-links" id="navLinks">
                 <li><a onclick="navigateTo('home')" data-page="home" class="active">หน้าหลัก</a></li>
                 <li><a onclick="navigateTo('about')" data-page="about">เกี่ยวกับ</a></li>
                 <li><a onclick="navigateTo('ai')" data-page="ai">🤖 AI</a></li>
@@ -501,9 +601,9 @@
             <section class="hero-section" style="text-align: center;">
                 <img src="https://img2.pic.in.th/pic/IMG_20251114_110305.jpg" alt="เมก้า" class="profile-photo">
                 <h1>สวัสดีครับ, ผม เมก้า</h1>
-                <p style="font-size: 1.4rem; color: var(--text-light); margin-bottom: 20px;">13 ปี นักพัฒนาเว็บไซต์มือใหม่</p>
-                <p style="font-size: 1.1rem; max-width: 700px; margin: 0 auto 30px;">รักการเขียนโค้ดและสร้างสรรค์เว็บไซต์ กำลังเรียนรู้เทคโนโลยีใหม่ๆ และพัฒนาทักษะด้าน AI อย่างต่อเนื่อง 🚀</p>
-                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <p style="font-size: 1.2rem; color: var(--text-light); margin-bottom: 15px;">13 ปี นักพัฒนาเว็บไซต์มือใหม่</p>
+                <p style="font-size: 1rem; margin: 0 auto 25px;">รักการเขียนโค้ดและสร้างสรรค์เว็บไซต์ กำลังเรียนรู้เทคโนโลยีใหม่ๆ และพัฒนาทักษะด้าน AI อย่างต่อเนื่อง 🚀</p>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
                     <button onclick="navigateTo('about')" class="btn btn-primary">เกี่ยวกับฉัน</button>
                     <button onclick="navigateTo('ai')" class="btn btn-primary">🤖 ทดลอง AI</button>
                     <button onclick="navigateTo('portfolio')" class="btn btn-primary">ดูผลงาน</button>
@@ -516,27 +616,27 @@
         <div id="about" class="page">
             <section class="content-section" style="text-align: center;">
                 <h2 class="section-title">👋 เกี่ยวกับเมก้า</h2>
-                <p style="max-width: 800px; margin: 20px auto; font-size: 1.1rem; color: var(--text-light);">
+                <p style="margin: 20px auto; font-size: 1rem; color: var(--text-light); line-height: 1.8;">
                     สวัสดีครับ! ผมชื่อเมก้า อายุ 13 ปี เป็นนักเรียนที่หลงใหลในการเขียนโปรแกรมและเทคโนโลยี AI 
                     ผมเริ่มต้นเรียนรู้การเขียนโค้ดด้วยตัวเองและตื่นเต้นที่จะพัฒนาทักษะให้ดีขึ้นทุกวัน 
                     เป้าหมายของผมคือการสร้างสรรค์เว็บไซต์และแอปพลิเคชันที่มีประโยชน์ต่อผู้คน!
                 </p>
-                <div style="margin-top: 40px;">
+                <div style="margin-top: 30px;">
                     <button onclick="navigateTo('ai')" class="btn btn-primary">เรียนรู้เกี่ยวกับ AI →</button>
                 </div>
             </section>
         </div>
 
-        <!-- AI PAGE (NEW!) -->
+        <!-- AI PAGE -->
         <div id="ai" class="page">
             <section class="content-section">
-                <h2 class="section-title" style="text-align: center;">🤖 โลกของปัญญาประดิษฐ์ (AI)</h2>
+                <h2 class="section-title" style="text-align: center;">🤖 โลกของปัญญาประดิษฐ์</h2>
                 
                 <div class="ai-grid">
                     <div class="ai-card">
                         <i class="fas fa-brain"></i>
                         <h3>AI คืออะไร?</h3>
-                        <p>ปัญญาประดิษฐ์ (Artificial Intelligence) คือการทำให้คอมพิวเตอร์มีความสามารถในการเรียนรู้ คิด และตัดสินใจเหมือนมนุษย์ โดยใช้ข้อมูลและอัลกอริทึมเพื่อแก้ปัญหาต่างๆ</p>
+                        <p>ปัญญาประดิษฐ์ (Artificial Intelligence) คือการทำให้คอมพิวเตอร์มีความสามารถในการเรียนรู้ คิด และตัดสินใจเหมือนมนุษย์</p>
                     </div>
 
                     <div class="ai-card">
@@ -544,45 +644,43 @@
                         <h3>ประเภทของ AI</h3>
                         <p><strong>• Machine Learning:</strong> ระบบเรียนรู้จากข้อมูล<br>
                         <strong>• Deep Learning:</strong> เรียนรู้ผ่าน Neural Networks<br>
-                        <strong>• NLP:</strong> ทำความเข้าใจภาษาธรรมชาติ<br>
-                        <strong>• Computer Vision:</strong> มองเห็นและเข้าใจภาพ</p>
+                        <strong>• NLP:</strong> ทำความเข้าใจภาษา</p>
                     </div>
 
                     <div class="ai-card">
                         <i class="fas fa-graduation-cap"></i>
                         <h3>การเทรน AI</h3>
-                        <p>AI เรียนรู้ผ่านการป้อนข้อมูลจำนวนมาก (Training Data) และปรับปรุงตัวเองผ่านการทำซ้ำๆ จนกว่าจะให้ผลลัพธ์ที่แม่นยำ เรียกว่า "การเทรนโมเดล"</p>
+                        <p>AI เรียนรู้ผ่านการป้อนข้อมูลจำนวนมาก และปรับปรุงตัวเองจนให้ผลลัพธ์ที่แม่นยำ</p>
                     </div>
 
                     <div class="ai-card">
                         <i class="fas fa-comment-dots"></i>
                         <h3>Language Models</h3>
-                        <p><strong>ตัวอย่าง:</strong> GPT, Gemini, Claude<br>
-                        เป็น AI ที่เข้าใจและสร้างภาษาได้ โดยเรียนรู้จากข้อความนับพันล้านคำ สามารถสนทนา แปลภาษา เขียนโค้ด และช่วยแก้ปัญหาได้</p>
+                        <p><strong>ตัวอย่าง:</strong> GPT, Gemini, Claude - เป็น AI ที่เข้าใจและสร้างภาษาได้ สามารถสนทนา แปลภาษา และเขียนโค้ด</p>
                     </div>
 
                     <div class="ai-card">
                         <i class="fas fa-cogs"></i>
                         <h3>การทำงานของ AI</h3>
-                        <p>1. รับข้อมูลนำเข้า (Input)<br>
+                        <p>1. รับข้อมูลนำเข้า<br>
                         2. ประมวลผลด้วยโมเดล<br>
-                        3. ให้ผลลัพธ์ (Output)<br>
-                        4. เรียนรู้จากข้อผิดพลาดและปรับปรุง</p>
+                        3. ให้ผลลัพธ์<br>
+                        4. เรียนรู้และปรับปรุง</p>
                     </div>
 
                     <div class="ai-card">
                         <i class="fas fa-lightbulb"></i>
                         <h3>การใช้งาน AI</h3>
-                        <p>• ผู้ช่วยเสมือน (Virtual Assistant)<br>
-                        • แชทบอท (Chatbot)<br>
-                        • แนะนำสินค้า (Recommendation)<br>
+                        <p>• ผู้ช่วยเสมือน<br>
+                        • แชทบอท<br>
+                        • แนะนำสินค้า<br>
                         • วิเคราะห์ข้อมูล<br>
                         • สร้างเนื้อหา</p>
                     </div>
                 </div>
 
                 <div class="chat-container">
-                    <h3 style="text-align: center; margin-bottom: 20px; color: var(--primary);">
+                    <h3 style="text-align: center; margin-bottom: 15px; color: var(--primary);">
                         <i class="fas fa-comments"></i> ทดลองคุยกับ Gemini AI
                     </h3>
                     
@@ -600,7 +698,7 @@
                     </div>
                 </div>
 
-                <div style="text-align: center; margin-top: 40px;">
+                <div style="text-align: center; margin-top: 30px;">
                     <button onclick="navigateTo('skills')" class="btn btn-primary">ดูทักษะของฉัน →</button>
                 </div>
             </section>
@@ -610,17 +708,17 @@
         <div id="skills" class="page">
             <section class="content-section" style="text-align: center;">
                 <h2 class="section-title">💼 ทักษะของเมก้า</h2>
-                <div class="skill-list" id="skillList">
+                <div class="skill-list">
                     <div class="skill-item">HTML5</div>
-                    <div class="skill-item">CSS3 & Animation</div>
+                    <div class="skill-item">CSS3</div>
                     <div class="skill-item">JavaScript</div>
                     <div class="skill-item">Python</div>
-                    <div class="skill-item">AI & Machine Learning</div>
+                    <div class="skill-item">AI & ML</div>
                     <div class="skill-item">Git & GitHub</div>
-                    <div class="skill-item">Responsive Design</div>
-                    <div class="skill-item">UI/UX Design</div>
+                    <div class="skill-item">Responsive</div>
+                    <div class="skill-item">UI/UX</div>
                 </div>
-                <div style="margin-top: 40px;">
+                <div style="margin-top: 30px;">
                     <button onclick="navigateTo('portfolio')" class="btn btn-primary">ดูผลงาน →</button>
                 </div>
             </section>
@@ -630,7 +728,7 @@
         <div id="portfolio" class="page">
             <section class="content-section" style="text-align: center;">
                 <h2 class="section-title">📂 ผลงานของเมก้า</h2>
-                <div class="portfolio-grid" id="portfolioGrid">
+                <div class="portfolio-grid">
                     <div class="project-card">
                         <img src="https://img2.pic.in.th/pic/Gemini_Generated_Image_kas7wskas7wskas70fa0f75ef4f13073.png" alt="โปรเจค 1">
                         <div class="project-card-content">
@@ -646,7 +744,7 @@
                         </div>
                     </div>
                 </div>
-                <div style="margin-top: 40px;">
+                <div style="margin-top: 30px;">
                     <button onclick="navigateTo('comments')" class="btn btn-primary">ดูความคิดเห็น →</button>
                 </div>
             </section>
@@ -673,8 +771,8 @@
                     </button>
                 </form>
 
-                <div id="commentsList" style="max-width: 800px; margin: 0 auto;">
-                    <div style="text-align: center; padding: 20px; color: var(--text-light);">กำลังโหลดความคิดเห็น...</div>
+                <div id="commentsList">
+                    <div class="loading">กำลังโหลดความคิดเห็น...</div>
                 </div>
             </section>
         </div>
@@ -683,37 +781,43 @@
         <div id="contact" class="page">
             <section class="content-section" style="text-align: center;">
                 <h2 class="section-title">📧 ติดต่อเมก้า</h2>
-                <p style="font-size: 1.2rem; margin-bottom: 30px; color: var(--text);">
+                <p style="font-size: 1.1rem; margin-bottom: 25px; color: var(--text);">
                     หากคุณต้องการติดต่อหรือมีคำถาม ส่งข้อความมาได้เลยครับ ยินดีตอบทุกคำถาม!
                 </p>
-                <a href="mailto:uoicom01@gmail.com" class="btn btn-primary" style="display: inline-block; margin-bottom: 30px;">
+                <a href="mailto:uoicom01@gmail.com" class="btn btn-primary" style="display: inline-block; margin-bottom: 25px;">
                     <i class="fas fa-envelope"></i> ส่งอีเมล
                 </a>
-                <div style="font-size: 2.5rem;">
-                    <a href="#" style="color: var(--primary); margin: 0 15px; transition: all 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='var(--primary)'">
+                <div style="font-size: 2.2rem;">
+                    <a href="#" style="color: var(--primary); margin: 0 12px; transition: all 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='var(--primary)'">
                         <i class="fab fa-github"></i>
                     </a>
-                    <a href="#" style="color: var(--primary); margin: 0 15px; transition: all 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='var(--primary)'">
+                    <a href="#" style="color: var(--primary); margin: 0 12px; transition: all 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='var(--primary)'">
                         <i class="fab fa-facebook"></i>
                     </a>
-                    <a href="#" style="color: var(--primary); margin: 0 15px; transition: all 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='var(--primary)'">
+                    <a href="#" style="color: var(--primary); margin: 0 12px; transition: all 0.3s;" onmouseover="this.style.color='var(--secondary)'" onmouseout="this.style.color='var(--primary)'">
                         <i class="fab fa-twitter"></i>
                     </a>
                 </div>
-                <div style="margin-top: 40px;">
+                <div style="margin-top: 30px;">
                     <button onclick="navigateTo('home')" class="btn btn-secondary">← กลับหน้าหลัก</button>
                 </div>
             </section>
         </div>
     </div>
 
-    <footer style="text-align: center;">
+    <footer>
         <p>&copy; 2024 เมก้า | Student Developer Portfolio | Made with ❤️</p>
     </footer>
 
     <script>
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwCANOGos05cnO06GAYqymLd_2MNN2yAWh9GpGD9ypf2UJ5TXM099H3FR-26oRpL2Sbdw/exec';
-        let GEMINI_API_KEY = localStorage.getItem('gemini_api_key') || '';
+        const GEMINI_API_KEY = 'AIzaSyBKQTji6M7AcrWc_6XUA0DMx2BXWJjTkxI';
+
+        // Mobile Menu Toggle
+        function toggleMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+        }
 
         // Navigation
         function navigateTo(pageId) {
@@ -722,42 +826,29 @@
             document.querySelectorAll('.nav-links a').forEach(link => {
                 link.classList.toggle('active', link.dataset.page === pageId);
             });
+            
+            // Close mobile menu
+            document.getElementById('navLinks').classList.remove('active');
+            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Gemini AI Functions
-        function saveApiKey() {
-            const key = document.getElementById('apiKey').value.trim();
-            if (key) {
-                GEMINI_API_KEY = key;
-                localStorage.setItem('gemini_api_key', key);
-                alert('✅ บันทึก API Key เรียบร้อย! ลองส่งข้อความได้เลย');
-                document.getElementById('apiKey').value = '';
-            } else {
-                alert('❌ กรุณาใส่ API Key');
-            }
-        }
-
+        // Gemini AI Chat
         async function sendMessage() {
             const input = document.getElementById('userMessage');
             const message = input.value.trim();
             
             if (!message) return;
-            if (!GEMINI_API_KEY) {
-                alert('❌ กรุณาใส่ Gemini API Key ก่อนส่งข้อความ');
-                return;
-            }
 
-            // Add user message
             addMessage(message, 'user');
             input.value = '';
             
             const sendBtn = document.getElementById('sendBtn');
             sendBtn.disabled = true;
-            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังคิด...';
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> คิด...';
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyBKQTji6M7AcrWc_6XUA0DMx2BXWJjTkxI`, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -773,10 +864,10 @@
                     const aiResponse = data.candidates[0].content.parts[0].text;
                     addMessage(aiResponse, 'ai');
                 } else {
-                    addMessage('ขออภัย เกิดข้อผิดพลาด: ' + (data.error?.message || 'ไม่สามารถรับคำตอบได้'), 'ai');
+                    addMessage('ขอโทษครับ เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง', 'ai');
                 }
             } catch (error) {
-                addMessage('❌ เกิดข้อผิดพลาด: ' + error.message + ' (ตรวจสอบ API Key)', 'ai');
+                addMessage('❌ เกิดข้อผิดพลาด: ' + error.message, 'ai');
             }
 
             sendBtn.disabled = false;
@@ -792,7 +883,7 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
-        // Comments
+        // Comments System
         document.getElementById('commentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button');
@@ -812,7 +903,7 @@
                 e.target.reset();
                 loadComments();
             } catch (error) {
-                alert('❌ เกิดข้อผิดพลาด');
+                alert('❌ เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
             }
 
             btn.disabled = false;
@@ -830,36 +921,66 @@
                         <div class="comment-item">
                             <div class="comment-header">
                                 <span class="comment-author"><i class="fas fa-user-circle"></i> ${c.name}</span>
-                                <span class="comment-date">${new Date(c.timestamp).toLocaleDateString('th-TH')}</span>
+                                <span class="comment-date">${new Date(c.timestamp).toLocaleDateString('th-TH', { 
+                                    year: 'numeric', 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                })}</span>
                             </div>
                             <p>${c.comment}</p>
                         </div>
                     `).join('');
                 } else {
-                    list.innerHTML = '<p style="text-align: center; color: var(--text-light);">ยังไม่มีความคิดเห็น เป็นคนแรกได้เลย!</p>';
+                    list.innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 20px;">ยังไม่มีความคิดเห็น เป็นคนแรกได้เลย!</p>';
                 }
             } catch (error) {
                 console.error('Error loading comments:', error);
+                document.getElementById('commentsList').innerHTML = '<p style="text-align: center; color: var(--text-light); padding: 20px;">ไม่สามารถโหลดความคิดเห็นได้</p>';
             }
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadComments();
-            if (GEMINI_API_KEY) {
-                document.getElementById('apiKey').value = GEMINI_API_KEY.substring(0, 10) + '...';
+        });
+
+        // Parallax effect for desktop
+        if (window.innerWidth > 768) {
+            document.addEventListener('mousemove', (e) => {
+                const shapes = document.querySelectorAll('.shape');
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+                shapes.forEach((shape, i) => {
+                    const speed = (i + 1) * 15;
+                    shape.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+                });
+            });
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const navLinks = document.getElementById('navLinks');
+            const menuToggle = document.querySelector('.menu-toggle');
+            
+            if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+                navLinks.classList.remove('active');
             }
         });
 
-        // Parallax effect
-        document.addEventListener('mousemove', (e) => {
-            const shapes = document.querySelectorAll('.shape');
-            const x = e.clientX / window.innerWidth;
-            const y = e.clientY / window.innerHeight;
-            shapes.forEach((shape, i) => {
-                const speed = (i + 1) * 20;
-                shape.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+        // Prevent scroll when mobile menu is open
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.target.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
             });
+        });
+
+        observer.observe(document.getElementById('navLinks'), { 
+            attributes: true, 
+            attributeFilter: ['class'] 
         });
     </script>
 </body>
