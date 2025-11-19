@@ -586,14 +586,9 @@
                         <i class="fas fa-comments"></i> ทดลองคุยกับ Gemini AI
                     </h3>
                     
-                    <div class="api-key-input">
-                        <input type="password" id="apiKey" placeholder="ใส่ Gemini API Key ของคุณ (ฟรีที่ ai.google.dev)">
-                        <button class="btn btn-primary" onclick="saveApiKey()">บันทึก</button>
-                    </div>
-
                     <div class="chat-messages" id="chatMessages">
                         <div class="message ai">
-                            <strong>🤖 Gemini:</strong> สวัสดีครับ! ผมคือ Gemini AI ผู้ช่วยที่พร้อมตอบคำถามของคุณ กรุณาใส่ API Key เพื่อเริ่มสนทนา
+                            <strong>🤖 Gemini:</strong> สวัสดีครับ! ผมคือตัวอย่าง AI ของเมก้าครับ
                         </div>
                     </div>
 
@@ -762,7 +757,7 @@
             sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังคิด...';
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyBKQTji6M7AcrWc_6XUA0DMx2BXWJjTkxI`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
