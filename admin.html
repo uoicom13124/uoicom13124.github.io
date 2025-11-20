@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+        /* ... (โค้ด CSS เดิมทั้งหมด) ... */
         :root {
             --primary: #3B82F6;
             --primary-dark: #2563EB;
@@ -380,6 +381,10 @@
             margin-bottom: 10px;
         }
 
+        .stat-card p {
+            font-weight: 500;
+        }
+
         .preview-image {
             max-width: 100%;
             max-height: 200px;
@@ -459,10 +464,30 @@
                 justify-content: center;
             }
         }
+        
+        /* Loading/Status Message */
+        .status-message {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        .status-message.loading {
+            background: #FEEBCB;
+            color: #D97706;
+        }
+        .status-message.success {
+            background: #D1FAE5;
+            color: #059669;
+        }
+        .status-message.error {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
     </style>
 </head>
 <body>
-    <!-- Login Screen -->
     <div class="login-container" id="loginScreen">
         <div class="login-box">
             <h1><i class="fas fa-lock"></i> Admin Login</h1>
@@ -480,7 +505,6 @@
         </div>
     </div>
 
-    <!-- Admin Panel -->
     <div class="admin-container" id="adminPanel">
         <div class="admin-header">
             <div>
@@ -496,8 +520,11 @@
                 </button>
             </div>
         </div>
+        
+        <div class="status-message loading" id="dataStatus" style="display: none;">
+            <i class="fas fa-spinner fa-spin"></i> กำลังโหลดข้อมูลจาก Google Sheet...
+        </div>
 
-        <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card">
                 <i class="fas fa-user"></i>
@@ -521,23 +548,21 @@
             </div>
         </div>
 
-        <!-- Tabs -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="openTab('profile')">
+            <button class="tab-btn active" onclick="openTab('profile', event)">
                 <i class="fas fa-user"></i> โปรไฟล์
             </button>
-            <button class="tab-btn" onclick="openTab('projects')">
+            <button class="tab-btn" onclick="openTab('projects', event)">
                 <i class="fas fa-folder"></i> ผลงาน
             </button>
-            <button class="tab-btn" onclick="openTab('skills')">
+            <button class="tab-btn" onclick="openTab('skills', event)">
                 <i class="fas fa-code"></i> ทักษะ
             </button>
-            <button class="tab-btn" onclick="openTab('comments')">
+            <button class="tab-btn" onclick="openTab('comments', event)">
                 <i class="fas fa-comments"></i> คอมเม้นต์
             </button>
         </div>
 
-        <!-- Profile Tab -->
         <div id="profileTab" class="tab-content active">
             <h2 class="section-title"><i class="fas fa-user"></i> แก้ไขโปรไฟล์</h2>
             
@@ -568,7 +593,7 @@
             </div>
 
             <div class="form-group">
-                <label>สีหลัก</label>
+                <label>สีหลัก (Primary Color)</label>
                 <div class="color-picker-group">
                     <input type="color" id="primaryColor" value="#3B82F6">
                     <span id="primaryColorValue">#3B82F6</span>
@@ -576,7 +601,7 @@
             </div>
 
             <div class="form-group">
-                <label>สีรอง</label>
+                <label>สีรอง (Secondary Color)</label>
                 <div class="color-picker-group">
                     <input type="color" id="secondaryColor" value="#10B981">
                     <span id="secondaryColorValue">#10B981</span>
@@ -588,7 +613,6 @@
             </button>
         </div>
 
-        <!-- Projects Tab -->
         <div id="projectsTab" class="tab-content">
             <h2 class="section-title"><i class="fas fa-folder"></i> จัดการผลงาน</h2>
             
@@ -596,10 +620,11 @@
                 <i class="fas fa-plus"></i> เพิ่มผลงานใหม่
             </button>
 
-            <div class="project-list" id="projectList"></div>
+            <div class="project-list" id="projectList">
+                <p class="loading">กำลังโหลดผลงาน...</p>
+            </div>
         </div>
 
-        <!-- Skills Tab -->
         <div id="skillsTab" class="tab-content">
             <h2 class="section-title"><i class="fas fa-code"></i> จัดการทักษะ</h2>
             
@@ -607,17 +632,19 @@
                 <i class="fas fa-plus"></i> เพิ่มทักษะใหม่
             </button>
 
-            <div class="skill-list-admin" id="skillList"></div>
+            <div class="skill-list-admin" id="skillList">
+                <p class="loading">กำลังโหลดทักษะ...</p>
+            </div>
         </div>
 
-        <!-- Comments Tab -->
         <div id="commentsTab" class="tab-content">
             <h2 class="section-title"><i class="fas fa-comments"></i> จัดการความคิดเห็น</h2>
-            <div class="comments-list" id="commentsList"></div>
+            <div class="comments-list" id="commentsList">
+                <p class="loading">กำลังโหลดความคิดเห็น...</p>
+            </div>
         </div>
     </div>
 
-    <!-- Project Modal -->
     <div class="modal" id="projectModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -625,7 +652,7 @@
                 <button class="close-modal" onclick="closeProjectModal()">&times;</button>
             </div>
 
-            <input type="hidden" id="projectEditIndex">
+            <input type="hidden" id="projectEditID">
 
             <div class="form-group">
                 <label>รูปภาพ (URL)</label>
@@ -649,12 +676,11 @@
             </div>
 
             <button class="save-btn" onclick="saveProject()">
-                <i class="fas fa-save"></i> บันทึก
+                <i class="fas fa-save"></i> <span id="projectSaveBtnText">บันทึก</span>
             </button>
         </div>
     </div>
 
-    <!-- Skill Modal -->
     <div class="modal" id="skillModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -668,22 +694,67 @@
             </div>
 
             <button class="save-btn" onclick="saveSkill()">
-                <i class="fas fa-save"></i> บันทึก
+                <i class="fas fa-save"></i> <span id="skillSaveBtnText">บันทึก</span>
             </button>
         </div>
     </div>
 
     <script>
         const ADMIN_PASSWORD = 'sans13124';
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz2BcLAUNJpRYPtUOFtllQFNGCMMW8l-oRXphtucfoCP6bWMeA9niVa_5gHOHwnNpTz3A/exec';
-ilkil;
+        // <<< ** สำคัญ: เปลี่ยนเป็น URL API ของ Google Apps Script ของคุณ ** >>>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwJctttDqPkpFkscNRBMdZ4P4yn6N217K38GtOpWkqFp1f9dA3tb8A9j8AxtKlHgk0x/exec'; 
 
-        // ตรวจสอบการล็อกอิน
+        // Global data structure
+        let siteData = {
+            profile: {},
+            projects: [],
+            skills: [],
+            comments: []
+        };
+        
+        // --- Utility Function for POST requests ---
+        async function postToScript(action, payload = {}) {
+            showStatus('loading', 'กำลังดำเนินการ...');
+            
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, ...payload })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && !result.error) {
+                    showStatus('success', result.message || 'ดำเนินการสำเร็จ!');
+                    return result;
+                } else {
+                    throw new Error(result.message || 'Error from script');
+                }
+            } catch (error) {
+                console.error('API Error:', error);
+                showStatus('error', '❌ ผิดพลาด: ' + error.message);
+                throw error;
+            }
+        }
+
+        // --- Status and Loading ---
+        function showStatus(type, message) {
+            const statusDiv = document.getElementById('dataStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.style.display = 'block';
+            if (type !== 'loading') {
+                setTimeout(() => statusDiv.style.display = 'none', 5000);
+            }
+        }
+
+        // --- Login / Auth ---
         if (sessionStorage.getItem('adminLoggedIn') === 'true') {
             showAdminPanel();
         }
 
-        // Login
         function login() {
             const password = document.getElementById('passwordInput').value;
             if (password === ADMIN_PASSWORD) {
@@ -714,30 +785,65 @@ ilkil;
         }
 
         // Tab Management
-        function openTab(tabName) {
+        function openTab(tabName, event) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             
             document.getElementById(tabName + 'Tab').classList.add('active');
-            event.target.classList.add('active');
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active');
+            } else {
+                // สำหรับกรณีที่เรียกจากฟังก์ชันอื่น (e.g. loadAllData)
+                document.querySelector(`.tab-btn[onclick*="${tabName}"]`).classList.add('active');
+            }
         }
 
-        // Load All Data
+        // --- Core Data Loader (GET from Apps Script) ---
         async function loadAllData() {
-            loadProfile();
-            loadProjects();
-            loadSkills();
-            loadComments();
+            showStatus('loading', 'กำลังดึงข้อมูลทั้งหมดจาก Google Sheet...');
+            try {
+                const response = await fetch(SCRIPT_URL);
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const data = await response.json();
+                
+                if (data.error) throw new Error(data.details || data.error);
+
+                siteData.profile = data.profile || {};
+                siteData.projects = data.projects || [];
+                siteData.skills = data.skills || [];
+                siteData.comments = data.comments || [];
+                
+                renderAdminPanel();
+                showStatus('success', '✅ โหลดข้อมูลสำเร็จ!');
+
+            } catch (error) {
+                console.error('Error loading data from Google Sheet:', error);
+                showStatus('error', '⚠️ โหลดข้อมูลล้มเหลว: ' + error.message);
+            }
         }
 
-        // Profile Management
-        function loadProfile() {
-            const profile = JSON.parse(localStorage.getItem('siteProfile') || '{}');
-            document.getElementById('profileImage').value = profile.image || 'https://img2.pic.in.th/pic/IMG_20251114_110305.jpg';
-            document.getElementById('profileName').value = profile.name || 'เมก้า';
-            document.getElementById('profileTagline').value = profile.tagline || '✨ นักเรียนผู้หลงใหลในการเขียนโค้ด';
-            document.getElementById('profileDescription').value = profile.description || 'กำลังศึกษาและพัฒนาทักษะในโลกดิจิทัล';
-            document.getElementById('profileEmail').value = profile.email || 'uoicom01@gmail.com';
+        function renderAdminPanel() {
+            // Stats
+            document.getElementById('projectCount').textContent = siteData.projects.length;
+            document.getElementById('skillCount').textContent = siteData.skills.length;
+            document.getElementById('commentCount').textContent = siteData.comments.length;
+            
+            // Render Tabs
+            renderProfileTab();
+            renderProjectsTab();
+            renderSkillsTab();
+            renderCommentsTab();
+        }
+        
+        // --- Profile Management (Tab 1) ---
+        function renderProfileTab() {
+            const profile = siteData.profile;
+            document.getElementById('profileImage').value = profile.image || '';
+            document.getElementById('profileName').value = profile.name || '';
+            document.getElementById('profileTagline').value = profile.tagline || '';
+            document.getElementById('profileDescription').value = profile.description || '';
+            document.getElementById('profileEmail').value = profile.email || '';
             document.getElementById('primaryColor').value = profile.primaryColor || '#3B82F6';
             document.getElementById('secondaryColor').value = profile.secondaryColor || '#10B981';
             
@@ -745,7 +851,7 @@ ilkil;
             previewProfileImage();
         }
 
-        function saveProfile() {
+        async function saveProfile() {
             const profile = {
                 image: document.getElementById('profileImage').value,
                 name: document.getElementById('profileName').value,
@@ -756,13 +862,20 @@ ilkil;
                 secondaryColor: document.getElementById('secondaryColor').value
             };
             
-            localStorage.setItem('siteProfile', JSON.stringify(profile));
-            alert('✅ บันทึกโปรไฟล์สำเร็จ!');
+            try {
+                await postToScript('saveProfile', { profile: profile });
+                // อัปเดตข้อมูลภายใน Admin Panel ทันที
+                siteData.profile = profile;
+            } catch (error) {
+                // Handled in postToScript
+            }
         }
-
-        // Preview Images
+        
+        // Preview Images & Colors
         document.getElementById('profileImage').addEventListener('input', previewProfileImage);
         document.getElementById('projectImage').addEventListener('input', previewProjectImage);
+        document.getElementById('primaryColor').addEventListener('input', updateColorDisplay);
+        document.getElementById('secondaryColor').addEventListener('input', updateColorDisplay);
 
         function previewProfileImage() {
             const url = document.getElementById('profileImage').value;
@@ -786,132 +899,136 @@ ilkil;
             }
         }
 
-        // Color Picker
-        document.getElementById('primaryColor').addEventListener('input', updateColorDisplay);
-        document.getElementById('secondaryColor').addEventListener('input', updateColorDisplay);
-
         function updateColorDisplay() {
             document.getElementById('primaryColorValue').textContent = document.getElementById('primaryColor').value;
             document.getElementById('secondaryColorValue').textContent = document.getElementById('secondaryColor').value;
         }
 
-        // Projects Management
-        function loadProjects() {
-            const projects = JSON.parse(localStorage.getItem('siteProjects') || '[]');
+        // --- Projects Management (Tab 2) ---
+        function renderProjectsTab() {
             const projectList = document.getElementById('projectList');
-            document.getElementById('projectCount').textContent = projects.length;
+            const projects = siteData.projects;
 
             if (projects.length === 0) {
                 projectList.innerHTML = '<p style="text-align: center; color: #6B7280;">ยังไม่มีผลงาน</p>';
                 return;
             }
 
-            projectList.innerHTML = projects.map((p, i) => `
+            projectList.innerHTML = projects.map(p => `
                 <div class="project-item">
-                    <img src="${p.image}" alt="${p.title}">
+                    <img src="${p.Image}" alt="${p.Title}" onerror="this.src='https://via.placeholder.com/100/CCCCCC/808080?text=No+Image'">
                     <div class="project-info">
-                        <h3>${p.title}</h3>
-                        <p>${p.description}</p>
-                        <small>${p.link}</small>
+                        <strong>${p.Title}</strong>
+                        <p style="color: #6B7280; font-size: 0.9rem;">${p.Description}</p>
+                        <small>${p.Link}</small>
                     </div>
                     <div class="project-actions">
-                        <button class="save-btn" onclick="editProject(${i})">
+                        <button class="save-btn" onclick="openProjectModal('${p.ID}')">
                             <i class="fas fa-edit"></i> แก้ไข
                         </button>
-                        <button class="delete-btn" onclick="deleteProject(${i})">
+                        <button class="delete-btn" onclick="deleteProject('${p.ID}', event)">
                             <i class="fas fa-trash"></i> ลบ
                         </button>
                     </div>
                 </div>
             `).join('');
         }
-
-        function openProjectModal(index = null) {
+        
+        function openProjectModal(id = null) {
             document.getElementById('projectModal').classList.add('active');
-            document.getElementById('projectEditIndex').value = index !== null ? index : '';
+            document.getElementById('projectEditID').value = id || '';
             
-            if (index !== null) {
-                const projects = JSON.parse(localStorage.getItem('siteProjects') || '[]');
-                const p = projects[index];
-                document.getElementById('projectModalTitle').textContent = 'แก้ไขผลงาน';
-                document.getElementById('projectImage').value = p.image;
-                document.getElementById('projectTitle').value = p.title;
-                document.getElementById('projectDescription').value = p.description;
-                document.getElementById('projectLink').value = p.link;
-                previewProjectImage();
-            } else {
-                document.getElementById('projectModalTitle').textContent = 'เพิ่มผลงาน';
-                document.getElementById('projectImage').value = '';
-                document.getElementById('projectTitle').value = '';
-                document.getElementById('projectDescription').value = '';
-                document.getElementById('projectLink').value = '';
-                document.getElementById('projectImagePreview').style.display = 'none';
-            }
-        }
+            document.getElementById('projectImagePreview').style.display = 'none';
+            document.getElementById('projectImage').value = '';
+            document.getElementById('projectTitle').value = '';
+            document.getElementById('projectDescription').value = '';
+            document.getElementById('projectLink').value = '';
 
-        function editProject(index) {
-            openProjectModal(index);
+            if (id !== null) {
+                const p = siteData.projects.find(item => item.ID == id);
+                if (p) {
+                    document.getElementById('projectModalTitle').textContent = 'แก้ไขผลงาน';
+                    document.getElementById('projectImage').value = p.Image;
+                    document.getElementById('projectTitle').value = p.Title;
+                    document.getElementById('projectDescription').value = p.Description;
+                    document.getElementById('projectLink').value = p.Link;
+                    previewProjectImage();
+                }
+            } else {
+                document.getElementById('projectModalTitle').textContent = 'เพิ่มผลงานใหม่';
+            }
         }
 
         function closeProjectModal() {
             document.getElementById('projectModal').classList.remove('active');
         }
 
-        function saveProject() {
-            const projects = JSON.parse(localStorage.getItem('siteProjects') || '[]');
-            const indexValue = document.getElementById('projectEditIndex').value;
+        async function saveProject() {
+            const id = document.getElementById('projectEditID').value;
+            const btn = document.getElementById('projectSaveBtnText');
+            const originalText = btn.textContent;
+            
+            btn.textContent = 'กำลังบันทึก...';
             
             const project = {
-                image: document.getElementById('projectImage').value,
-                title: document.getElementById('projectTitle').value,
-                description: document.getElementById('projectDescription').value,
-                link: document.getElementById('projectLink').value
+                Image: document.getElementById('projectImage').value,
+                Title: document.getElementById('projectTitle').value,
+                Description: document.getElementById('projectDescription').value,
+                Link: document.getElementById('projectLink').value
             };
 
-            if (!project.title || !project.description) {
+            if (!project.Title || !project.Description) {
                 alert('❌ กรุณากรอกข้อมูลให้ครบถ้วน');
+                btn.textContent = originalText;
                 return;
             }
 
-            if (indexValue !== '') {
-                projects[parseInt(indexValue)] = project;
-            } else {
-                projects.push(project);
+            try {
+                await postToScript('saveProject', { 
+                    id: id, 
+                    project: project 
+                });
+                
+                closeProjectModal();
+                await loadAllData(); // โหลดข้อมูลใหม่ทั้งหมดหลังบันทึก
+            } catch (error) {
+                // Error handled in postToScript
+            } finally {
+                btn.textContent = originalText;
             }
-
-            localStorage.setItem('siteProjects', JSON.stringify(projects));
-            closeProjectModal();
-            loadProjects();
-            alert('✅ บันทึกผลงานสำเร็จ!');
         }
 
-        function deleteProject(index) {
-            if (!confirm('ต้องการลบผลงานนี้?')) return;
+        async function deleteProject(id, event) {
+            if (!confirm('ต้องการลบผลงานนี้อย่างถาวร?')) return;
             
-            const projects = JSON.parse(localStorage.getItem('siteProjects') || '[]');
-            projects.splice(index, 1);
-            localStorage.setItem('siteProjects', JSON.stringify(projects));
-            loadProjects();
-            alert('✅ ลบผลงานสำเร็จ!');
-        }
+            const btn = event.currentTarget;
+            btn.disabled = true;
 
-        // Skills Management
-        function loadSkills() {
-            const skills = JSON.parse(localStorage.getItem('siteSkills') || '[]');
+            try {
+                await postToScript('deleteProject', { id: id });
+                await loadAllData();
+            } catch (error) {
+                btn.disabled = false;
+                // Error handled in postToScript
+            }
+        }
+        
+        // --- Skills Management (Tab 3) ---
+        function renderSkillsTab() {
             const skillList = document.getElementById('skillList');
-            document.getElementById('skillCount').textContent = skills.length;
+            const skills = siteData.skills;
 
             if (skills.length === 0) {
                 skillList.innerHTML = '<p style="text-align: center; color: #6B7280;">ยังไม่มีทักษะ</p>';
                 return;
             }
 
-            skillList.innerHTML = skills.map((skill, i) => `
+            skillList.innerHTML = skills.map(s => `
                 <div class="skill-item-admin">
                     <div style="flex: 1;">
-                        <strong>${skill}</strong>
+                        <strong>${s.SkillName}</strong>
                     </div>
-                    <button class="delete-btn" onclick="deleteSkill(${i})">
+                    <button class="delete-btn" onclick="deleteSkill('${s.ID}', event)">
                         <i class="fas fa-trash"></i> ลบ
                     </button>
                 </div>
@@ -927,61 +1044,82 @@ ilkil;
             document.getElementById('skillModal').classList.remove('active');
         }
 
-        function saveSkill() {
-            const skills = JSON.parse(localStorage.getItem('siteSkills') || '[]');
+        async function saveSkill() {
             const skillName = document.getElementById('skillName').value.trim();
+            const btn = document.getElementById('skillSaveBtnText');
+            const originalText = btn.textContent;
+            
+            btn.textContent = 'กำลังบันทึก...';
 
             if (!skillName) {
                 alert('❌ กรุณากรอกชื่อทักษะ');
+                btn.textContent = originalText;
                 return;
             }
-
-            skills.push(skillName);
-            localStorage.setItem('siteSkills', JSON.stringify(skills));
-            closeSkillModal();
-            loadSkills();
-            alert('✅ เพิ่มทักษะสำเร็จ!');
-        }
-
-        function deleteSkill(index) {
-            if (!confirm('ต้องการลบทักษะนี้?')) return;
             
-            const skills = JSON.parse(localStorage.getItem('siteSkills') || '[]');
-            skills.splice(index, 1);
-            localStorage.setItem('siteSkills', JSON.stringify(skills));
-            loadSkills();
-            alert('✅ ลบทักษะสำเร็จ!');
+            try {
+                await postToScript('saveSkill', { skill: { SkillName: skillName } });
+                
+                closeSkillModal();
+                await loadAllData(); // โหลดข้อมูลใหม่ทั้งหมดหลังบันทึก
+            } catch (error) {
+                // Error handled in postToScript
+            } finally {
+                btn.textContent = originalText;
+            }
         }
 
-        // Comments Management
-        async function loadComments() {
-            const commentsList = document.getElementById('commentsList');
-            commentsList.innerHTML = '<p style="text-align: center; color: #6B7280;">กำลังโหลด...</p>';
+        async function deleteSkill(id, event) {
+            if (!confirm('ต้องการลบทักษะนี้อย่างถาวร?')) return;
+            
+            const btn = event.currentTarget;
+            btn.disabled = true;
 
             try {
-                const response = await fetch(SCRIPT_URL);
-                const data = await response.json();
-                
-                document.getElementById('commentCount').textContent = data.comments?.length || 0;
-
-                if (data.comments && data.comments.length > 0) {
-                    commentsList.innerHTML = data.comments.map((c, i) => `
-                        <div class="comment-admin-item">
-                            <div class="comment-info">
-                                <strong style="color: var(--primary);">${c.name}</strong>
-                                <p style="margin: 10px 0;">${c.comment}</p>
-                                <small style="color: #6B7280;">${formatDate(c.timestamp)}</small>
-                            </div>
-                            <button class="delete-btn" onclick="alert('ฟีเจอร์ลบคอมเม้นต์ต้องการการตั้งค่า Google Apps Script เพิ่มเติม')">
-                                <i class="fas fa-trash"></i> ลบ
-                            </button>
-                        </div>
-                    `).join('');
-                } else {
-                    commentsList.innerHTML = '<p style="text-align: center; color: #6B7280;">ยังไม่มีความคิดเห็น</p>';
-                }
+                await postToScript('deleteSkill', { id: id });
+                await loadAllData();
             } catch (error) {
-                commentsList.innerHTML = '<p style="text-align: center; color: var(--danger);">⚠️ ไม่สามารถโหลดความคิดเห็นได้</p>';
+                btn.disabled = false;
+                // Error handled in postToScript
+            }
+        }
+
+        // --- Comments Management (Tab 4) ---
+        function renderCommentsTab() {
+            const commentsList = document.getElementById('commentsList');
+            const comments = siteData.comments;
+
+            if (comments.length === 0) {
+                commentsList.innerHTML = '<p style="text-align: center; color: #6B7280;">ยังไม่มีความคิดเห็น</p>';
+                return;
+            }
+            
+            commentsList.innerHTML = comments.map(c => `
+                <div class="comment-admin-item">
+                    <div class="comment-info">
+                        <strong style="color: var(--primary);">${c.Name}</strong>
+                        <p style="margin: 10px 0;">${c.Comment}</p>
+                        <small style="color: #6B7280;">${formatDate(c.Timestamp)}</small>
+                    </div>
+                    <button class="delete-btn" onclick="deleteComment('${new Date(c.Timestamp).toISOString()}', event)">
+                        <i class="fas fa-trash"></i> ลบ
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        async function deleteComment(timestamp, event) {
+            if (!confirm('ต้องการลบความคิดเห็นนี้อย่างถาวร?')) return;
+            
+            const btn = event.currentTarget;
+            btn.disabled = true;
+
+            try {
+                await postToScript('deleteComment', { timestamp: timestamp });
+                await loadAllData();
+            } catch (error) {
+                btn.disabled = false;
+                // Error handled in postToScript
             }
         }
 
@@ -992,32 +1130,9 @@ ilkil;
                 month: 'long',
                 day: 'numeric',
                 hour: '2-digit',
-                minute: '2-digit'
+                minute: '2-digit',
+                second: '2-digit'
             });
-        }
-
-        // Initialize default data if empty
-        if (!localStorage.getItem('siteProjects')) {
-            const defaultProjects = [
-                {
-                    image: 'https://img2.pic.in.th/pic/Gemini_Generated_Image_kas7wskas7wskas70fa0f75ef4f13073.png',
-                    title: '🎨 ตัวละครสไตล์ Chibi',
-                    description: 'สร้างสรรค์ภาพตัวละครน่ารักด้วย AI และเทคนิคการออกแบบ ที่ทำให้ตัวผมกลายเป็นตัวการ์ตูนสุดน่ารัก',
-                    link: 'https://img2.pic.in.th/pic/Gemini_Generated_Image_kas7wskas7wskas70fa0f75ef4f13073.png'
-                },
-                {
-                    image: 'https://img2.pic.in.th/pic/1763093613326.jpg',
-                    title: '🤖 แขนหุ่นยนต์ไซเบอร์พังก์',
-                    description: 'ผลงานการปรับแต่งภาพด้วย AI พร้อมการออกแบบแขนกลที่ดูล้ำสมัย เต็มไปด้วยรายละเอียดทางเทคโนโลยี',
-                    link: 'https://img2.pic.in.th/pic/1763093613326.jpg'
-                }
-            ];
-            localStorage.setItem('siteProjects', JSON.stringify(defaultProjects));
-        }
-
-        if (!localStorage.getItem('siteSkills')) {
-            const defaultSkills = ['HTML5', 'CSS3 & Animation', 'JavaScript', 'Python', 'Git & GitHub', 'Responsive Design', 'UI/UX Design', 'AI Integration'];
-            localStorage.setItem('siteSkills', JSON.stringify(defaultSkills));
         }
     </script>
 </body>
