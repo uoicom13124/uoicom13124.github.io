@@ -414,7 +414,7 @@
         .project-card h3 { margin-bottom: 10px; color: var(--primary); font-size: 1.2rem; }
         .project-card p { color: var(--text-light); font-size: 0.95rem; }
 
-        /* Lightbox Styles (unchanged) */
+        /* Lightbox Styles */
         .lightbox-overlay {
             position: fixed;
             top: 0;
@@ -550,7 +550,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
-        /* Comments (unchanged) */
+        /* Comments */
         .comment-form {
             background: white;
             padding: 20px;
@@ -611,96 +611,7 @@
             color: var(--text-light); 
         }
 
-        /* NEW: Donate Leaderboard Styles */
-        .donate-leaderboard {
-            margin-top: 30px;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px var(--shadow);
-        }
-
-        .donate-leaderboard h3 {
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 15px;
-            margin: 0;
-            font-size: 1.3rem;
-            text-align: center;
-        }
-
-        .leaderboard-list {
-            background: white;
-            list-style: none;
-            padding: 15px 20px;
-        }
-
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #E5E7EB;
-            transition: background-color 0.3s;
-        }
-        
-        .leaderboard-item:hover {
-            background-color: #F9FAFB;
-        }
-
-        .leaderboard-item:last-child {
-            border-bottom: none;
-        }
-
-        .leaderboard-rank {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--primary);
-            width: 30px;
-            text-align: center;
-        }
-
-        .leaderboard-name {
-            flex-grow: 1;
-            font-weight: 600;
-            padding-left: 10px;
-        }
-
-        .leaderboard-amount {
-            font-weight: 700;
-            color: var(--secondary);
-            font-size: 1.1rem;
-        }
-        
-        .leaderboard-item.top-3 .leaderboard-name {
-            background: linear-gradient(90deg, var(--accent), var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .leaderboard-item.top-3 .leaderboard-rank {
-            color: var(--accent);
-        }
-        
-        /* Form for Donate */
-        #donateForm {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px var(--shadow);
-            margin-bottom: 30px;
-        }
-
-        .donate-note {
-            background-color: #FEF3C7;
-            color: #92400E;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border-left: 5px solid var(--accent);
-        }
-
-
-        /* Footer (unchanged) */
+        /* Footer */
         footer {
             background: rgba(31, 41, 55, 0.95);
             color: #9CA3AF;
@@ -711,7 +622,7 @@
             font-size: 0.9rem;
         }
 
-        /* Mobile Styles (unchanged) */
+        /* Mobile Styles */
         @media (max-width: 768px) {
             .menu-toggle { display: block; }
             
@@ -812,14 +723,14 @@
             }
         }
 
-        /* Touch Improvements (unchanged) */
+        /* Touch Improvements */
         @media (hover: none) {
             .btn:active { transform: scale(0.95); }
             .skill-item:active { transform: scale(0.95); }
             .nav-links a:active { background: rgba(59, 130, 246, 0.2); }
         }
 
-        /* Loading State (unchanged) */
+        /* Loading State */
         .loading {
             text-align: center;
             padding: 20px;
@@ -850,7 +761,7 @@
             </button>
             <ul class="nav-links" id="navLinks">
                 <li><a onclick="navigateTo('home')" data-page="home" class="active">หน้าหลัก</a></li>
-                <li><a onclick="navigateTo('donate')" data-page="donate">💰 บริจาค</a></li> <li><a onclick="navigateTo('about')" data-page="about">เกี่ยวกับ</a></li>
+                <li><a onclick="navigateTo('about')" data-page="about">เกี่ยวกับ</a></li>
                 <li><a onclick="navigateTo('ai')" data-page="ai">🤖 AI</a></li>
                 <li><a onclick="navigateTo('skills')" data-page="skills">ทักษะ</a></li>
                 <li><a onclick="navigateTo('portfolio')" data-page="portfolio">ผลงาน</a></li>
@@ -860,6 +771,7 @@
         </div>
     </nav>
 
+    <!-- Lightbox -->
     <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox(event)">
         <div class="lightbox-content" onclick="event.stopPropagation()">
             <button class="lightbox-close" onclick="closeLightbox()">
@@ -888,55 +800,11 @@
                     <button onclick="navigateTo('about')" class="btn btn-primary">เกี่ยวกับฉัน</button>
                     <button onclick="navigateTo('ai')" class="btn btn-primary">🤖 ทดลอง AI</button>
                     <button onclick="navigateTo('portfolio')" class="btn btn-primary">ดูผลงาน</button>
-                    <button onclick="navigateTo('donate')" class="btn btn-secondary">💰 สนับสนุน</button> </div>
-            </section>
-            
-            <section class="content-section">
-                <h2 class="section-title" style="text-align: center;">🙏 ผู้สนับสนุนหลัก</h2>
-                <div class="donate-leaderboard">
-                    <h3>ยอดบริจาครวม: <span id="totalDonation">... บาท</span></h3>
-                    <ul class="leaderboard-list" id="leaderboardList">
-                        <div class="loading">กำลังโหลดข้อมูลผู้สนับสนุน...</div>
-                        </ul>
+                    <button onclick="navigateTo('contact')" class="btn btn-secondary">ติดต่อ</button>
                 </div>
             </section>
         </div>
 
-        <div id="donate" class="page">
-            <section class="content-section">
-                <h2 class="section-title" style="text-align: center;">💰 สนับสนุนเมก้า</h2>
-                
-                <p class="donate-note">
-                    <strong>ขั้นตอน:</strong> 1. สร้างซองอังเปา (TrueMoney) → 2. คัดลอกลิงก์ → 3. กรอกชื่อและลิงก์ด้านล่าง → 4. กดตรวจสอบ/บริจาค
-                </p>
-
-                <form id="donateForm">
-                    <div class="form-group">
-                        <label for="donorName"><i class="fas fa-user"></i> ชื่อผู้บริจาค (จะปรากฏใน Leaderboard) *</label>
-                        <input type="text" id="donorName" required placeholder="เช่น MegaDev">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="angpaoLink"><i class="fas fa-link"></i> ลิงก์ซองอังเปา *</label>
-                        <input type="url" id="angpaoLink" required 
-                               placeholder="เช่น https://gift.truemoney.com/campaign/?v=019a17003d6975174996bee95ea96d013aC"
-                               pattern="https?:\/\/(www\.)?gift\.truemoney\.com\/campaign\/\?v=.+"
-                               title="ต้องเป็นลิงก์ซองอังเปา TrueMoney Wallet ที่ถูกต้อง">
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary" id="donateBtn">
-                        <i class="fas fa-check-circle"></i> ตรวจสอบและบริจาค
-                    </button>
-                    <p id="donateStatus" style="margin-top: 15px; font-weight: 600;"></p>
-                </form>
-
-                <h3 style="text-align: center; margin-top: 40px; color: var(--text);">🎉 ขอบคุณทุกการสนับสนุนครับ!</h3>
-                <div style="text-align: center; margin-top: 20px;">
-                    <button onclick="navigateTo('home')" class="btn btn-secondary">← กลับหน้าหลัก</button>
-                </div>
-            </section>
-        </div>
-        
         <div id="about" class="page">
             <section class="content-section" style="text-align: center;">
                 <h2 class="section-title">👋 เกี่ยวกับเมก้า</h2>
@@ -1116,19 +984,9 @@
     </footer>
 
     <script>
-        // *** 1. CONFIGURATION (ปรับปรุง) ***
-        // URL ของ Google Apps Script (ต้องเปลี่ยนเป็น URL ที่คุณ Deploy เอง)
-        const APPS_SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_DEPLOYMENT_URL_HERE'; 
-        // URL เดิมสำหรับ Comments (อาจใช้ APPS_SCRIPT_URL เดียวกันได้ถ้าปรับปรุง Apps Script)
-        const COMMENTS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwCANOGos05cnO06GAYqymLd_2MNN2yAWh9GpGD9ypf2UJ5TXM099H3FR-26oRpL2Sbdw/exec';
-        
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwCANOGos05cnO06GAYqymLd_2MNN2yAWh9GpGD9ypf2UJ5TXM099H3FR-26oRpL2Sbdw/exec';
         const GEMINI_API_KEY = 'AIzaSyBKQTji6M7AcrWc_6XUA0DMx2BXWJjTkxI';
         const POSTS_JSON_URL = 'posts.json';
-        
-        // API สำหรับตรวจสอบ TrueMoney (เลข 0806341561 คือเบอร์รับเงินของคุณ)
-        const TRUEMONEY_API_BASE = 'https://api.xpluem.com/';
-        const TRUEMONEY_API_PHONE = '0806341561'; 
-
 
         let currentImages = [];
         let currentImageIndex = 0;
@@ -1149,15 +1007,13 @@
             
             if (pageId === 'portfolio') {
                 loadPortfolioPosts();
-            } else if (pageId === 'home') {
-                loadLeaderboard(); // โหลด Leaderboard ทุกครั้งที่กลับหน้าหลัก
             }
             
             document.getElementById('navLinks').classList.remove('active');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Lightbox Functions (unchanged)
+        // Lightbox Functions
         function openLightbox(images, index, titles) {
             currentImages = images;
             currentImageIndex = index;
@@ -1206,7 +1062,7 @@
             }, 50);
         }
 
-        // Keyboard Navigation (unchanged)
+        // Keyboard Navigation
         document.addEventListener('keydown', (e) => {
             const lightbox = document.getElementById('lightbox');
             if (!lightbox.classList.contains('active')) return;
@@ -1220,7 +1076,7 @@
             }
         });
 
-        // Load Portfolio Posts (unchanged)
+        // Load Portfolio Posts
         async function loadPortfolioPosts() {
             const grid = document.getElementById('portfolioGrid');
             grid.innerHTML = '<div class="loading">กำลังโหลดผลงาน...</div>';
@@ -1259,7 +1115,7 @@
             }
         }
 
-        // Gemini AI Chat (unchanged)
+        // Gemini AI Chat
         async function sendMessage() {
             const input = document.getElementById('userMessage');
             const message = input.value.trim();
@@ -1309,7 +1165,7 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
-        // Comments System (uses old SCRIPT_URL for compatibility)
+        // Comments System
         document.getElementById('commentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.target.querySelector('button');
@@ -1317,7 +1173,7 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังส่ง...';
 
             try {
-                await fetch(COMMENTS_SCRIPT_URL, {
+                await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: JSON.stringify({
                         name: document.getElementById('name').value,
@@ -1338,7 +1194,7 @@
 
         async function loadComments() {
             try {
-                const response = await fetch(COMMENTS_SCRIPT_URL);
+                const response = await fetch(SCRIPT_URL);
                 const data = await response.json();
                 const list = document.getElementById('commentsList');
                 
@@ -1365,149 +1221,15 @@
             }
         }
 
-        // *** 2. DONATION SYSTEM LOGIC (NEW) ***
-
-        document.getElementById('donateForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const donorName = document.getElementById('donorName').value.trim();
-            const angpaoLink = document.getElementById('angpaoLink').value.trim();
-            const donateBtn = document.getElementById('donateBtn');
-            const statusDiv = document.getElementById('donateStatus');
-
-            if (!donorName || !angpaoLink) {
-                statusDiv.style.color = '#EF4444';
-                statusDiv.textContent = 'กรุณากรอกชื่อและลิงก์ซองอังเปาให้ครบถ้วน';
-                return;
-            }
-
-            // Extract the 'v=' value (the key)
-            const match = angpaoLink.match(/v=([^&]+)/);
-            if (!match) {
-                statusDiv.style.color = '#EF4444';
-                statusDiv.textContent = 'รูปแบบลิงก์ซองอังเปาไม่ถูกต้อง กรุณาตรวจสอบ';
-                return;
-            }
-            const angpaoKey = match[1];
-
-            donateBtn.disabled = true;
-            donateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังตรวจสอบ...';
-            statusDiv.style.color = '#F59E0B';
-            statusDiv.textContent = 'กำลังตรวจสอบลิงก์และดึงข้อมูลการบริจาค...';
-
-            try {
-                // 1. Check TrueMoney API
-                const checkUrl = `${TRUEMONEY_API_BASE}${angpaoKey}/${TRUEMONEY_API_PHONE}`;
-                
-                const apiResponse = await fetch(checkUrl, { method: 'GET' });
-                const apiData = await apiResponse.json();
-
-                if (!apiData.success) {
-                    statusDiv.style.color = '#EF4444';
-                    statusDiv.textContent = `❌ การตรวจสอบล้มเหลว: ${apiData.message || 'ซองอาจถูกใช้ไปแล้ว, ลิงก์ไม่ถูกต้อง, หรือเกิดข้อผิดพลาดในการรับเงิน'}`;
-                    donateBtn.disabled = false;
-                    donateBtn.innerHTML = '<i class="fas fa-redo"></i> ลองใหม่อีกครั้ง';
-                    return;
-                }
-                
-                const receivedAmount = parseFloat(apiData.data.amount);
-                const trueMoneyName = apiData.data.name;
-
-                // 2. Send Data to Google Apps Script for saving
-                statusDiv.style.color = var(--primary);
-                statusDiv.textContent = `✅ ตรวจสอบสำเร็จ! ชื่อ: ${trueMoneyName}, จำนวน: ${receivedAmount.toFixed(2)} บาท. กำลังบันทึกข้อมูล...`;
-
-                const sheetResponse = await fetch(APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'addDonation',
-                        name: donorName,
-                        amount: receivedAmount,
-                        angpaoKey: angpaoKey,
-                        trueMoneyName: trueMoneyName
-                    })
-                });
-
-                const sheetData = await sheetResponse.json();
-
-                if (sheetData.status === 'success') {
-                    statusDiv.style.color = var(--secondary);
-                    statusDiv.textContent = `🎉 บริจาคสำเร็จ! ${donorName} (+${receivedAmount.toFixed(2)} บาท). ขอบคุณมากครับ!`;
-                    e.target.reset(); // Clear form
-                    loadLeaderboard(); // Refresh leaderboard on home page
-                } else {
-                    statusDiv.style.color = '#F59E0B'; // Use accent for warning/partial success
-                    statusDiv.textContent = `⚠️ ตรวจสอบสำเร็จ แต่บันทึกลง Sheet มีปัญหา: ${sheetData.message}. โปรดแจ้งผู้พัฒนา.`;
-                }
-
-            } catch (error) {
-                console.error('Donation Error:', error);
-                statusDiv.style.color = '#EF4444';
-                statusDiv.textContent = `❌ เกิดข้อผิดพลาดในการเชื่อมต่อ: ${error.message}.`;
-            }
-
-            donateBtn.disabled = false;
-            donateBtn.innerHTML = '<i class="fas fa-check-circle"></i> ตรวจสอบและบริจาค';
-        });
-
-        // *** 3. LEADERBOARD DISPLAY LOGIC (NEW) ***
-        async function loadLeaderboard() {
-            const list = document.getElementById('leaderboardList');
-            const totalDonationSpan = document.getElementById('totalDonation');
-            list.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> กำลังโหลดผู้สนับสนุน...</div>';
-            totalDonationSpan.textContent = '... บาท';
-
-            // ตรวจสอบว่า APPS_SCRIPT_URL ถูกตั้งค่าแล้วหรือไม่
-            if (APPS_SCRIPT_URL.includes('https://script.google.com/macros/s/AKfycbz0LjfnBJf3vw0OqiEbbN6Iq3KLf1Z4WUQe3gPddZtg3kJAE5cfqYQEI9J3Zuuo8XWG/exec')) {
-                list.innerHTML = `<p style="text-align: center; color: #EF4444; padding: 20px;">
-                    ❌ กรุณาตั้งค่า <strong>APPS_SCRIPT_URL</strong> ในโค้ด JavaScript ก่อน
-                </p>`;
-                return;
-            }
-
-            try {
-                // Fetch data from Apps Script for Leaderboard (GET request)
-                const response = await fetch(`${APPS_SCRIPT_URL}?action=getLeaderboard`);
-                const data = await response.json();
-                
-                if (data.status === 'success' && data.leaderboard) {
-                    const leaderboard = data.leaderboard; // [{name: "...", totalAmount: 100}, ...]
-                    
-                    const total = leaderboard.reduce((sum, item) => sum + item.totalAmount, 0);
-                    totalDonationSpan.textContent = `${total.toFixed(2)} บาท`;
-
-                    list.innerHTML = leaderboard.map((item, index) => `
-                        <li class="leaderboard-item ${index < 3 ? 'top-3' : ''}">
-                            <span class="leaderboard-rank">${index + 1}.</span>
-                            <span class="leaderboard-name">${item.name}</span>
-                            <span class="leaderboard-amount">฿ ${item.totalAmount.toFixed(2)}</span>
-                        </li>
-                    `).join('');
-                } else {
-                    list.innerHTML = `<p style="text-align: center; color: var(--text-light); padding: 20px;">
-                        ยังไม่มีผู้สนับสนุน: ${data.message || 'เกิดข้อผิดพลาด'}
-                    </p>`;
-                }
-            } catch (error) {
-                console.error('Error loading leaderboard:', error);
-                list.innerHTML = `<p style="text-align: center; color: #EF4444; padding: 20px;">
-                    ❌ ไม่สามารถโหลด Leaderboard ได้: ตรวจสอบ Apps Script URL และการตั้งค่า.
-                </p>`;
-            }
-        }
-
-
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadComments();
-            loadLeaderboard(); // โหลด Leaderboard ตั้งแต่เริ่มต้น
             if (document.getElementById('portfolio').classList.contains('active')) {
                 loadPortfolioPosts();
             }
         });
 
-        // Parallax effect (unchanged)
+        // Parallax effect
         if (window.innerWidth > 768) {
             document.addEventListener('mousemove', (e) => {
                 const shapes = document.querySelectorAll('.shape');
@@ -1520,7 +1242,7 @@
             });
         }
 
-        // Close mobile menu when clicking outside (unchanged)
+        // Close mobile menu when clicking outside
         document.addEventListener('click', (e) => {
             const navLinks = document.getElementById('navLinks');
             const menuToggle = document.querySelector('.menu-toggle');
@@ -1530,7 +1252,7 @@
             }
         });
 
-        // Prevent scroll when mobile menu is open (unchanged)
+        // Prevent scroll when mobile menu is open
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.target.classList.contains('active')) {
