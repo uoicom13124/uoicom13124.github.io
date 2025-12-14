@@ -1,466 +1,101 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Advanced Mobile RPG</title>
-    <style>
-        body {
-            background-color: #111;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            font-family: sans-serif;
-            overflow: hidden; /* ป้องกันการเลื่อน */
-        }
-        canvas {
-            border: 4px solid #fff;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-            background-color: #000;
-        }
-        /* Style สำหรับปุ่มควบคุมและ UI */
-        #mobile-ui {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; /* ทำให้คลิกทะลุไปที่ Canvas ได้ */
-        }
-        #controls, #action-buttons {
-            position: absolute;
-            pointer-events: all; /* ทำให้ปุ่มกดได้ */
-            padding: 10px;
-        }
-        
-        /* D-Pad controls (มุมซ้ายล่าง) */
-        #controls {
-            bottom: 20px;
-            left: 20px;
-            width: 150px;
-            height: 150px;
-        }
-        .dpad-btn {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background-color: rgba(76, 175, 80, 0.7);
-            border: 2px solid #388E3C;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 20px;
-            border-radius: 8px;
-            touch-action: manipulation;
-        }
-        #up-btn { top: 0; left: 50px; }
-        #down-btn { bottom: 0; left: 50px; }
-        #left-btn { top: 50px; left: 0; }
-        #right-btn { top: 50px; right: 0; }
-        .dpad-btn:active { background-color: #388E3C; }
+<meta charset="UTF-8">
+<title>Simple RPG</title>
+<style>
+  body {
+    background:#111;
+    display:flex;
+    justify-content:center;
+    margin-top:20px;
+  }
 
-        /* ปุ่ม Action (มุมขวาบน) */
-        #action-buttons {
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-        }
-        .action-btn {
-            padding: 10px 15px;
-            background-color: rgba(0, 150, 255, 0.7);
-            border: 2px solid #0056b3;
-            border-radius: 5px;
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-            pointer-events: all;
-            touch-action: manipulation;
-        }
-        .action-btn:active { background-color: #0056b3; }
+  #game {
+    display:grid;
+    grid-template-columns: repeat(10, 32px);
+    grid-template-rows: repeat(10, 32px);
+    gap:1px;
+  }
 
-        /* ปุ่ม Fullscreen (มุมขวาบน) */
-        #fullscreen-btn {
-            position: absolute;
-            top: 20px;
-            right: 150px; /* วางข้างปุ่ม Action */
-            padding: 8px 12px;
-            background-color: rgba(255, 87, 34, 0.7);
-            border: 2px solid #D32F2F;
-            border-radius: 5px;
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-            pointer-events: all;
-            touch-action: manipulation;
-        }
-        #fullscreen-btn:active { background-color: #D32F2F; }
+  .tile {
+    width:32px;
+    height:32px;
+  }
 
-        /* Battle System UI (ซ่อนไว้ก่อน) */
-        #battle-screen {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
-            z-index: 100;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-        #battle-log {
-            width: 80%;
-            height: 100px;
-            background-color: #333;
-            border: 2px solid #fff;
-            padding: 10px;
-            overflow-y: scroll;
-            margin-bottom: 20px;
-        }
-        .battle-btn {
-            padding: 10px 20px;
-            margin: 5px;
-            background-color: #007bff;
-            border: none;
-            color: white;
-            cursor: pointer;
-        }
-    </style>
-    <script src="https://unpkg.com/kaboom@3000/dist/kaboom.js"></script>
+  .grass { background:#3cb371; }
+  .wall  { background:#555; }
+  .water { background:#1e90ff; }
+
+  .player {
+    background:red;
+  }
+</style>
 </head>
 <body>
 
-    <div id="mobile-ui">
-        <button id="fullscreen-btn">เต็มจอ</button>
+<div id="game"></div>
 
-        <div id="action-buttons">
-            <button class="action-btn" id="inventory-btn">🎒 เก็บของ</button>
-            <button class="action-btn" id="attack-btn">⚔️ โจมตี</button>
-        </div>
-        
-        <div id="controls">
-            <div class="dpad-btn" id="up-btn" data-dir="up">▲</div>
-            <div class="dpad-btn" id="down-btn" data-dir="down">▼</div>
-            <div class="dpad-btn" id="left-btn" data-dir="left">◀</div>
-            <div class="dpad-btn" id="right-btn" data-dir="right">▶</div>
-        </div>
-    </div>
-    
-    <div id="battle-screen">
-        <h2 id="battle-title">การต่อสู้เริ่มขึ้น!</h2>
-        <p id="enemy-stats"></p>
-        <div id="battle-log"></div>
-        <div id="battle-actions">
-            <button class="battle-btn" onclick="playerAttack()">โจมตี</button>
-            <button class="battle-btn" onclick="runAway()">หนี</button>
-        </div>
-    </div>
+<script>
+const mapData = [
+  [1,1,1,1,1,1,1,1,1,1],
+  [1,2,2,2,1,1,3,3,3,1],
+  [1,1,1,2,1,1,1,1,3,1],
+  [1,3,1,2,1,2,2,1,3,1],
+  [1,3,1,1,1,1,2,1,1,1],
+  [1,3,3,3,1,1,1,1,2,1],
+  [1,1,1,3,1,2,2,1,2,1],
+  [1,2,1,1,1,1,1,1,1,1],
+  [1,2,2,2,2,2,1,3,3,1],
+  [1,1,1,1,1,1,1,1,1,1]
+];
 
-    <script>
-        // 1. ตั้งค่า Kaboom และ Canvas
-        kaboom({
-            width: 400,
-            height: 400,
-            canvas: document.querySelector("#gameCanvas"),
-            letterbox: true, // ทำให้เกมอยู่กลางจอเมื่อปรับขนาด
-            scale: 1,
-        });
+const game = document.getElementById("game");
+let player = { x: 0, y: 0 };
 
-        // 2. Load Assets (ในโลกจริงจะใช้รูปภาพจริง)
-        // Kaboom ให้เรากำหนด "Sprite" (ภาพ) ด้วยชื่อ
-        loadSprite("player", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAACzXTVzAAAAAXNSR0IArs4c6QAAADFJREFUGFdjZEACz//o3bV3N9bCwMiAoY4BkwC0YAwMYWk0i4MhQIAAGHwGAQAKg/1n09/kfgAAAABJRU5ErkJggg==", {
-            sliceX: 1, sliceY: 1, 
-        });
-        loadSprite("wall", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAACzXTVzAAAAAXNSR0IArs4c6QAAAEFJREFUGFdjZEACT/+p3bV3N9ZgQBAfAwMEJcSAqI4BkwC0YAwMYWk0i4MhQIAAGHwGAQAKgw8s4M+o3bUAAEA5D/l2Ld7BPAAAAABJRU5ErkJggg==", {
-            sliceX: 1, sliceY: 1, 
-        });
-        loadSprite("tree", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAACzXTVzAAAAAXNSR0IArs4c6QAAAEJJREFUGFdjZGBg+M8AgygM/n8Qh4pB5g8EBYGhhcE/BkYwBhjQ8e9S8M/AwMAQWgc/h/gPMQ5Dgw8M4KMAAMqY3+j0t3uCAAAAAElFTkSuQmCC", {
-            sliceX: 1, sliceY: 1, 
-        });
-        loadSprite("monster", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAYAAACzXTVzAAAAAXNSR0IArs4c6QAAAEJJREFUGFdjZGBg+M9AIiAMg8EBBjQ+g4AAYeD/YpB5GxkQhQIBgwB0YIwMYWk0i4MhQIAAGHwGAQAKg/1n09/kfgAAAABJRU5ErkJggg==", {
-            sliceX: 1, sliceY: 1, 
-        });
-        loadSprite("potion", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUAAAAcAAAAHCAYAAACzXTVzAAAAAXNSR0IArs4c6QAAADpJREFUGFdjZGBg+M8AgygMf8XzHyEGA0o/h/gPMQ5Dgw8M4KMAAMD/g/j/g3hQhYIBFw0AAMs+J5wBw7zYAAAAAElFTkSuQmCC", {
-            sliceX: 1, sliceY: 1, 
-        });
+function drawMap() {
+  game.innerHTML = "";
+  for (let y = 0; y < mapData.length; y++) {
+    for (let x = 0; x < mapData[y].length; x++) {
+      const tile = document.createElement("div");
+      tile.classList.add("tile");
 
-        // Map configuration
-        const TILE_SIZE = 40; // ขนาดต่อช่อง
-        const MAP_SIZE = 30; // แผนที่ 30x30 ช่อง (ใหญ่มาก)
-        const GENERATION_DENSITY = 0.2; // ความหนาแน่นของต้นไม้ (20%)
-        const ENEMY_DENSITY = 0.05; // ความหนาแน่นของศัตรู (5%)
+      if (mapData[y][x] === 1) tile.classList.add("grass");
+      if (mapData[y][x] === 2) tile.classList.add("wall");
+      if (mapData[y][x] === 3) tile.classList.add("water");
 
-        // Inventory
-        let inventory = {
-            potion: 0,
-            gold: 0,
-        };
+      if (player.x === x && player.y === y) {
+        tile.classList.add("player");
+      }
 
-        // Battle State
-        let currentEnemy = null;
-        let playerStats = { hp: 100, atk: 15, def: 5 };
-        let enemyStats = {};
-        
-        // --- ส่วนที่ 1: การสร้างแผนที่แบบสุ่ม (Procedural Generation) ---
-        
-        // สร้าง Array แผนที่ขนาดใหญ่และสุ่มตำแหน่งสิ่งของ
-        function generateMap() {
-            const mapArray = [];
-            for (let y = 0; y < MAP_SIZE; y++) {
-                const row = [];
-                for (let x = 0; x < MAP_SIZE; x++) {
-                    // กำหนดขอบเขตเป็นกำแพง
-                    if (x === 0 || x === MAP_SIZE - 1 || y === 0 || y === MAP_SIZE - 1) {
-                        row.push("w"); // wall
-                    } 
-                    // สุ่มวางต้นไม้
-                    else if (Math.random() < GENERATION_DENSITY) {
-                        row.push("t"); // tree
-                    } 
-                    // สุ่มวางศัตรู
-                    else if (Math.random() < ENEMY_DENSITY) {
-                        row.push("e"); // enemy
-                    }
-                    // สุ่มวางไอเทม
-                    else if (Math.random() < 0.01) {
-                        row.push("p"); // potion (1%)
-                    }
-                    else {
-                        row.push(" "); // ground
-                    }
-                }
-                mapArray.push(row.join(""));
-            }
-            return mapArray;
-        }
-        
+      game.appendChild(tile);
+    }
+  }
+}
 
-        // --- ส่วนที่ 2: Scene Game (แผนที่หลัก) ---
+function canWalk(x, y) {
+  if (x < 0 || y < 0 || y >= mapData.length || x >= mapData[0].length) return false;
+  return mapData[y][x] === 1;
+}
 
-        scene("game", () => {
-            // สร้างแผนที่ใหม่ทุกครั้งที่เข้า Scene
-            const generatedMap = generateMap();
+document.addEventListener("keydown", e => {
+  let nx = player.x;
+  let ny = player.y;
 
-            // สร้าง Layout Game (ใช้ map() ของ Kaboom)
-            const level = addLevel(generatedMap, {
-                tileWidth: TILE_SIZE,
-                tileHeight: TILE_SIZE,
-                tiles: {
-                    "w": () => [
-                        sprite("wall"),
-                        area(),
-                        solid(), // ชนได้
-                        "wall"
-                    ],
-                    "t": () => [
-                        sprite("tree"),
-                        area(),
-                        solid(),
-                        "tree"
-                    ],
-                    "e": () => [
-                        sprite("monster"),
-                        area(),
-                        "enemy" // แท็กศัตรู
-                    ],
-                    "p": () => [
-                        sprite("potion"),
-                        area(),
-                        "item"
-                    ],
-                    " ": () => [], // พื้นเปล่า
-                }
-            });
+  if (e.key === "w") ny--;
+  if (e.key === "s") ny++;
+  if (e.key === "a") nx--;
+  if (e.key === "d") nx++;
 
-            // สร้าง Player
-            const player = add([
-                sprite("player"),
-                pos(TILE_SIZE * 2, TILE_SIZE * 2), // เริ่มที่ (2, 2)
-                area(),
-                solid(),
-                "player",
-                {
-                    speed: 200,
-                    inventory: inventory,
-                    stats: playerStats,
-                }
-            ]);
+  if (canWalk(nx, ny)) {
+    player.x = nx;
+    player.y = ny;
+    drawMap();
+  }
+});
 
-            // Camera ติดตาม Player
-            player.onUpdate(() => {
-                camPos(player.pos);
-            });
-            
-            // Text UI สำหรับแสดงสถานะ
-            const statusText = add([
-                text(`HP: ${player.stats.hp} | Gold: ${inventory.gold}`, { size: 16 }),
-                fixed(), // ทำให้ Text ติดอยู่กับหน้าจอไม่ขยับ
-                pos(10, 10),
-                z(100),
-            ]);
+drawMap();
+</script>
 
-            player.onUpdate(() => {
-                statusText.text = `HP: ${player.stats.hp} | Gold: ${inventory.gold} | Potion: ${inventory.potion}`;
-            });
-
-            // การเดิน (ใช้ 'key' event แทน 'onKeyPress' เพื่อความรู้สึกแบบ RPG)
-            onKeyPress("up", () => player.move(0, -player.speed));
-            onKeyPress("down", () => player.move(0, player.speed));
-            onKeyPress("left", () => player.move(-player.speed, 0));
-            onKeyPress("right", () => player.move(player.speed, 0));
-
-            // การชนกับศัตรู (Battle System Trigger)
-            player.onCollide("enemy", (e) => {
-                if (currentEnemy === null) {
-                    currentEnemy = e;
-                    enemyStats = { hp: randi(30, 60), atk: randi(8, 15), def: randi(0, 5) };
-                    e.destroy(); // ลบ Sprite ศัตรูในแผนที่
-                    go("battle"); // เข้าสู่ Scene ต่อสู้
-                }
-            });
-            
-            // การเก็บไอเทม
-            player.onCollide("item", (i) => {
-                inventory.potion++;
-                i.destroy();
-                statusText.text = "ได้รับ Potion! " + statusText.text;
-            });
-        });
-
-        // --- ส่วนที่ 3: Scene Battle (ระบบต่อสู้แบบเทิร์นเบส) ---
-
-        scene("battle", () => {
-            document.getElementById("battle-screen").style.display = 'flex';
-            logBattle(`เจอศัตรู! HP: ${enemyStats.hp}`);
-            updateBattleStats();
-        });
-
-        function logBattle(message) {
-            const log = document.getElementById("battle-log");
-            log.innerHTML += `<p>${message}</p>`;
-            log.scrollTop = log.scrollHeight; // เลื่อนลงล่างสุด
-        }
-
-        function updateBattleStats() {
-            document.getElementById("battle-title").innerText = `HP ของคุณ: ${playerStats.hp}`;
-            document.getElementById("enemy-stats").innerText = `ศัตรู: HP ${enemyStats.hp} | ATK ${enemyStats.atk}`;
-        }
-        
-        function playerAttack() {
-            if (playerStats.hp <= 0) return;
-
-            // ผู้เล่นโจมตี
-            let playerDmg = Math.max(0, playerStats.atk - enemyStats.def);
-            enemyStats.hp -= playerDmg;
-            logBattle(`คุณโจมตีศัตรู สร้างความเสียหาย ${playerDmg}`);
-
-            if (enemyStats.hp <= 0) {
-                logBattle("คุณชนะการต่อสู้!");
-                currentEnemy = null;
-                inventory.gold += randi(5, 15);
-                endBattle();
-                return;
-            }
-
-            // ศัตรูโจมตี
-            enemyTurn();
-            updateBattleStats();
-        }
-
-        function enemyTurn() {
-            let enemyDmg = Math.max(0, enemyStats.atk - playerStats.def);
-            playerStats.hp -= enemyDmg;
-            logBattle(`ศัตรูโจมตีคุณ สร้างความเสียหาย ${enemyDmg}`);
-            
-            if (playerStats.hp <= 0) {
-                logBattle("คุณพ่ายแพ้! Game Over!");
-                endBattle(true);
-            }
-        }
-        
-        function runAway() {
-            if (Math.random() > 0.5) { // 50% หนีสำเร็จ
-                logBattle("หนีสำเร็จ!");
-                endBattle();
-            } else {
-                logBattle("หนีไม่สำเร็จ! ศัตรูโจมตีสวน!");
-                enemyTurn();
-                updateBattleStats();
-            }
-        }
-
-        function endBattle(isGameOver = false) {
-            currentEnemy = null;
-            document.getElementById("battle-screen").style.display = 'none';
-            document.getElementById("battle-log").innerHTML = ''; // Clear log
-
-            if (isGameOver) {
-                go("game_over");
-            } else {
-                go("game"); // กลับสู่แผนที่
-            }
-        }
-        
-        // Scene Game Over
-        scene("game_over", () => {
-            add([
-                text("Game Over!", { size: 32 }),
-                pos(center()),
-                origin("center"),
-            ]);
-            add([
-                text("กด Spacebar เพื่อเริ่มใหม่", { size: 16 }),
-                pos(center().x, center().y + 40),
-                origin("center"),
-            ]);
-            onKeyPress("space", () => {
-                // Reset stats and inventory before restarting
-                playerStats = { hp: 100, atk: 15, def: 5 };
-                inventory = { potion: 0, gold: 0 };
-                go("game");
-            });
-        });
-
-        // --- ส่วนที่ 4: การควบคุมมือถือและปุ่มเต็มจอ ---
-        
-        // ฟังเหตุการณ์จากปุ่ม D-Pad
-        document.querySelectorAll('.dpad-btn').forEach(button => {
-            button.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                const dir = button.getAttribute('data-dir');
-                // Kaboom จะจัดการการเดินเองผ่าน onKeyPress ที่เราเขียนไว้
-                // เราสั่งให้ Kaboom จำลองการกดปุ่ม
-                keyPress(dir);
-            });
-        });
-        
-        // ปุ่ม Inventory
-        document.getElementById('inventory-btn').onclick = () => {
-            alert(`--- Inventory ---\nGold: ${inventory.gold}\nPotion: ${inventory.potion}`);
-        };
-
-        // ปุ่มโจมตี (ใช้ในแผนที่)
-        document.getElementById('attack-btn').onclick = () => {
-            alert("โจมตีได้เมื่อชนศัตรูเท่านั้น!");
-        };
-
-        // ปุ่ม Fullscreen
-        document.getElementById('fullscreen-btn').onclick = () => {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-            } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
-                document.documentElement.webkitRequestFullscreen();
-            }
-        };
-
-        // เริ่มเกม
-        go("game");
-    </script>
 </body>
 </html>
