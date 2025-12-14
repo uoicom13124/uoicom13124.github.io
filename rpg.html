@@ -2,19 +2,10 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>Random RPG</title>
+<title>Advanced RPG</title>
 <style>
-  body {
-    margin:0;
-    overflow:hidden;
-    background:#111;
-  }
-
-  canvas {
-    display:block;
-    margin:auto;
-    background:#000;
-  }
+  body { margin:0; overflow:hidden; background:#111; }
+  canvas { display:block; }
 </style>
 </head>
 <body>
@@ -22,98 +13,59 @@
 <canvas id="game"></canvas>
 
 <script>
+/* ================= CONFIG ================= */
+const TILE = 32;
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+canvas.width = innerWidth;
+canvas.height = innerHeight;
 
-const TILE = 32;
+/* ================= INPUT ================= */
+const keys = {};
+addEventListener("keydown", e => keys[e.key] = true);
+addEventListener("keyup", e => keys[e.key] = false);
 
-// ===== สร้างแมพแบบสุ่ม =====
-const mapWidth = Math.ceil(canvas.width / TILE);
-const mapHeight = Math.ceil(canvas.height / TILE);
-
+/* ================= MAP ================= */
+const MAP_W = 200;
+const MAP_H = 200;
 const map = [];
-for (let y = 0; y < mapHeight; y++) {
-  map[y] = [];
-  for (let x = 0; x < mapWidth; x++) {
-    map[y][x] = Math.random() < 0.2 ? 1 : 0;
+
+for (let y=0;y<MAP_H;y++){
+  map[y]=[];
+  for(let x=0;x<MAP_W;x++){
+    map[y][x] = Math.random()<0.15 ? 1 : 0;
   }
 }
 
-// ===== ผู้เล่น =====
+/* ================= PLAYER ================= */
 const player = {
-  x: 100,
-  y: 100,
-  speed: 2,
-  size: 24
+  x: MAP_W*TILE/2,
+  y: MAP_H*TILE/2,
+  size: 24,
+  speed: 3,
+  hp: 100,
+  atk: 20,
+  atkCooldown: 0
 };
 
-const keys = {};
-
-// ===== input =====
-window.addEventListener("keydown", e => keys[e.key] = true);
-window.addEventListener("keyup", e => keys[e.key] = false);
-
-// ===== collision =====
-function canWalk(nx, ny) {
-  const left = Math.floor(nx / TILE);
-  const top = Math.floor(ny / TILE);
-  const right = Math.floor((nx + player.size) / TILE);
-  const bottom = Math.floor((ny + player.size) / TILE);
-
-  if (
-    map[top]?.[left] === 1 ||
-    map[top]?.[right] === 1 ||
-    map[bottom]?.[left] === 1 ||
-    map[bottom]?.[right] === 1
-  ) return false;
-
-  return true;
+/* ================= ENEMY ================= */
+const enemies = [];
+for(let i=0;i<20;i++){
+  enemies.push({
+    x: Math.random()*MAP_W*TILE,
+    y: Math.random()*MAP_H*TILE,
+    size: 24,
+    speed: 1.5,
+    hp: 40
+  });
 }
 
-// ===== game loop =====
-function update() {
-  let dx = 0, dy = 0;
-
-  if (keys["w"]) dy -= player.speed;
-  if (keys["s"]) dy += player.speed;
-  if (keys["a"]) dx -= player.speed;
-  if (keys["d"]) dx += player.speed;
-
-  if (canWalk(player.x + dx, player.y)) player.x += dx;
-  if (canWalk(player.x, player.y + dy)) player.y += dy;
+/* ================= COLLISION ================= */
+function isWall(px,py){
+  const tx = Math.floor(px/TILE);
+  const ty = Math.floor(py/TILE);
+  return map[ty]?.[tx]===1;
 }
 
-function draw() {
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  // draw map
-  for (let y = 0; y < mapHeight; y++) {
-    for (let x = 0; x < mapWidth; x++) {
-      if (map[y][x] === 1) {
-        ctx.fillStyle = "#555";
-      } else {
-        ctx.fillStyle = "#3cb371";
-      }
-      ctx.fillRect(x*TILE, y*TILE, TILE, TILE);
-    }
-  }
-
-  // draw player
-  ctx.fillStyle = "red";
-  ctx.fillRect(player.x, player.y, player.size, player.size);
-}
-
-function loop() {
-  update();
-  draw();
-  requestAnimationFrame(loop);
-}
-
-loop();
-</script>
-
-</body>
-</html>
+/* ================= CAMERA*
