@@ -68,4 +68,103 @@ function isWall(px,py){
   return map[ty]?.[tx]===1;
 }
 
-/* ================= CAMERA*
+/* ================= CAMERA ================= */
+const camera = {x:0,y:0};
+
+/* ================= UPDATE ================= */
+function update(){
+  let dx=0, dy=0;
+  if(keys["w"]) dy-=player.speed;
+  if(keys["s"]) dy+=player.speed;
+  if(keys["a"]) dx-=player.speed;
+  if(keys["d"]) dx+=player.speed;
+
+  if(!isWall(player.x+dx,player.y)) player.x+=dx;
+  if(!isWall(player.x,player.y+dy)) player.y+=dy;
+
+  camera.x = player.x - canvas.width/2;
+  camera.y = player.y - canvas.height/2;
+
+  if(player.atkCooldown>0) player.atkCooldown--;
+
+  // ===== enemy AI =====
+  enemies.forEach(e=>{
+    const dist = Math.hypot(player.x-e.x, player.y-e.y);
+    if(dist<300){
+      const angle = Math.atan2(player.y-e.y, player.x-e.x);
+      e.x += Math.cos(angle)*e.speed;
+      e.y += Math.sin(angle)*e.speed;
+    }
+
+    // enemy attack
+    if(dist<30){
+      player.hp -= 0.3;
+    }
+  });
+
+  // ===== player attack =====
+  if(keys[" "] && player.atkCooldown<=0){
+    player.atkCooldown=30;
+    enemies.forEach(e=>{
+      const d=Math.hypot(player.x-e.x, player.y-e.y);
+      if(d<50) e.hp-=player.atk;
+    });
+  }
+
+  // remove dead enemies
+  for(let i=enemies.length-1;i>=0;i--){
+    if(enemies[i].hp<=0) enemies.splice(i,1);
+  }
+}
+
+/* ================= DRAW ================= */
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  // map
+  for(let y=0;y<MAP_H;y++){
+    for(let x=0;x<MAP_W;x++){
+      ctx.fillStyle = map[y][x] ? "#444":"#2ecc71";
+      ctx.fillRect(
+        x*TILE-camera.x,
+        y*TILE-camera.y,
+        TILE,TILE
+      );
+    }
+  }
+
+  // player
+  ctx.fillStyle="red";
+  ctx.fillRect(
+    player.x-camera.x,
+    player.y-camera.y,
+    player.size,player.size
+  );
+
+  // enemies
+  enemies.forEach(e=>{
+    ctx.fillStyle="purple";
+    ctx.fillRect(
+      e.x-camera.x,
+      e.y-camera.y,
+      e.size,e.size
+    );
+  });
+
+  // UI
+  ctx.fillStyle="white";
+  ctx.fillText("HP: "+Math.floor(player.hp),20,30);
+  ctx.fillText("Enemies: "+enemies.length,20,50);
+}
+
+/* ================= LOOP ================= */
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+
+</body>
+</html>
