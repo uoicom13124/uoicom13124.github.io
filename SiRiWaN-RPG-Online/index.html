@@ -3,239 +3,340 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>3D RPG Game - Ragnarok Style</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>2.5D Rotating Map Game</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #000; overflow: hidden; width: 100vw; height: 100vh; font-family: sans-serif; }
-        #game-ui { position: fixed; top: 10px; left: 10px; color: white; pointer-events: none; text-shadow: 1px 1px 2px black; }
-        
-        /* D-PAD สำหรับมือถือ */
-        #dpad {
-            position: fixed; bottom: 20px; right: 20px; z-index: 200;
-            display: grid; grid-template-columns: repeat(3, 50px); grid-template-rows: repeat(3, 50px); gap: 5px;
+        canvas { display: block; }
+
+        /* UI Overlay */
+        #ui-layer {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            color: white;
+            pointer-events: none;
+            text-shadow: 1px 1px 2px black;
         }
+
+        /* Mobile D-Pad */
+        #dpad {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 200;
+            display: none;
+            touch-action: none;
+        }
+        .dpad-grid { display: grid; grid-template-columns: repeat(3, 60px); grid-template-rows: repeat(3, 60px); gap: 5px; }
         .dbtn {
-            background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
-            border-radius: 10px; color: white; display: flex; align-items: center; justify-content: center;
-            font-size: 20px; cursor: pointer; user-select: none; backdrop-filter: blur(5px);
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 10px;
+            color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; pointer-events: auto; cursor: pointer;
+            user-select: none; -webkit-tap-highlight-color: transparent;
         }
         .dbtn.active { background: rgba(255,255,255,0.5); transform: scale(0.9); }
-        .empty { pointer-events: none; opacity: 0; }
-        
-        @media (min-width: 1024px) { #dpad { display: none; } }
+        .dbtn-empty { pointer-events: none; }
+        @media (pointer: coarse), (max-width: 768px) { #dpad { display: block; } }
     </style>
 </head>
 <body>
 
-<div id="game-ui">
-    <p>ขวาเมาส์ค้าง: หมุนมุมกล้อง</p>
-    <p>WASD / ลูกศร: เดินตามทิศที่มอง</p>
+<div id="ui-layer">
+    <p>หมุนกล้อง: คลิกขวา/ซ้าย ค้างแล้วลาก</p>
+    <p>เดิน: WASD หรือ D-Pad</p>
 </div>
 
 <div id="dpad">
-    <div class="empty"></div><div class="dbtn" id="d-up">▲</div><div class="empty"></div>
-    <div class="dbtn" id="d-left">◀</div><div class="empty"></div><div class="dbtn" id="d-right">▶</div>
-    <div class="empty"></div><div class="dbtn" id="d-down">▼</div><div class="empty"></div>
+    <div class="dpad-grid">
+        <div class="dbtn-empty"></div>
+        <div id="d-up" class="dbtn">▲</div>
+        <div class="dbtn-empty"></div>
+        <div id="d-left" class="dbtn">◀</div>
+        <div class="dbtn-empty"></div>
+        <div id="d-right" class="dbtn">▶</div>
+        <div class="dbtn-empty"></div>
+        <div id="d-down" class="dbtn">▼</div>
+        <div class="dbtn-empty"></div>
+    </div>
 </div>
 
+<!-- Load Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
 <script>
-// --- CONFIGURATION ---
-const TILE_SIZE = 1;
-const MOVE_SPEED = 5; // tiles per second
+/** * CONFIGURATION & CONSTANTS
+ */
+const TILE_SIZE = 1; 
+const MOVE_SPEED = 5; // units per second
 const TILE_DEFS = {
     grass1: { walkable: true, img: 'img/map/grass1.png', color: 0x5a9940 },
     grass2: { walkable: true, img: 'img/map/grass2.png', color: 0x4a8835 },
+    path:   { walkable: true, img: 'img/map/path.png',   color: 0x967117 },
+    tree:   { walkable: false, img: 'img/map/tree.png',  color: 0x2d5a27 },
 };
 
-// --- THREE.JS SETUP ---
 let scene, camera, renderer, clock;
-let playerGroup, playerModel;
-let mapGroup;
-let grid = [];
-let isRotating = false;
-let cameraAngle = Math.PI / 4; // มุมเริ่มต้น
-let cameraPitch = Math.PI / 3; // ก้มมองลงมา
+let mapGroup, playerMesh;
+let grid = [], mapRows = 0, mapCols = 0;
 let keys = {};
 let mobileDir = null;
 
-function initThree() {
+// Player logic state
+let playerPos = new THREE.Vector3(0, 0, 0);
+let targetPos = new THREE.Vector3(0, 0, 0);
+let isMoving = false;
+let currentDir = 'down';
+
+// Camera rotation state
+let cameraAngle = Math.PI / 4; // 45 degrees
+let cameraPitch = Math.PI / 4; // 45 degrees tilt
+let isDragging = false;
+let previousMouse = { x: 0, y: 0 };
+
+/** * MAP PARSER (Same logic as original)
+ */
+function parseMap(text) {
+    try {
+        const json = JSON.parse(text);
+        if (Array.isArray(json)) {
+            if (typeof json[0] === 'string') {
+                return json.map(line => [...line.matchAll(/\[([a-zA-Z0-9_]+)\]/g)].map(m => m[1].toLowerCase())).filter(r => r.length);
+            }
+            if (Array.isArray(json[0])) {
+                return json.map(row => row.map(v => String(v).toLowerCase()));
+            }
+        }
+    } catch (_) {}
+    return text.trim().split('\n').map(line => [...line.matchAll(/\[([a-zA-Z0-9_]+)\]/g)].map(m => m[1].toLowerCase())).filter(r => r.length);
+}
+
+/** * INITIALIZATION
+ */
+async function init() {
+    // 1. Scene Setup
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87ceeb); // ท้องฟ้า
+    scene.background = new THREE.Color(0x1a1a2e);
+    clock = new THREE.Clock();
 
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
     document.body.appendChild(renderer.domElement);
 
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(10, 20, 10);
-    light.castShadow = true;
-    scene.add(light);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
 
-    mapGroup = new THREE.Group();
-    scene.add(mapGroup);
-
-    // สร้างตัวละคร (แทนด้วยกล่องแบบ RPG)
-    playerGroup = new THREE.Group();
-    const bodyGeo = new THREE.BoxGeometry(0.5, 0.8, 0.3);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x2244bb });
-    playerModel = new THREE.Mesh(bodyGeo, bodyMat);
-    playerModel.position.y = 0.4; // ยกให้เท้าแตะพื้น
-    playerModel.castShadow = true;
-    playerGroup.add(playerModel);
-    scene.add(playerGroup);
-
-    clock = new THREE.Clock();
-}
-
-function parseMap(text) {
-    return text.trim().split('\n')
-        .map(line => [...line.matchAll(/\[([a-zA-Z0-9_]+)\]/g)].map(m => m[1].toLowerCase()))
-        .filter(r => r.length);
-}
-
-function buildMap(g) {
-    grid = g;
-    const loader = new THREE.TextureLoader();
-    
-    g.forEach((row, r) => {
-        row.forEach((tileName, c) => {
-            const def = TILE_DEFS[tileName] || TILE_DEFS.grass1;
-            const geo = new THREE.PlaneGeometry(TILE_SIZE, TILE_SIZE);
-            const mat = new THREE.MeshStandardMaterial({ 
-                color: def.color,
-                side: THREE.DoubleSide 
-            });
-
-            // ลองโหลดรูป ถ้าโหลดไม่ได้จะใช้สีแทน
-            loader.load(def.img, (tex) => {
-                tex.magFilter = THREE.NearestFilter;
-                mat.map = tex;
-                mat.color.set(0xffffff);
-                mat.needsUpdate = true;
-            }, undefined, () => {});
-
-            const mesh = new THREE.Mesh(geo, mat);
-            mesh.rotation.x = -Math.PI / 2;
-            mesh.position.set(c * TILE_SIZE, 0, r * TILE_SIZE);
-            mesh.receiveShadow = true;
-            mapGroup.add(mesh);
-        });
-    });
-}
-
-function getWalkable(x, z) {
-    const r = Math.round(z);
-    const c = Math.round(x);
-    if (r < 0 || r >= grid.length || c < 0 || c >= grid[0].length) return false;
-    const tileName = grid[r][c];
-    return (TILE_DEFS[tileName] || {walkable: true}).walkable;
-}
-
-// --- INPUT & CAMERA CONTROL ---
-function setupControls() {
-    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
-    window.addEventListener('keyup', e => delete keys[e.key.toLowerCase()]);
-    
-    window.addEventListener('mousedown', e => { if (e.button === 2) isRotating = true; });
-    window.addEventListener('mouseup', e => { if (e.button === 2) isRotating = false; });
-    window.addEventListener('contextmenu', e => e.preventDefault());
-
-    window.addEventListener('mousemove', e => {
-        if (isRotating) {
-            cameraAngle -= e.movementX * 0.005;
-            cameraPitch = Math.max(0.2, Math.min(Math.PI / 2.1, cameraPitch + e.movementY * 0.005));
-        }
-    });
-
-    // Mobile D-pad
-    const dirs = ['up', 'down', 'left', 'right'];
-    dirs.forEach(d => {
-        const btn = document.getElementById('d-' + d);
-        btn.addEventListener('touchstart', (e) => { e.preventDefault(); mobileDir = d; btn.classList.add('active'); });
-        btn.addEventListener('touchend', () => { mobileDir = null; btn.classList.remove('active'); });
-    });
-}
-
-function update() {
-    const dt = clock.getDelta();
-    let moveX = 0;
-    let moveZ = 0;
-
-    const inputDir = mobileDir || (keys['w'] || keys['arrowup'] ? 'up' : keys['s'] || keys['arrowdown'] ? 'down' : keys['a'] || keys['arrowleft'] ? 'left' : keys['d'] || keys['arrowright'] ? 'right' : null);
-
-    if (inputDir) {
-        // คำนวณทิศทางเดินตามมุมกล้อง (Forward คือทิศที่กล้องมองไป)
-        const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), cameraAngle));
-        const right = new THREE.Vector3(1, 0, 0).applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), cameraAngle));
-
-        if (inputDir === 'up') { moveX = forward.x; moveZ = forward.z; }
-        if (inputDir === 'down') { moveX = -forward.x; moveZ = -forward.z; }
-        if (inputDir === 'left') { moveX = -right.x; moveZ = -right.z; }
-        if (inputDir === 'right') { moveX = right.x; moveZ = right.z; }
-
-        const nextX = playerGroup.position.x + moveX * MOVE_SPEED * dt;
-        const nextZ = playerGroup.position.z + moveZ * MOVE_SPEED * dt;
-
-        if (getWalkable(nextX, nextZ)) {
-            playerGroup.position.x = nextX;
-            playerGroup.position.z = nextZ;
-            
-            // หมุนโมเดลตัวละครไปตามทิศที่เดิน
-            const targetAngle = Math.atan2(moveX, moveZ);
-            playerModel.rotation.y = targetAngle;
-        }
-    }
-
-    // อัปเดตตำแหน่งกล้องให้ตามตัวละคร
-    const camDist = 8;
-    camera.position.x = playerGroup.position.x + Math.sin(cameraAngle) * camDist * Math.cos(cameraPitch);
-    camera.position.z = playerGroup.position.z + Math.cos(cameraAngle) * camDist * Math.cos(cameraPitch);
-    camera.position.y = playerGroup.position.y + Math.sin(cameraPitch) * camDist;
-    camera.lookAt(playerGroup.position);
-}
-
-function animate() {
-    update();
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate);
-}
-
-// --- START GAME ---
-async function start() {
-    initThree();
-    setupControls();
-
-    const fallbackMap = `
-[grass2][grass1][grass1][grass2][grass1][path][path][grass1][grass2][grass1]
+    // 2. Load Map Data
+    let mapText;
+    try {
+        const res = await fetch('maps/test.json');
+        if (!res.ok) throw new Error();
+        mapText = await res.text();
+    } catch (e) {
+        mapText = `[grass2][grass1][grass1][grass2][grass1][path][path][grass1][grass2][grass1]
 [grass1][grass1][grass1][grass1][grass1][path][grass2][grass1][grass1][grass1]
 [grass1][tree][grass1][grass2][grass1][path][grass1][grass1][tree][grass1]
 [grass2][grass1][grass1][grass1][path][path][grass1][grass2][grass1][grass1]
-[grass1][grass1][tree][grass1][path][grass1][grass1][grass1][grass1][grass2]
-[grass1][grass2][grass1][grass1][path][grass1][grass2][tree][grass1][grass1]
-[grass1][grass1][grass1][grass2][path][path][path][grass1][grass1][grass1]
-[grass2][tree][grass1][grass1][grass1][grass2][path][grass1][grass2][grass1]
-[grass1][grass1][grass1][grass1][grass2][grass1][path][path][grass1][grass1]
-[grass1][grass1][grass2][grass1][grass1][grass1][grass1][path][grass1][grass2]
-    `.trim();
+[grass1][grass1][tree][grass1][path][grass1][grass1][grass1][grass1][grass2]`;
+    }
 
-    buildMap(parseMap(fallbackMap));
+    grid = parseMap(mapText);
+    mapRows = grid.length;
+    mapCols = grid[0].length;
+
+    // 3. Build Map Mesh
+    mapGroup = new THREE.Group();
+    const loader = new THREE.TextureLoader();
+    const textureCache = {};
+
+    for (let r = 0; r < mapRows; r++) {
+        for (let c = 0; c < mapCols; c++) {
+            const tileKey = grid[r][c];
+            const def = TILE_DEFS[tileKey] || TILE_DEFS.grass1;
+            
+            const geometry = new THREE.PlaneGeometry(TILE_SIZE, TILE_SIZE);
+            let material;
+
+            if (def.img) {
+                if (!textureCache[def.img]) {
+                    const tex = loader.load(def.img);
+                    tex.magFilter = THREE.NearestFilter;
+                    tex.minFilter = THREE.NearestFilter;
+                    textureCache[def.img] = new THREE.MeshBasicMaterial({ map: tex });
+                }
+                material = textureCache[def.img];
+            } else {
+                material = new THREE.MeshBasicMaterial({ color: def.color });
+            }
+
+            const tile = new THREE.Mesh(geometry, material);
+            tile.rotation.x = -Math.PI / 2; // Flat on ground
+            tile.position.set(c * TILE_SIZE, 0, r * TILE_SIZE);
+            mapGroup.add(tile);
+        }
+    }
+    scene.add(mapGroup);
+
+    // 4. Create Player (Billboard Sprite)
+    // We use a simple Cube for now to ensure it follows the "Box" request but styled to look like a character
+    const pGeo = new THREE.BoxGeometry(0.5, 0.7, 0.1);
+    const pMat = new THREE.MeshPhongMaterial({ color: 0x2244bb });
+    playerMesh = new THREE.Mesh(pGeo, pMat);
+    playerMesh.position.y = 0.35; 
+    scene.add(playerMesh);
+
+    // Find starting position
+    for (let r = 0; r < mapRows; r++) {
+        for (let c = 0; c < mapCols; c++) {
+            if ((TILE_DEFS[grid[r][c]] || TILE_DEFS.grass1).walkable) {
+                playerPos.set(c, 0, r);
+                targetPos.copy(playerPos);
+                playerMesh.position.x = c;
+                playerMesh.position.z = r;
+                break;
+            }
+        }
+    }
+
+    // 5. Events
+    setupControls();
+    window.addEventListener('resize', onWindowResize);
     
-    // ตั้งจุดเริ่มต้น
-    playerGroup.position.set(5, 0, 5);
-    
-    animate();
+    // Start Loop
+    requestAnimationFrame(animate);
 }
 
-window.onload = start;
-window.onresize = () => {
+/** * CONTROLS & INPUT
+ */
+function setupControls() {
+    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+    window.addEventListener('keyup', e => delete keys[e.key.toLowerCase()]);
+
+    // Mouse Rotation
+    renderer.domElement.addEventListener('mousedown', e => { isDragging = true; previousMouse = { x: e.clientX, y: e.clientY }; });
+    window.addEventListener('mouseup', () => isDragging = false);
+    window.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        const deltaX = e.clientX - previousMouse.x;
+        cameraAngle -= deltaX * 0.01;
+        previousMouse = { x: e.clientX, y: e.clientY };
+    });
+
+    // Touch Rotation
+    renderer.domElement.addEventListener('touchstart', e => {
+        if(e.touches.length === 1) {
+            isDragging = true;
+            previousMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+    }, {passive: false});
+    window.addEventListener('touchend', () => isDragging = false);
+    window.addEventListener('touchmove', e => {
+        if (!isDragging || e.touches.length !== 1) return;
+        const deltaX = e.touches[0].clientX - previousMouse.x;
+        cameraAngle -= deltaX * 0.01;
+        previousMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    });
+
+    // Mobile D-Pad
+    const btnMap = { up:'d-up', down:'d-down', left:'d-left', right:'d-right' };
+    for (const [dir, id] of Object.entries(btnMap)) {
+        const btn = document.getElementById(id);
+        const press = e => { e.preventDefault(); mobileDir = dir; btn.classList.add('active'); };
+        const release = e => { e.preventDefault(); if (mobileDir === dir) mobileDir = null; btn.classList.remove('active'); };
+        btn.addEventListener('touchstart', press);
+        btn.addEventListener('touchend', release);
+        btn.addEventListener('mousedown', press);
+        btn.addEventListener('mouseup', release);
+    }
+}
+
+function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-};
+}
+
+/** * CORE LOGIC
+ */
+function getMoveDir() {
+    if (mobileDir) return mobileDir;
+    if (keys['w'] || keys['arrowup']) return 'up';
+    if (keys['s'] || keys['arrowdown']) return 'down';
+    if (keys['a'] || keys['arrowleft']) return 'left';
+    if (keys['d'] || keys['arrowright']) return 'right';
+    return null;
+}
+
+function isWalkable(c, r) {
+    const col = Math.round(c);
+    const row = Math.round(r);
+    if (row < 0 || row >= mapRows || col < 0 || col >= mapCols) return false;
+    const tileType = grid[row][col];
+    return (TILE_DEFS[tileType] || TILE_DEFS.grass1).walkable;
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    const dt = clock.getDelta();
+
+    // 1. Movement Logic based on Camera Angle
+    if (!isMoving) {
+        const input = getMoveDir();
+        if (input) {
+            // คำนวณทิศทางการเดินตามมุมกล้อง
+            // 'up' คือเดินเข้าไปในทิศที่กล้องมอง
+            let moveAngle = 0;
+            if (input === 'up') moveAngle = 0;
+            if (input === 'down') moveAngle = Math.PI;
+            if (input === 'left') moveAngle = Math.PI / 2;
+            if (input === 'right') moveAngle = -Math.PI / 2;
+
+            // ผสมมุม input เข้ากับมุมกล้องปัจจุบัน (ปัดเศษให้ตรง Grid)
+            const combinedAngle = cameraAngle + moveAngle;
+            const dx = -Math.sin(combinedAngle);
+            const dz = -Math.cos(combinedAngle);
+
+            // หา Grid ที่ใกล้ที่สุดในทิศนั้น
+            const nx = Math.round(playerPos.x + (Math.abs(dx) > Math.abs(dz) ? Math.sign(dx) : 0));
+            const nz = Math.round(playerPos.z + (Math.abs(dz) >= Math.abs(dx) ? Math.sign(dz) : 0));
+
+            if (isWalkable(nx, nz)) {
+                targetPos.set(nx, 0, nz);
+                isMoving = true;
+            }
+        }
+    } else {
+        // Smooth interpolation
+        playerPos.lerp(targetPos, dt * MOVE_SPEED * 2);
+        if (playerPos.distanceTo(targetPos) < 0.05) {
+            playerPos.copy(targetPos);
+            isMoving = false;
+        }
+    }
+
+    // 2. Update Player Mesh
+    playerMesh.position.x = playerPos.x;
+    playerMesh.position.z = playerPos.z;
+    // Make player face the camera (Billboard style like RO)
+    playerMesh.rotation.y = cameraAngle;
+
+    // 3. Update Camera
+    const camDist = 8;
+    camera.position.x = playerMesh.position.x + Math.sin(cameraAngle) * camDist * Math.cos(cameraPitch);
+    camera.position.z = playerMesh.position.z + Math.cos(cameraAngle) * camDist * Math.cos(cameraPitch);
+    camera.position.y = camDist * Math.sin(cameraPitch);
+    camera.lookAt(playerMesh.position);
+
+    renderer.render(scene, camera);
+}
+
+window.onload = init;
 </script>
 </body>
 </html>
+
