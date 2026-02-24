@@ -1,326 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>2.5D Rotating Map Game - Enhanced</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #000; overflow: hidden; width: 100vw; height: 100vh; font-family: sans-serif; }
-        canvas { display: block; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+<title>SiRiWaN-RPG-Online</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* UI Overlay */
-        #ui-layer {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            color: white;
-            pointer-events: none;
-            text-shadow: 1px 1px 2px black;
-            z-index: 100;
-        }
+  body {
+    background: #111;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-        #camera-controls {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-            display: flex;
-            gap: 10px;
-        }
+  /* กรอบเกมหลัก */
+  #game-viewport {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: #222;
+  }
 
-        .btn-ui {
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: 1px solid #fff;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            pointer-events: auto;
-        }
-        .btn-ui:active { background: #444; }
-        .btn-active { background: #2d5a27; border-color: #5f5; }
+  /* แผนที่ที่จะเคลื่อนที่ */
+  #map-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    will-change: transform;
+    image-rendering: pixelated;
+  }
 
-        /* Mobile D-Pad */
-        #dpad {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 200;
-            display: none;
-            touch-action: none;
-        }
-        .dpad-grid { display: grid; grid-template-columns: repeat(3, 60px); grid-template-rows: repeat(3, 60px); gap: 5px; }
-        .dbtn {
-            background: rgba(255,255,255,0.2);
-            border: 2px solid rgba(255,255,255,0.4);
-            border-radius: 10px;
-            color: white;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px; pointer-events: auto; cursor: pointer;
-            user-select: none; -webkit-tap-highlight-color: transparent;
-        }
-        .dbtn.active { background: rgba(255,255,255,0.5); transform: scale(0.9); }
-        .dbtn-empty { pointer-events: none; }
-        @media (pointer: coarse), (max-width: 768px) { #dpad { display: block; } }
-    </style>
+  .tile {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0.1px solid rgba(0,0,0,0.05);
+  }
+
+  /* ตัวละครถูกล็อคไว้กึ่งกลางหน้าจอเสมอ */
+  #character-anchor {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 100;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+  }
+
+  .char-visuals {
+    position: relative;
+    width: 40px;
+    height: 48px;
+    transform: translateY(-15px); /* ปรับให้เท้าอยู่ตรงจุดศูนย์กลาง */
+  }
+
+  .char-shadow {
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 6px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 50%;
+  }
+
+  .char-body {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .char-head {
+    width: 22px;
+    height: 20px;
+    background: #f5c78a;
+    border: 2px solid #c8855a;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    z-index: 2;
+  }
+
+  .char-eye { width: 3px; height: 4px; background: #2a1a0a; border-radius: 1px; }
+
+  .char-torso {
+    width: 20px;
+    height: 16px;
+    background: #2244bb;
+    border: 2px solid #1133aa;
+    border-radius: 4px 4px 2px 2px;
+    margin-top: -2px;
+  }
+
+  .char-legs { display: flex; gap: 2px; margin-top: -2px; }
+  .char-leg { width: 8px; height: 10px; background: #112266; border-radius: 0 0 2px 2px; transform-origin: top; }
+
+  /* Animations */
+  @keyframes walk-cycle { 0%, 100% { transform: rotate(20deg); } 50% { transform: rotate(-20deg); } }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
+  .walking .char-leg:nth-child(1) { animation: walk-cycle 0.25s infinite; }
+  .walking .char-leg:nth-child(2) { animation: walk-cycle 0.25s infinite reverse; }
+  .walking .char-body { animation: bob 0.25s infinite; }
+  .face-left .char-body { transform: scaleX(-1); }
+
+  /* D-PAD */
+  #controls {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    display: grid;
+    grid-template-columns: repeat(3, 60px);
+    grid-template-rows: repeat(3, 60px);
+    gap: 10px;
+    z-index: 1000;
+  }
+
+  .btn {
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.4);
+    border-radius: 15px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    touch-action: none;
+    user-select: none;
+    backdrop-filter: blur(5px);
+  }
+
+  .btn:active, .btn.active { background: rgba(255,255,255,0.5); transform: scale(0.9); }
+  .empty { pointer-events: none; opacity: 0; }
+
+  @media (min-width: 800px) { #controls { bottom: 40px; left: 40px; } }
+</style>
 </head>
 <body>
 
-<div id="ui-layer">
-    <p>เดิน: WASD หรือ D-Pad</p>
-    <p id="rot-hint">มุมมองหมุน: คลิกค้างเพื่อลากหมุน</p>
-</div>
-
-<div id="camera-controls">
-    <button id="cam-normal" class="btn-ui btn-active">มุมมองปกติ</button>
-    <button id="cam-rotate" class="btn-ui">มุมมองหมุนได้</button>
-</div>
-
-<div id="dpad">
-    <div class="dpad-grid">
-        <div class="dbtn-empty"></div>
-        <div id="d-up" class="dbtn">▲</div>
-        <div class="dbtn-empty"></div>
-        <div id="d-left" class="dbtn">◀</div>
-        <div class="dbtn-empty"></div>
-        <div id="d-right" class="dbtn">▶</div>
-        <div class="dbtn-empty"></div>
-        <div id="d-down" class="dbtn">▼</div>
-        <div class="dbtn-empty"></div>
+<div id="game-viewport">
+  <div id="map-container"></div>
+  
+  <div id="character-anchor">
+    <div id="char-sprite" class="char-visuals">
+      <div class="char-shadow"></div>
+      <div class="char-body">
+        <div class="char-head">
+          <div class="char-eye"></div>
+          <div class="char-eye"></div>
+        </div>
+        <div class="char-torso"></div>
+        <div class="char-legs">
+          <div class="char-leg"></div>
+          <div class="char-leg"></div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<div id="controls">
+  <div class="empty"></div>
+  <div class="btn" id="up">▲</div>
+  <div class="empty"></div>
+  <div class="btn" id="left">◀</div>
+  <div class="btn" id="down">▼</div>
+  <div class="btn" id="right">▶</div>
+</div>
 
 <script>
-/** * CONFIGURATION
- */
-const TILE_SIZE = 1; 
-const MOVE_SPEED = 5;
-const TILE_DEFS = {
-    grass1: { walkable: true, img: 'img/map/grass1.png', color: 0x5a9940 },
-    grass2: { walkable: true, img: 'img/map/grass2.png', color: 0x4a8835, hasParticle: true },
+const TILE_SIZE = 64;
+const MOVE_SPEED = 5; // ความเร็วในการเคลื่อนที่ (tiles ต่อวินาที)
+
+const TILE_TYPES = {
+  '.': { name: 'grass', color: '#4CAF50', walkable: true },
+  '#': { name: 'wall', color: '#444', walkable: false },
+  '~': { name: 'water', color: '#2196F3', walkable: false },
+  'P': { name: 'path', color: '#8D6E63', walkable: true }
 };
 
-let scene, camera, renderer, clock;
-let mapGroup, playerMesh;
-let grid = [], mapRows = 0, mapCols = 0;
-let keys = {};
-let mobileDir = null;
+const MAP_DATA = [
+  "##########",
+  "#........#",
+  "#..P..#..#",
+  "#.PPP.#..#",
+  "#..P..#..#",
+  "#..P..#..#",
+  "#..PPPP..#",
+  "#..#..#..#",
+  "#........#",
+  "##########"
+];
 
-// Player & Camera State
-let playerPos = new THREE.Vector3(0, 0, 0);
-let targetPos = new THREE.Vector3(0, 0, 0);
-let isMoving = false;
+// สถานะเกม
+const state = {
+  px: 2, // ตำแหน่ง X ของผู้เล่น (ในหน่วย Tile)
+  py: 2, // ตำแหน่ง Y ของผู้เล่น
+  tx: 2, // เป้าหมาย X
+  ty: 2, // เป้าหมาย Y
+  isMoving: false,
+  progress: 0,
+  facing: 'down',
+  keys: {},
+  mobileDir: null
+};
 
-let cameraAngle = 0; 
-let cameraPitch = Math.PI / 4.5; // ประมาณ 40 องศา
-let isDragging = false;
-let previousMouse = { x: 0, y: 0 };
-let cameraMode = 'normal'; // 'normal' or 'rotate'
+const mapContainer = document.getElementById('map-container');
+const charSprite = document.getElementById('char-sprite');
 
-const billboards = []; // เก็บอ้างอิงของ particle เพื่อหมุนตามกล้อง
-
-/** * INITIALIZATION
- */
-async function init() {
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87ceeb); // Sky blue
-    clock = new THREE.Clock();
-
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    
-    renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
-    scene.add(ambientLight);
-
-    // Load Map
-    let mapText = `[grass2][grass1][grass1][grass2][grass1][path][path][grass1][grass2][grass1]
-[grass1][grass1][grass1][grass1][grass1][path][grass2][grass1][grass1][grass1]
-[grass1][tree][grass1][grass2][grass1][path][grass1][grass1][tree][grass1]
-[grass2][grass1][grass1][grass1][path][path][grass1][grass2][grass1][grass1]
-[grass1][grass1][tree][grass1][path][grass1][grass1][grass1][grass1][grass2]`;
-
-    grid = parseMap(mapText);
-    mapRows = grid.length;
-    mapCols = grid[0].length;
-
-    mapGroup = new THREE.Group();
-    const loader = new THREE.TextureLoader();
-    
-    // Particle Texture
-    const grassParticleTex = loader.load('img/map/grass2_1.png', undefined, undefined, () => {
-        console.warn("Please ensure img/map/grass2_1.png exists.");
+function init() {
+  // สร้างแผนที่
+  MAP_DATA.forEach((row, r) => {
+    [...row].forEach((char, c) => {
+      const tileDef = TILE_TYPES[char] || TILE_TYPES['.'];
+      const el = document.createElement('div');
+      el.className = 'tile';
+      el.style.width = TILE_SIZE + 'px';
+      el.style.height = TILE_SIZE + 'px';
+      el.style.left = (c * TILE_SIZE) + 'px';
+      el.style.top = (r * TILE_SIZE) + 'px';
+      el.style.backgroundColor = tileDef.color;
+      mapContainer.appendChild(el);
     });
-    grassParticleTex.magFilter = THREE.NearestFilter;
+  });
 
-    for (let r = 0; r < mapRows; r++) {
-        for (let c = 0; c < mapCols; c++) {
-            const tileKey = grid[r][c];
-            const def = TILE_DEFS[tileKey] || TILE_DEFS.grass1;
-            
-            // Floor Plane
-            const geometry = new THREE.PlaneGeometry(TILE_SIZE, TILE_SIZE);
-            const material = new THREE.MeshBasicMaterial({ color: def.color });
-            const tile = new THREE.Mesh(geometry, material);
-            tile.rotation.x = -Math.PI / 2;
-            tile.position.set(c * TILE_SIZE, 0, r * TILE_SIZE);
-            mapGroup.add(tile);
+  // ระบบควบคุม
+  window.addEventListener('keydown', e => state.keys[e.key] = true);
+  window.addEventListener('keyup', e => delete state.keys[e.key]);
 
-            // Add Grass Particle if grass2
-            if (def.hasParticle) {
-                const pMat = new THREE.SpriteMaterial({ map: grassParticleTex, transparent: true });
-                const sprite = new THREE.Sprite(pMat);
-                sprite.scale.set(0.6, 0.6, 1);
-                sprite.position.set(c * TILE_SIZE, 0.3, r * TILE_SIZE); // ลอยสูงจากพื้นเล็กน้อย
-                scene.add(sprite);
-                billboards.push(sprite); // เก็บไว้ในลิสต์เพื่อให้ Sprite หันตามกล้องอัตโนมัติ (Default behavior of Sprite)
-            }
-        }
+  const setupBtn = (id, dir) => {
+    const el = document.getElementById(id);
+    const start = (e) => { e.preventDefault(); state.mobileDir = dir; el.classList.add('active'); };
+    const end = () => { if(state.mobileDir === dir) state.mobileDir = null; el.classList.remove('active'); };
+    el.addEventListener('touchstart', start);
+    el.addEventListener('touchend', end);
+    el.addEventListener('mousedown', start);
+    el.addEventListener('mouseup', end);
+  };
+
+  setupBtn('up', 'up');
+  setupBtn('down', 'down');
+  setupBtn('left', 'left');
+  setupBtn('right', 'right');
+
+  requestAnimationFrame(update);
+}
+
+function isWalkable(x, y) {
+  if (y < 0 || y >= MAP_DATA.length || x < 0 || x >= MAP_DATA[0].length) return false;
+  const char = MAP_DATA[y][x];
+  return TILE_TYPES[char]?.walkable;
+}
+
+function update(ts) {
+  if (!state.lastTs) state.lastTs = ts;
+  const dt = (ts - state.lastTs) / 1000;
+  state.lastTs = ts;
+
+  if (state.isMoving) {
+    state.progress += dt * MOVE_SPEED;
+    if (state.progress >= 1) {
+      state.px = state.tx;
+      state.py = state.ty;
+      state.isMoving = false;
+      state.progress = 0;
     }
-    scene.add(mapGroup);
+  }
 
-    // Player
-    const pGeo = new THREE.BoxGeometry(0.4, 0.6, 0.4);
-    const pMat = new THREE.MeshPhongMaterial({ color: 0xff0000 });
-    playerMesh = new THREE.Mesh(pGeo, pMat);
-    playerMesh.position.y = 0.3; 
-    scene.add(playerMesh);
+  if (!state.isMoving) {
+    let dx = 0, dy = 0;
+    const dir = state.mobileDir || (state.keys['w'] || state.keys['ArrowUp'] ? 'up' : 
+                state.keys['s'] || state.keys['ArrowDown'] ? 'down' :
+                state.keys['a'] || state.keys['ArrowLeft'] ? 'left' :
+                state.keys['d'] || state.keys['ArrowRight'] ? 'right' : null);
 
-    // Start Position
-    playerPos.set(5, 0, 2);
-    targetPos.copy(playerPos);
+    if (dir) {
+      state.facing = dir;
+      if (dir === 'up') dy = -1;
+      if (dir === 'down') dy = 1;
+      if (dir === 'left') dx = -1;
+      if (dir === 'right') dx = 1;
 
-    setupControls();
-    animate();
-}
-
-function parseMap(text) {
-    return text.trim().split('\n').map(line => [...line.matchAll(/\[([a-zA-Z0-9_]+)\]/g)].map(m => m[1].toLowerCase())).filter(r => r.length);
-}
-
-function setupControls() {
-    window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
-    window.addEventListener('keyup', e => delete keys[e.key.toLowerCase()]);
-
-    // UI Buttons
-    document.getElementById('cam-normal').onclick = () => {
-        cameraMode = 'normal';
-        cameraAngle = 0;
-        document.getElementById('cam-normal').classList.add('btn-active');
-        document.getElementById('cam-rotate').classList.remove('btn-active');
-        document.getElementById('rot-hint').style.display = 'none';
-    };
-    document.getElementById('cam-rotate').onclick = () => {
-        cameraMode = 'rotate';
-        document.getElementById('cam-rotate').classList.add('btn-active');
-        document.getElementById('cam-normal').classList.remove('btn-active');
-        document.getElementById('rot-hint').style.display = 'block';
-    };
-
-    // Interaction for Rotation
-    const onDown = (x, y) => { if(cameraMode === 'rotate') { isDragging = true; previousMouse = { x, y }; } };
-    const onMove = (x, y) => {
-        if (!isDragging) return;
-        const deltaX = x - previousMouse.x;
-        cameraAngle -= deltaX * 0.01;
-        previousMouse = { x, y };
-    };
-
-    renderer.domElement.addEventListener('mousedown', e => onDown(e.clientX, e.clientY));
-    window.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
-    window.addEventListener('mouseup', () => isDragging = false);
-
-    renderer.domElement.addEventListener('touchstart', e => onDown(e.touches[0].clientX, e.touches[0].clientY));
-    window.addEventListener('touchmove', e => onMove(e.touches[0].clientX, e.touches[0].clientY));
-    window.addEventListener('touchend', () => isDragging = false);
-
-    // D-Pad
-    const btnMap = { up:'d-up', down:'d-down', left:'d-left', right:'d-right' };
-    for (const [dir, id] of Object.entries(btnMap)) {
-        const btn = document.getElementById(id);
-        const press = e => { e.preventDefault(); mobileDir = dir; btn.classList.add('active'); };
-        const release = e => { e.preventDefault(); if (mobileDir === dir) mobileDir = null; btn.classList.remove('active'); };
-        btn.addEventListener('touchstart', press); btn.addEventListener('mousedown', press);
-        btn.addEventListener('touchend', release); btn.addEventListener('mouseup', release);
+      if (isWalkable(state.px + dx, state.py + dy)) {
+        state.tx = state.px + dx;
+        state.ty = state.py + dy;
+        state.isMoving = true;
+      }
     }
+  }
+
+  // คำนวณตำแหน่งแสดงผล (Interpolation)
+  const renderX = state.px + (state.tx - state.px) * state.progress;
+  const renderY = state.py + (state.ty - state.py) * state.progress;
+
+  // เลื่อน Map ให้สวนทางกับผู้เล่น (ทำหน้าที่เป็นกล้อง)
+  // สูตร: กึ่งกลางหน้าจอ - (ตำแหน่งผู้เล่น * ขนาด Tile) - (ครึ่ง Tile เพื่อให้กึ่งกลางตัวละคร)
+  const viewW = window.innerWidth;
+  const viewH = window.innerHeight;
+  const camX = (viewW / 2) - (renderX * TILE_SIZE) - (TILE_SIZE / 2);
+  const camY = (viewH / 2) - (renderY * TILE_SIZE) - (TILE_SIZE / 2);
+
+  mapContainer.style.transform = `translate(${camX}px, ${camY}px)`;
+  
+  // อัปเดตท่าทางตัวละคร
+  charSprite.classList.toggle('walking', state.isMoving);
+  charSprite.classList.toggle('face-left', state.facing === 'left');
+
+  requestAnimationFrame(update);
 }
 
-function getMoveDir() {
-    if (mobileDir) return mobileDir;
-    if (keys['w'] || keys['arrowup']) return 'up';
-    if (keys['s'] || keys['arrowdown']) return 'down';
-    if (keys['a'] || keys['arrowleft']) return 'left';
-    if (keys['d'] || keys['arrowright']) return 'right';
-    return null;
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-    const dt = clock.getDelta();
-
-    // 1. Movement Logic
-    if (!isMoving) {
-        const input = getMoveDir();
-        if (input) {
-            let moveAngle = 0;
-            if (input === 'up') moveAngle = 0;
-            if (input === 'down') moveAngle = Math.PI;
-            if (input === 'left') moveAngle = Math.PI / 2;
-            if (input === 'right') moveAngle = -Math.PI / 2;
-
-            const combinedAngle = cameraAngle + moveAngle;
-            const dx = -Math.round(Math.sin(combinedAngle));
-            const dz = -Math.round(Math.cos(combinedAngle));
-
-            const nx = playerPos.x + dx;
-            const nz = playerPos.z + dz;
-
-            // Simple boundary check
-            if (nx >= 0 && nx < mapCols && nz >= 0 && nz < mapRows) {
-                const tileType = grid[nz][nx];
-                if ((TILE_DEFS[tileType] || TILE_DEFS.grass1).walkable) {
-                    targetPos.set(nx, 0, nz);
-                    isMoving = true;
-                }
-            }
-        }
-    } else {
-        playerPos.lerp(targetPos, dt * MOVE_SPEED * 2);
-        if (playerPos.distanceTo(targetPos) < 0.05) {
-            playerPos.copy(targetPos);
-            isMoving = false;
-        }
-    }
-
-    // Update Player Mesh
-    playerMesh.position.x = playerPos.x;
-    playerMesh.position.z = playerPos.z;
-    playerMesh.rotation.y = cameraAngle;
-
-    // 2. Camera Update
-    const camDist = 7;
-    const targetCamX = playerMesh.position.x + Math.sin(cameraAngle) * camDist * Math.cos(cameraPitch);
-    const targetCamZ = playerMesh.position.z + Math.cos(cameraAngle) * camDist * Math.cos(cameraPitch);
-    const targetCamY = camDist * Math.sin(cameraPitch);
-
-    camera.position.set(targetCamX, targetCamY, targetCamZ);
-    camera.lookAt(playerMesh.position);
-
-    renderer.render(scene, camera);
-}
-
-window.onload = init;
-window.onresize = () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-};
+init();
 </script>
 </body>
 </html>
