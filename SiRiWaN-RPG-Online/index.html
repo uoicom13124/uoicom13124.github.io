@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Siriwan RPG 3D - Custom UI & Map</title>
+    <title>Siriwan RPG 3D - WASD & Custom UI</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
@@ -40,7 +40,7 @@
             box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
         }
 
-        /* ระบบ Inventory ใหม่โดยใช้รูปภาพที่อัปโหลด */
+        /* ระบบ Inventory ใหม่โดยใช้รูปภาพ img/ui/inventory */
         #inventory-ui {
             position: fixed;
             bottom: 20px;
@@ -60,9 +60,9 @@
         .slot {
             width: var(--slot-size);
             height: var(--slot-size);
-            /* ใช้รูปภาพจาก Sample-InventorySlotsSet.png (สมมติว่าเซฟไว้ที่พาธนี้) */
-            background-image: url('Sample-InventorySlotsSet.png');
-            /* เลือกโซนสีเทาเข้ม (Black/Dark Grey set) */
+            /* เปลี่ยนพาธรูปภาพตามที่ระบุ */
+            background-image: url('img/ui/inventory');
+            /* เลือกโซนสีเทาเข้มจากแผ่นรูปภาพ */
             background-size: 800px 400px; 
             background-position: -210px -10px; 
             image-rendering: pixelated;
@@ -77,7 +77,6 @@
 
         .slot:active { transform: scale(0.9); }
 
-        /* เอฟเฟกต์เมื่อเลือกช่อง */
         .slot.active::after {
             content: '';
             position: absolute;
@@ -122,7 +121,6 @@
             color: white; font-size: 13px; z-index: 1000; display: none;
         }
 
-        /* ปรับขนาดสำหรับมือถือ */
         @media (max-width: 600px) {
             :root { --slot-size: 50px; }
             #inventory-ui { bottom: 10px; gap: 5px; padding: 8px; }
@@ -147,7 +145,7 @@
 </div>
 
 <script>
-    // --- Config ---
+    // --- Configuration ---
     const TILE_SIZE = 1;
     const MOVE_SPEED = 0.12;
     const SPRITE_ROWS = 4; 
@@ -175,6 +173,9 @@
     let playerMoveDir = new THREE.Vector2(0, 1); 
     let animFrame = 0, animTimer = 0, animSpeed = 0.12;
 
+    // ระบบจัดการ Key State สำหรับ WASD
+    const keys = { w: false, a: false, s: false, d: false };
+
     function startGame() {
         document.getElementById('startup-overlay').style.display = 'none';
         document.getElementById('loading-screen').style.display = 'block';
@@ -184,8 +185,7 @@
 
     function init3D() {
         scene = new THREE.Scene();
-        // ท้องฟ้าสีฟ้าตามคำขอ (Sky Blue)
-        scene.background = new THREE.Color(0x87CEEB); 
+        scene.background = new THREE.Color(0x87CEEB); // ท้องฟ้าสีฟ้าเดิม
 
         camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -202,20 +202,31 @@
         scene.add(groundGroup);
 
         window.addEventListener('resize', onWindowResize);
+        
+        // Key Listeners สำหรับ Slot และ WASD
         window.addEventListener('keydown', (e) => {
-            if (e.key >= '1' && e.key <= '5') selectSlot(parseInt(e.key) - 1);
+            const k = e.key.toLowerCase();
+            if (k >= '1' && k <= '5') selectSlot(parseInt(k) - 1);
+            if (k in keys) {
+                keys[k] = true;
+                targetPos = null; // หยุดการคลิกเดินเมื่อกด WASD
+            }
         });
+        window.addEventListener('keyup', (e) => {
+            const k = e.key.toLowerCase();
+            if (k in keys) keys[k] = false;
+        });
+
         setupInputHandlers();
     }
 
     async function loadAssetsAndMap() {
         const loader = new THREE.TextureLoader();
         
-        // โหลดทรัพยากร (รูปเดิมทั้งหมด)
         const [g1, g2, pTex] = await Promise.all([
             loader.loadAsync('img/map/grass1.png').catch(() => createPlaceholderTex('#3d6b3d')),
             loader.loadAsync('img/map/grass2.png').catch(() => createPlaceholderTex('#2d4d2d')),
-            loader.loadAsync('img/player.png').catch(() => loader.loadAsync('image_093b0c.png')) // ใช้รูปที่อัปโหลดถ้าไฟล์เดิมไม่มี
+            loader.loadAsync('img/player.png').catch(() => loader.loadAsync('image_093b0c.png'))
         ]);
 
         [g1, g2, pTex].forEach(t => {
@@ -229,7 +240,6 @@
         pTex.wrapS = pTex.wrapT = THREE.RepeatWrapping;
         pTex.repeat.set(1/SPRITE_COLS, 1/SPRITE_ROWS);
 
-        // โหลดแมพจาก JSON
         try {
             const response = await fetch('maps/test.json');
             const rawMap = await response.json();
@@ -284,32 +294,68 @@
         scene.add(player);
     }
 
-    function animate() {
-        requestAnimationFrame(animate);
-        if (!isGameStarted) return;
+    function handleMovement() {
+        let dx = 0;
+        let dz = 0;
 
+        // คำนวณทิศทางตามกล้อง (Camera Relative Movement)
+        const forward = new THREE.Vector3();
+        camera.getWorldDirection(forward);
+        forward.y = 0;
+        forward.normalize();
+        
+        const right = new THREE.Vector3();
+        right.crossVectors(forward, camera.up);
+
+        if (keys.w) { dx += forward.x; dz += forward.z; }
+        if (keys.s) { dx -= forward.x; dz -= forward.z; }
+        if (keys.a) { dx -= right.x; dz -= right.z; }
+        if (keys.d) { dx += right.x; dz += right.z; }
+
+        if (dx !== 0 || dz !== 0) {
+            const mag = Math.sqrt(dx*dx + dz*dz);
+            player.position.x += (dx/mag) * MOVE_SPEED;
+            player.position.z += (dz/mag) * MOVE_SPEED;
+            playerMoveDir.set(dx/mag, dz/mag);
+            
+            animTimer += 0.016;
+            if (animTimer > animSpeed) {
+                animFrame = (animFrame + 1) % SPRITE_COLS;
+                animTimer = 0;
+            }
+            return true;
+        }
+
+        // ระบบคลิกเดินเดิม
         if (targetPos) {
-            const dx = targetPos.x - player.position.x;
-            const dz = targetPos.z - player.position.z;
-            const dist = Math.sqrt(dx*dx + dz*dz);
+            const tdx = targetPos.x - player.position.x;
+            const tdz = targetPos.z - player.position.z;
+            const dist = Math.sqrt(tdx*tdx + tdz*tdz);
 
             if (dist > 0.1) {
-                player.position.x += (dx / dist) * MOVE_SPEED;
-                player.position.z += (dz / dist) * MOVE_SPEED;
-                playerMoveDir.set(dx / dist, dz / dist);
+                player.position.x += (tdx / dist) * MOVE_SPEED;
+                player.position.z += (tdz / dist) * MOVE_SPEED;
+                playerMoveDir.set(tdx / dist, tdz / dist);
                 animTimer += 0.016;
                 if (animTimer > animSpeed) {
                     animFrame = (animFrame + 1) % SPRITE_COLS;
                     animTimer = 0;
                 }
+                return true;
             } else {
                 targetPos = null;
-                animFrame = 0; 
             }
-        } else {
-            animFrame = 0;
         }
+        
+        animFrame = 0;
+        return false;
+    }
 
+    function animate() {
+        requestAnimationFrame(animate);
+        if (!isGameStarted) return;
+
+        handleMovement();
         updatePlayerSprite();
         updateCameraPosition();
         renderer.render(scene, camera);
@@ -363,7 +409,6 @@
             handleStart(e.clientX, e.clientY, e.button);
         });
 
-        // Touch support สำหรับมือถือ
         window.addEventListener('touchstart', (e) => {
             if (e.target.closest('#inventory-ui')) return;
             handleStart(e.touches[0].clientX, e.touches[0].clientY, 0);
