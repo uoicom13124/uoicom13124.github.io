@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Game</title>
+<title>Siriwan RPG Online</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -65,8 +65,7 @@
     position: absolute;
     top: 0;
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: Gn    align-items: center;
   }
 
   .char-head {
@@ -226,13 +225,30 @@ const TILE_DEFS = {
 };
 
 function getTileDef(name) {
-  return TILE_DEFS[name] || { walkable: true, color: '#333' };
+  if (TILE_DEFS[name]) return TILE_DEFS[name];
+  // ถ้าไม่เจอใน Def ให้สร้างขึ้นมาใหม่แบบเดินได้ตาม logic เดิมของคุณ
+  const h = [...name].reduce((a, c) => a + c.charCodeAt(0), 0);
+  TILE_DEFS[name] = {
+    walkable: true,
+    img: `img/map/${name}.png`,
+    color: `hsl(${(h * 53) % 360},45%,40%)`
+  };
+  return TILE_DEFS[name];
 }
 
 function parseMap(text) {
-  return text.trim().split('\n')
-    .map(line => [...line.matchAll(/\[([a-zA-Z0-9_]+)\]/g)].map(m => m[1].toLowerCase()))
-    .filter(r => r.length);
+  try {
+    const json = JSON.parse(text);
+    if (Array.isArray(json)) {
+      if (typeof json[0] === 'string') {
+        return json.map(line => [...line.matchAll(/\[([a-zA-Z0-9_]+)\]/g)].map(m => m[1].toLowerCase())).filter(r => r.length);
+      }
+      if (Array.isArray(json[0])) {
+        return json.map(row => row.map(v => String(v).toLowerCase()));
+      }
+    }
+  } catch (_) {}
+  return text.trim().split('\n').map(line => [...line.matchAll(/\[([a-zA-Z0-9_]+)\]/g)].map(m => m[1].toLowerCase())).filter(r => r.length);
 }
 
 const TILE_SIZE = 48;
@@ -255,6 +271,8 @@ function buildMap(g) {
   mapRows = g.length;
   mapCols = g[0]?.length || 0;
   mapEl.innerHTML = '';
+  mapEl.style.width  = (mapCols * TILE_SIZE) + 'px';
+  mapEl.style.height = (mapRows * TILE_SIZE) + 'px';
   
   const frag = document.createDocumentFragment();
   for (let r = 0; r < mapRows; r++) {
@@ -270,7 +288,6 @@ function buildMap(g) {
       img.style.cssText = 'width:100%;height:100%;display:block;image-rendering:pixelated;';
       img.onerror = () => img.remove();
       el.appendChild(img);
-      
       frag.appendChild(el);
     }
   }
@@ -323,8 +340,8 @@ function loop(ts) {
     const dir = getInput();
     if (dir) {
       const [dx, dy] = DIRS[dir];
-      const nx = tx + dx;
-      const ny = ty + dy;
+      const nx = Math.round(px) + dx;
+      const ny = Math.round(py) + dy;
       lastFace = dir;
       if (walkable(nx, ny)) {
         tx = nx; ty = ny;
@@ -334,7 +351,7 @@ function loop(ts) {
     }
   }
 
-  charEl.classList.toggle('walking', moving);
+  charEl.classList.toggle('walking', moving || !!getInput());
   charEl.classList.toggle('face-left', lastFace === 'left');
 
   updateCamera();
@@ -362,25 +379,32 @@ function setupDpad() {
   }
 }
 
-function init() {
-  // ใช้เฉพาะ grass1 และ grass2 ตามที่กำหนดใน TILE_DEFS
-  const mapText = `
-[grass2][grass1][grass1][grass2][grass1][grass2][grass2][grass1][grass2][grass1]
+async function init() {
+  let mapText;
+  try {
+    const res = await fetch('maps/test.json');
+    if (!res.ok) throw new Error();
+    mapText = await res.text();
+  } catch (err) {
+    mapText = `
+[grass2][grass1][grass1][grass2][grass1][grass1][grass1][grass1][grass2][grass1]
 [grass1][grass1][grass1][grass1][grass1][grass1][grass2][grass1][grass1][grass1]
 [grass1][grass1][grass1][grass2][grass1][grass1][grass1][grass1][grass1][grass1]
 [grass2][grass1][grass1][grass1][grass1][grass1][grass1][grass2][grass1][grass1]
 [grass1][grass1][grass1][grass1][grass1][grass1][grass1][grass1][grass1][grass2]
-[grass1][grass2][grass1][grass1][grass1][grass1][grass2][grass1][grass1][grass1]
-[grass1][grass1][grass1][grass2][grass1][grass2][grass1][grass1][grass1][grass1]
-[grass2][grass1][grass1][grass1][grass1][grass2][grass1][grass1][grass2][grass1]
-[grass1][grass1][grass1][grass1][grass2][grass1][grass1][grass1][grass1][grass1]
-[grass1][grass1][grass2][grass1][grass1][grass1][grass1][grass1][grass1][grass2]
 `.trim();
+  }
 
   const g = parseMap(mapText);
   buildMap(g);
 
-  px = 0; py = 0; tx = 0; ty = 0;
+  // หาจุด spawn แรกที่เดินได้
+  let sx = 0, sy = 0;
+  outer: for (let r = 0; r < g.length; r++)
+    for (let c = 0; c < g[r].length; c++)
+      if (getTileDef(g[r][c]).walkable) { sx = c; sy = r; break outer; }
+
+  px = sx; py = sy; tx = sx; ty = sy;
 
   setupDpad();
   requestAnimationFrame(ts => { lastTs = ts; loop(ts); });
