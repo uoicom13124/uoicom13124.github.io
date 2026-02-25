@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Meg RpG</title>
+    <title>Siriwan RPG 3D - Custom UI & Map</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
-            --sprite-size: 32px;
-            --slot-bg: rgba(20, 20, 30, 0.7);
-            --slot-border: rgba(255, 255, 255, 0.1);
-            --active-color: #00d2ff;
+            --slot-size: 60px;
+            --active-glow: #00f2ff;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -20,18 +18,18 @@
             overflow: hidden;
             width: 100vw; height: 100vh;
             font-family: 'Segoe UI', Tahoma, sans-serif;
-            color: white;
         }
 
         canvas { display: block; }
 
+        /* UI Overlay */
         #startup-overlay {
-            position: fixed;
-            top: 0; left: 0;
+            position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
             background: radial-gradient(circle, #1a1a2e 0%, #000 100%);
             z-index: 2000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white;
         }
 
         .start-btn {
@@ -42,41 +40,92 @@
             box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
         }
 
+        /* ระบบ Inventory ใหม่โดยใช้รูปภาพที่อัปโหลด */
         #inventory-ui {
-            position: fixed; bottom: 30px; left: 50%;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
             transform: translateX(-50%);
-            display: flex; gap: 15px; padding: 15px;
-            background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(12px);
-            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
             z-index: 500;
+            max-width: 95vw;
+            overflow-x: auto;
         }
 
         .slot {
-            width: 64px; height: 64px;
-            background: var(--slot-bg); border: 2px solid var(--slot-border);
-            border-radius: 14px; display: flex; align-items: center; justify-content: center;
-            position: relative; cursor: pointer; transition: all 0.2s;
+            width: var(--slot-size);
+            height: var(--slot-size);
+            /* ใช้รูปภาพจาก Sample-InventorySlotsSet.png (สมมติว่าเซฟไว้ที่พาธนี้) */
+            background-image: url('Sample-InventorySlotsSet.png');
+            /* เลือกโซนสีเทาเข้ม (Black/Dark Grey set) */
+            background-size: 800px 400px; 
+            background-position: -210px -10px; 
+            image-rendering: pixelated;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.1s;
+            flex-shrink: 0;
         }
 
-        .slot.active {
-            border-color: var(--active-color);
-            background: rgba(0, 210, 255, 0.1);
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
-            transform: translateY(-5px) scale(1.05);
+        .slot:active { transform: scale(0.9); }
+
+        /* เอฟเฟกต์เมื่อเลือกช่อง */
+        .slot.active::after {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            border: 3px solid var(--active-glow);
+            border-radius: 4px;
+            box-shadow: 0 0 10px var(--active-glow);
+            pointer-events: none;
         }
 
-        .item-icon { width: 40px; height: 40px; border-radius: 6px; }
+        .item-icon {
+            width: 70%;
+            height: 70%;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
         .item-count {
-            position: absolute; bottom: 6px; right: 8px;
-            font-size: 12px; font-weight: bold; text-shadow: 1px 1px 2px #000;
+            position: absolute;
+            bottom: 4px;
+            right: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 1px #000;
+            pointer-events: none;
         }
-        .slot-key { position: absolute; top: 4px; left: 6px; font-size: 10px; opacity: 0.4; }
+
+        .slot-key {
+            position: absolute;
+            top: 4px;
+            left: 6px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.6);
+            pointer-events: none;
+        }
 
         #loading-screen {
             position: fixed; top: 20px; left: 20px;
-            padding: 8px 20px; background: rgba(0,0,0,0.7);
-            border: 1px solid var(--active-color); border-radius: 30px;
-            font-size: 13px; z-index: 1000; display: none;
+            padding: 8px 20px; background: rgba(0,0,0,0.8);
+            border: 1px solid #00d2ff; border-radius: 30px;
+            color: white; font-size: 13px; z-index: 1000; display: none;
+        }
+
+        /* ปรับขนาดสำหรับมือถือ */
+        @media (max-width: 600px) {
+            :root { --slot-size: 50px; }
+            #inventory-ui { bottom: 10px; gap: 5px; padding: 8px; }
         }
     </style>
 </head>
@@ -84,10 +133,10 @@
 
 <div id="startup-overlay">
     <h1 style="margin-bottom: 20px; letter-spacing: 2px;">SIRIVAN RPG</h1>
-    <button class="start-btn" onclick="startGame()">ENTER WORLD</button>
+    <button class="start-btn" onclick="startGame()">START GAME</button>
 </div>
 
-<div id="loading-screen">LOADING MAP...</div>
+<div id="loading-screen">CONNECTING...</div>
 
 <div id="inventory-ui">
     <div class="slot" id="slot-0" onclick="selectSlot(0)"><span class="slot-key">1</span></div>
@@ -98,10 +147,16 @@
 </div>
 
 <script>
+    // --- Config ---
     const TILE_SIZE = 1;
     const MOVE_SPEED = 0.12;
     const SPRITE_ROWS = 4; 
     const SPRITE_COLS = 4; 
+
+    let scene, camera, renderer, player, groundGroup, playerMaterial;
+    let textures = {}; 
+    let isGameStarted = false;
+    let activeSlot = 0;
 
     let inventory = [
         { id: 'hoe', count: 1, color: '#ff5555' }, 
@@ -109,14 +164,9 @@
         { id: 'carrot', count: 12, color: '#ffaa00' }, 
         null, null
     ];
-    let activeSlot = 0;
-    
-    let scene, camera, renderer, player, groundGroup, playerMaterial;
-    let textures = {}; 
-    let isGameStarted = false;
 
     let cameraRotation = { theta: Math.PI / 4, phi: Math.PI / 3 };
-    let cameraDistance = 14;
+    let cameraDistance = 15;
     let isRightMouseDown = false;
     let lastMousePos = { x: 0, y: 0 };
 
@@ -134,7 +184,8 @@
 
     function init3D() {
         scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x0a0a12);
+        // ท้องฟ้าสีฟ้าตามคำขอ (Sky Blue)
+        scene.background = new THREE.Color(0x87CEEB); 
 
         camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -142,9 +193,9 @@
         renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-        const sun = new THREE.DirectionalLight(0xffffff, 0.5);
-        sun.position.set(10, 20, 10);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+        const sun = new THREE.DirectionalLight(0xffffff, 0.4);
+        sun.position.set(20, 50, 20);
         scene.add(sun);
 
         groundGroup = new THREE.Group();
@@ -160,11 +211,11 @@
     async function loadAssetsAndMap() {
         const loader = new THREE.TextureLoader();
         
-        // โหลดรูปภาพทั้งหมด (รูปต้องอยู่ชื่อเดิม)
+        // โหลดทรัพยากร (รูปเดิมทั้งหมด)
         const [g1, g2, pTex] = await Promise.all([
-            loader.loadAsync('img/map/grass1.png').catch(() => createPlaceholderTex('#2d4c2d')),
-            loader.loadAsync('img/map/grass2.png').catch(() => createPlaceholderTex('#243b24')),
-            loader.loadAsync('img/player.png').catch(() => createPlaceholderTex('#ffffff'))
+            loader.loadAsync('img/map/grass1.png').catch(() => createPlaceholderTex('#3d6b3d')),
+            loader.loadAsync('img/map/grass2.png').catch(() => createPlaceholderTex('#2d4d2d')),
+            loader.loadAsync('img/player.png').catch(() => loader.loadAsync('image_093b0c.png')) // ใช้รูปที่อัปโหลดถ้าไฟล์เดิมไม่มี
         ]);
 
         [g1, g2, pTex].forEach(t => {
@@ -178,13 +229,12 @@
         pTex.wrapS = pTex.wrapT = THREE.RepeatWrapping;
         pTex.repeat.set(1/SPRITE_COLS, 1/SPRITE_ROWS);
 
-        // โหลด JSON แมพ
+        // โหลดแมพจาก JSON
         try {
             const response = await fetch('maps/test.json');
             const rawMap = await response.json();
             parseAndCreateMap(rawMap);
         } catch (e) {
-            console.warn("Map JSON not found, creating default.");
             createDefaultMap();
         }
 
@@ -198,19 +248,12 @@
 
     function parseAndCreateMap(rawMap) {
         const geometry = new THREE.PlaneGeometry(TILE_SIZE, TILE_SIZE);
-        
-        // วนลูปตามแถวใน JSON
         rawMap.forEach((rowString, r) => {
-            // ใช้ Regex แยก [item] ออกมาเป็น Array
-            // ผลลัพธ์จะเป็น ["grass2", "grass1", "grass2", ...]
             const tiles = rowString.match(/\[(.*?)\]/g).map(t => t.replace(/[\[\]]/g, ''));
-            
             tiles.forEach((tileKey, c) => {
                 const tex = textures[tileKey] || textures['grass1'];
                 const material = new THREE.MeshLambertMaterial({ map: tex });
                 const tile = new THREE.Mesh(geometry, material);
-                
-                // วางตำแหน่งตาม Column (c) และ Row (r)
                 tile.position.set(c * TILE_SIZE, 0, r * TILE_SIZE);
                 tile.rotation.x = -Math.PI / 2;
                 groundGroup.add(tile);
@@ -279,10 +322,10 @@
         let diff = (moveAngle - camAngle + Math.PI * 2) % (Math.PI * 2);
 
         let row = 0; 
-        if (diff > Math.PI * 0.25 && diff <= Math.PI * 0.75) row = 2; // ขวา
-        else if (diff > Math.PI * 0.75 && diff <= Math.PI * 1.25) row = 3; // หลัง
-        else if (diff > Math.PI * 1.25 && diff <= Math.PI * 1.75) row = 1; // ซ้าย
-        else row = 0; // หน้า
+        if (diff > Math.PI * 0.25 && diff <= Math.PI * 0.75) row = 2; // Right
+        else if (diff > Math.PI * 0.75 && diff <= Math.PI * 1.25) row = 3; // Back
+        else if (diff > Math.PI * 1.25 && diff <= Math.PI * 1.75) row = 1; // Left
+        else row = 0; // Front
 
         playerMaterial.map.offset.x = animFrame / SPRITE_COLS;
         playerMaterial.map.offset.y = (SPRITE_ROWS - 1 - row) / SPRITE_ROWS;
@@ -300,19 +343,31 @@
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
+        const handleStart = (clientX, clientY, button) => {
+            if (isGameStarted) {
+                if (button === 0) {
+                    mouse.x = (clientX / window.innerWidth) * 2 - 1;
+                    mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+                    raycaster.setFromCamera(mouse, camera);
+                    const intersects = raycaster.intersectObjects(groundGroup.children);
+                    if (intersects.length > 0) targetPos = { x: intersects[0].point.x, z: intersects[0].point.z };
+                } else if (button === 2) {
+                    isRightMouseDown = true;
+                    lastMousePos = { x: clientX, y: clientY };
+                }
+            }
+        };
+
         window.addEventListener('mousedown', (e) => {
             if (e.target.closest('#inventory-ui')) return;
-            if (e.button === 0) {
-                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-                raycaster.setFromCamera(mouse, camera);
-                const intersects = raycaster.intersectObjects(groundGroup.children);
-                if (intersects.length > 0) targetPos = { x: intersects[0].point.x, z: intersects[0].point.z };
-            } else if (e.button === 2) {
-                isRightMouseDown = true;
-                lastMousePos = { x: e.clientX, y: e.clientY };
-            }
+            handleStart(e.clientX, e.clientY, e.button);
         });
+
+        // Touch support สำหรับมือถือ
+        window.addEventListener('touchstart', (e) => {
+            if (e.target.closest('#inventory-ui')) return;
+            handleStart(e.touches[0].clientX, e.touches[0].clientY, 0);
+        }, { passive: false });
 
         window.addEventListener('mouseup', (e) => { if (e.button === 2) isRightMouseDown = false; });
         window.addEventListener('mousemove', (e) => {
@@ -324,7 +379,7 @@
             }
         });
         window.addEventListener('wheel', (e) => {
-            cameraDistance = Math.max(5, Math.min(40, cameraDistance + e.deltaY * 0.02));
+            cameraDistance = Math.max(5, Math.min(50, cameraDistance + e.deltaY * 0.02));
         });
     }
 
@@ -332,6 +387,7 @@
         for (let i = 0; i < 5; i++) {
             const slot = document.getElementById(`slot-${i}`);
             const item = inventory[i];
+            
             const oldIcon = slot.querySelector('.item-icon');
             const oldCount = slot.querySelector('.item-count');
             if (oldIcon) oldIcon.remove();
