@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Siri Online</title>
+    <title>Siriwan RPG 3D - Full Map Loader</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
             --sprite-size: 32px;
-            --grid-cols: 16;
             --slot-bg: rgba(20, 20, 30, 0.7);
             --slot-border: rgba(255, 255, 255, 0.1);
             --active-color: #00d2ff;
@@ -17,10 +16,9 @@
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            background-color: #05050a;
+            background-color: #000;
             overflow: hidden;
-            width: 100vw;
-            height: 100vh;
+            width: 100vw; height: 100vh;
             font-family: 'Segoe UI', Tahoma, sans-serif;
             color: white;
         }
@@ -33,105 +31,73 @@
             width: 100%; height: 100%;
             background: radial-gradient(circle, #1a1a2e 0%, #000 100%);
             z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
         .start-btn {
             padding: 15px 50px;
             background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
-            color: #fff;
-            border: none;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 22px;
-            cursor: pointer;
+            color: #fff; border: none; border-radius: 30px;
+            font-weight: bold; font-size: 22px; cursor: pointer;
             box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
-            transition: transform 0.2s;
         }
 
         #inventory-ui {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
+            position: fixed; bottom: 30px; left: 50%;
             transform: translateX(-50%);
-            display: flex;
-            gap: 12px;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex; gap: 15px; padding: 15px;
+            background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(12px);
+            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 500;
         }
 
         .slot {
-            width: 60px; height: 60px;
-            background: var(--slot-bg);
-            border: 2px solid var(--slot-border);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.2s;
+            width: 64px; height: 64px;
+            background: var(--slot-bg); border: 2px solid var(--slot-border);
+            border-radius: 14px; display: flex; align-items: center; justify-content: center;
+            position: relative; cursor: pointer; transition: all 0.2s;
         }
 
         .slot.active {
             border-color: var(--active-color);
             background: rgba(0, 210, 255, 0.1);
-            transform: translateY(-5px);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+            transform: translateY(-5px) scale(1.05);
         }
 
-        .item-icon {
-            width: 36px; height: 36px;
-            border-radius: 4px;
-        }
-
+        .item-icon { width: 40px; height: 40px; border-radius: 6px; }
         .item-count {
-            position: absolute;
-            bottom: 4px; right: 6px;
-            font-size: 11px;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px #000;
+            position: absolute; bottom: 6px; right: 8px;
+            font-size: 12px; font-weight: bold; text-shadow: 1px 1px 2px #000;
         }
+        .slot-key { position: absolute; top: 4px; left: 6px; font-size: 10px; opacity: 0.4; }
 
         #loading-screen {
-            position: fixed;
-            top: 20px; left: 20px;
-            padding: 8px 20px;
-            background: rgba(0,0,0,0.8);
-            border: 1px solid var(--active-color);
-            border-radius: 30px;
-            font-size: 13px;
-            z-index: 1000;
-            display: none;
+            position: fixed; top: 20px; left: 20px;
+            padding: 8px 20px; background: rgba(0,0,0,0.7);
+            border: 1px solid var(--active-color); border-radius: 30px;
+            font-size: 13px; z-index: 1000; display: none;
         }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div id="startup-overlay">
-    <h1 style="margin-bottom: 20px;">SIRIVAN RPG</h1>
+    <h1 style="margin-bottom: 20px; letter-spacing: 2px;">SIRIVAN RPG</h1>
     <button class="start-btn" onclick="startGame()">ENTER WORLD</button>
 </div>
 
-<div id="loading-screen">LOADING MAP FROM JSON...</div>
+<div id="loading-screen">LOADING MAP...</div>
 
 <div id="inventory-ui">
-    <div class="slot" id="slot-0" onclick="selectSlot(0)"></div>
-    <div class="slot" id="slot-1" onclick="selectSlot(1)"></div>
-    <div class="slot" id="slot-2" onclick="selectSlot(2)"></div>
-    <div class="slot" id="slot-3" onclick="selectSlot(3)"></div>
-    <div class="slot" id="slot-4" onclick="selectSlot(4)"></div>
+    <div class="slot" id="slot-0" onclick="selectSlot(0)"><span class="slot-key">1</span></div>
+    <div class="slot" id="slot-1" onclick="selectSlot(1)"><span class="slot-key">2</span></div>
+    <div class="slot" id="slot-2" onclick="selectSlot(2)"><span class="slot-key">3</span></div>
+    <div class="slot" id="slot-3" onclick="selectSlot(3)"><span class="slot-key">4</span></div>
+    <div class="slot" id="slot-4" onclick="selectSlot(4)"><span class="slot-key">5</span></div>
 </div>
 
 <script>
-    // --- Config ---
     const TILE_SIZE = 1;
     const MOVE_SPEED = 0.12;
     const SPRITE_ROWS = 4; 
@@ -146,17 +112,18 @@
     let activeSlot = 0;
     
     let scene, camera, renderer, player, groundGroup, playerMaterial;
+    let textures = {}; 
     let isGameStarted = false;
+
     let cameraRotation = { theta: Math.PI / 4, phi: Math.PI / 3 };
-    let cameraDistance = 12;
+    let cameraDistance = 14;
     let isRightMouseDown = false;
     let lastMousePos = { x: 0, y: 0 };
-    let playerWorldPos = new THREE.Vector3(5, 0.6, 5);
+
+    let playerWorldPos = new THREE.Vector3(10, 0.6, 10);
     let targetPos = null;
     let playerMoveDir = new THREE.Vector2(0, 1); 
-    let animFrame = 0;
-    let animTimer = 0;
-    const animSpeed = 0.12;
+    let animFrame = 0, animTimer = 0, animSpeed = 0.12;
 
     function startGame() {
         document.getElementById('startup-overlay').style.display = 'none';
@@ -168,55 +135,60 @@
     function init3D() {
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0x0a0a12);
+
         camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
+
         scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+        const sun = new THREE.DirectionalLight(0xffffff, 0.5);
+        sun.position.set(10, 20, 10);
+        scene.add(sun);
+
         groundGroup = new THREE.Group();
         scene.add(groundGroup);
+
+        window.addEventListener('resize', onWindowResize);
+        window.addEventListener('keydown', (e) => {
+            if (e.key >= '1' && e.key <= '5') selectSlot(parseInt(e.key) - 1);
+        });
         setupInputHandlers();
     }
 
     async function loadAssetsAndMap() {
         const loader = new THREE.TextureLoader();
-        const [tex1, tex2, charTex] = await Promise.all([
-            loader.loadAsync('img/map/grass.png').catch(() => createPlaceholderTex('#2d4c2d')),
-            loader.loadAsync('img/map/dirt.png').catch(() => createPlaceholderTex('#3d2b1f')),
+        
+        // โหลดรูปภาพทั้งหมด (รูปต้องอยู่ชื่อเดิม)
+        const [g1, g2, pTex] = await Promise.all([
+            loader.loadAsync('img/map/grass1.png').catch(() => createPlaceholderTex('#2d4c2d')),
+            loader.loadAsync('img/map/grass2.png').catch(() => createPlaceholderTex('#243b24')),
             loader.loadAsync('img/player.png').catch(() => createPlaceholderTex('#ffffff'))
         ]);
 
-        [tex1, tex2, charTex].forEach(t => {
+        [g1, g2, pTex].forEach(t => {
             t.magFilter = THREE.NearestFilter;
             t.minFilter = THREE.NearestFilter;
         });
 
-        charTex.wrapS = charTex.wrapT = THREE.RepeatWrapping;
-        charTex.repeat.set(1/SPRITE_COLS, 1/SPRITE_ROWS);
+        textures['grass1'] = g1;
+        textures['grass2'] = g2;
 
-        // --- ระบบโหลด MAP จาก JSON ---
-        let mapJson = null;
+        pTex.wrapS = pTex.wrapT = THREE.RepeatWrapping;
+        pTex.repeat.set(1/SPRITE_COLS, 1/SPRITE_ROWS);
+
+        // โหลด JSON แมพ
         try {
-            // พยายามโหลดไฟล์จริง
             const response = await fetch('maps/test.json');
-            if (response.ok) {
-                mapJson = await response.json();
-                console.log("Map loaded from JSON file");
-            } else {
-                throw new Error("File not found");
-            }
+            const rawMap = await response.json();
+            parseAndCreateMap(rawMap);
         } catch (e) {
-            // หากไม่มีไฟล์ ให้สร้าง Mock JSON Data ขึ้นมาจำลอง
-            console.warn("Using default map (JSON not found)");
-            mapJson = {
-                width: 20,
-                height: 20,
-                tiles: Array(400).fill(0).map(() => (Math.random() > 0.8 ? 1 : 0)) // 0=หญ้า, 1=ดิน
-            };
+            console.warn("Map JSON not found, creating default.");
+            createDefaultMap();
         }
 
-        buildMapFromJson(mapJson, tex1, tex2);
-        createPlayer(charTex);
+        createPlayer(pTex);
         updateInventoryUI();
         
         document.getElementById('loading-screen').style.display = 'none';
@@ -224,38 +196,46 @@
         animate();
     }
 
-    function buildMapFromJson(data, tex1, tex2) {
+    function parseAndCreateMap(rawMap) {
         const geometry = new THREE.PlaneGeometry(TILE_SIZE, TILE_SIZE);
-        const mat1 = new THREE.MeshLambertMaterial({ map: tex1 });
-        const mat2 = new THREE.MeshLambertMaterial({ map: tex2 });
-
-        const width = data.width;
-        const height = data.height;
-
-        data.tiles.forEach((type, index) => {
-            const x = index % width;
-            const z = Math.floor(index / width);
+        
+        // วนลูปตามแถวใน JSON
+        rawMap.forEach((rowString, r) => {
+            // ใช้ Regex แยก [item] ออกมาเป็น Array
+            // ผลลัพธ์จะเป็น ["grass2", "grass1", "grass2", ...]
+            const tiles = rowString.match(/\[(.*?)\]/g).map(t => t.replace(/[\[\]]/g, ''));
             
-            const material = type === 0 ? mat1 : mat2;
-            const tile = new THREE.Mesh(geometry, material);
-            tile.position.set(x * TILE_SIZE, 0, z * TILE_SIZE);
-            tile.rotation.x = -Math.PI / 2;
-            groundGroup.add(tile);
+            tiles.forEach((tileKey, c) => {
+                const tex = textures[tileKey] || textures['grass1'];
+                const material = new THREE.MeshLambertMaterial({ map: tex });
+                const tile = new THREE.Mesh(geometry, material);
+                
+                // วางตำแหน่งตาม Column (c) และ Row (r)
+                tile.position.set(c * TILE_SIZE, 0, r * TILE_SIZE);
+                tile.rotation.x = -Math.PI / 2;
+                groundGroup.add(tile);
+            });
         });
     }
 
-    function createPlaceholderTex(color) {
-        const canvas = document.createElement('canvas');
-        canvas.width = 64; canvas.height = 64;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = color;
-        ctx.fillRect(0, 0, 64, 64);
-        return new THREE.CanvasTexture(canvas);
+    function createDefaultMap() {
+        const geometry = new THREE.PlaneGeometry(TILE_SIZE, TILE_SIZE);
+        for(let r=0; r<20; r++) {
+            for(let c=0; c<20; c++) {
+                const mat = new THREE.MeshLambertMaterial({ map: textures['grass1'] });
+                const tile = new THREE.Mesh(geometry, mat);
+                tile.position.set(c, 0, r);
+                tile.rotation.x = -Math.PI / 2;
+                groundGroup.add(tile);
+            }
+        }
     }
 
     function createPlayer(tex) {
         const geometry = new THREE.PlaneGeometry(1.2, 1.2);
-        playerMaterial = new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.5 });
+        playerMaterial = new THREE.MeshBasicMaterial({ 
+            map: tex, transparent: true, alphaTest: 0.5, side: THREE.DoubleSide 
+        });
         player = new THREE.Mesh(geometry, playerMaterial);
         player.position.copy(playerWorldPos);
         scene.add(player);
@@ -264,17 +244,17 @@
     function animate() {
         requestAnimationFrame(animate);
         if (!isGameStarted) return;
-        const deltaTime = 0.016; 
 
         if (targetPos) {
             const dx = targetPos.x - player.position.x;
             const dz = targetPos.z - player.position.z;
             const dist = Math.sqrt(dx*dx + dz*dz);
+
             if (dist > 0.1) {
                 player.position.x += (dx / dist) * MOVE_SPEED;
                 player.position.z += (dz / dist) * MOVE_SPEED;
                 playerMoveDir.set(dx / dist, dz / dist);
-                animTimer += deltaTime;
+                animTimer += 0.016;
                 if (animTimer > animSpeed) {
                     animFrame = (animFrame + 1) % SPRITE_COLS;
                     animTimer = 0;
@@ -283,7 +263,10 @@
                 targetPos = null;
                 animFrame = 0; 
             }
+        } else {
+            animFrame = 0;
         }
+
         updatePlayerSprite();
         updateCameraPosition();
         renderer.render(scene, camera);
@@ -296,10 +279,10 @@
         let diff = (moveAngle - camAngle + Math.PI * 2) % (Math.PI * 2);
 
         let row = 0; 
-        if (diff > Math.PI * 0.25 && diff <= Math.PI * 0.75) row = 2;
-        else if (diff > Math.PI * 0.75 && diff <= Math.PI * 1.25) row = 3;
-        else if (diff > Math.PI * 1.25 && diff <= Math.PI * 1.75) row = 1;
-        else row = 0;
+        if (diff > Math.PI * 0.25 && diff <= Math.PI * 0.75) row = 2; // ขวา
+        else if (diff > Math.PI * 0.75 && diff <= Math.PI * 1.25) row = 3; // หลัง
+        else if (diff > Math.PI * 1.25 && diff <= Math.PI * 1.75) row = 1; // ซ้าย
+        else row = 0; // หน้า
 
         playerMaterial.map.offset.x = animFrame / SPRITE_COLS;
         playerMaterial.map.offset.y = (SPRITE_ROWS - 1 - row) / SPRITE_ROWS;
@@ -316,6 +299,7 @@
     function setupInputHandlers() {
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
+
         window.addEventListener('mousedown', (e) => {
             if (e.target.closest('#inventory-ui')) return;
             if (e.button === 0) {
@@ -329,22 +313,31 @@
                 lastMousePos = { x: e.clientX, y: e.clientY };
             }
         });
-        window.addEventListener('mouseup', () => isRightMouseDown = false);
+
+        window.addEventListener('mouseup', (e) => { if (e.button === 2) isRightMouseDown = false; });
         window.addEventListener('mousemove', (e) => {
             if (isRightMouseDown) {
                 cameraRotation.theta -= (e.clientX - lastMousePos.x) * 0.01;
-                cameraRotation.phi = Math.max(0.1, Math.min(Math.PI / 2.1, cameraRotation.phi - (e.clientY - lastMousePos.y) * 0.01));
+                cameraRotation.phi -= (e.clientY - lastMousePos.y) * 0.01;
+                cameraRotation.phi = Math.max(0.1, Math.min(Math.PI / 2.1, cameraRotation.phi));
                 lastMousePos = { x: e.clientX, y: e.clientY };
             }
+        });
+        window.addEventListener('wheel', (e) => {
+            cameraDistance = Math.max(5, Math.min(40, cameraDistance + e.deltaY * 0.02));
         });
     }
 
     function updateInventoryUI() {
         for (let i = 0; i < 5; i++) {
             const slot = document.getElementById(`slot-${i}`);
-            slot.innerHTML = '';
-            slot.classList.toggle('active', i === activeSlot);
             const item = inventory[i];
+            const oldIcon = slot.querySelector('.item-icon');
+            const oldCount = slot.querySelector('.item-count');
+            if (oldIcon) oldIcon.remove();
+            if (oldCount) oldCount.remove();
+
+            slot.classList.toggle('active', i === activeSlot);
             if (item) {
                 const icon = document.createElement('div');
                 icon.className = 'item-icon';
@@ -361,11 +354,20 @@
     }
 
     function selectSlot(i) { activeSlot = i; updateInventoryUI(); }
-    window.addEventListener('resize', () => {
+    function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+    }
+
+    function createPlaceholderTex(color) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 32; canvas.height = 32;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, 32, 32);
+        return new THREE.CanvasTexture(canvas);
+    }
 </script>
 </body>
 </html>
