@@ -1,49 +1,40 @@
-<!DOCTYPE html>
+<pointer-eventsPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-<title>SiRiWaN-RPG-Online</title>
+<title>SiRiWaN RPG Online</title></title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background: #111;
+    background: #1a1a2e;
     overflow: hidden;
     width: 100vw;
     height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 
-  /* กรอบเกมหลัก */
   #game-viewport {
     position: relative;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    background: #222;
   }
 
-  /* แผนที่ที่จะเคลื่อนที่ */
+  /* แผนที่ที่จะถูกเลื่อน */
   #map-container {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 0; left: 0;
     will-change: transform;
-    image-rendering: pixelated;
   }
 
   .tile {
     position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 0.1px solid rgba(0,0,0,0.05);
+    image-rendering: pixelated;
+    background-size: cover;
   }
 
-  /* ตัวละครถูกล็อคไว้กึ่งกลางหน้าจอเสมอ */
+  /* ตัวละครถูกล็อคไว้กึ่งกลางหน้าจอ */
   #character-anchor {
     position: absolute;
     top: 50%;
@@ -53,11 +44,12 @@
     transform: translate(-50%, -50%);
   }
 
-  .char-visuals {
+  .char-wrap {
     position: relative;
     width: 40px;
     height: 48px;
-    transform: translateY(-15px); /* ปรับให้เท้าอยู่ตรงจุดศูนย์กลาง */
+    /* ปรับ offset ให้เท้าตัวละครตรงกับจุดหมุนกึ่งกลางพอดี */
+    transform: translateY(-16px); 
   }
 
   .char-shadow {
@@ -65,87 +57,92 @@
     bottom: -2px;
     left: 50%;
     transform: translateX(-50%);
-    width: 20px;
-    height: 6px;
-    background: rgba(0,0,0,0.4);
+    width: 22px;
+    height: 7px;
+    background: rgba(0,0,0,0.3);
     border-radius: 50%;
   }
 
   .char-body {
     position: absolute;
     width: 100%;
-    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
   .char-head {
-    width: 22px;
-    height: 20px;
+    width: 18px;
+    height: 17px;
     background: #f5c78a;
     border: 2px solid #c8855a;
-    border-radius: 4px;
+    border-radius: 3px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 3px;
     z-index: 2;
   }
 
-  .char-eye { width: 3px; height: 4px; background: #2a1a0a; border-radius: 1px; }
+  .char-eye { width: 2px; height: 3px; background: #2a1a0a; border-radius: 1px; }
 
   .char-torso {
-    width: 20px;
-    height: 16px;
+    width: 16px;
+    height: 13px;
     background: #2244bb;
     border: 2px solid #1133aa;
-    border-radius: 4px 4px 2px 2px;
-    margin-top: -2px;
+    margin-top: -1px;
+    border-radius: 2px;
   }
 
-  .char-legs { display: flex; gap: 2px; margin-top: -2px; }
-  .char-leg { width: 8px; height: 10px; background: #112266; border-radius: 0 0 2px 2px; transform-origin: top; }
+  .char-legs { display: flex; gap: 2px; }
+  .char-leg { width: 6px; height: 9px; background: #112266; border-radius: 0 0 2px 2px; transform-origin: top; }
 
-  /* Animations */
-  @keyframes walk-cycle { 0%, 100% { transform: rotate(20deg); } 50% { transform: rotate(-20deg); } }
-  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+  /* Animation walking */
+  @keyframes leg-swing { 0%, 100% { transform: rotate(25deg); } 50% { transform: rotate(-25deg); } }
+  @keyframes body-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
 
-  .walking .char-leg:nth-child(1) { animation: walk-cycle 0.25s infinite; }
-  .walking .char-leg:nth-child(2) { animation: walk-cycle 0.25s infinite reverse; }
-  .walking .char-body { animation: bob 0.25s infinite; }
+  .walking .char-leg:nth-child(1) { animation: leg-swing 0.25s infinite; }
+  .walking .char-leg:nth-child(2) { animation: leg-swing 0.25s infinite reverse; }
+  .walking .char-body { animation: body-bob 0.25s infinite; }
   .face-left .char-body { transform: scaleX(-1); }
 
-  /* D-PAD */
-  #controls {
+  /* D-PAD Controls */
+  #dpad {
     position: fixed;
     bottom: 30px;
-    left: 30px;
+    right: 30px;
+    z-index: 200;
+    user-select: none;
+    touch-action: none;
+  }
+
+  .dpad-grid {
     display: grid;
     grid-template-columns: repeat(3, 60px);
     grid-template-rows: repeat(3, 60px);
-    gap: 10px;
-    z-index: 1000;
+    gap: 8px;
   }
 
-  .btn {
-    background: rgba(255,255,255,0.2);
-    border: 2px solid rgba(255,255,255,0.4);
-    border-radius: 15px;
+  .dbtn {
+    background: rgba(255,255,255,0.15);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 12px;
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 24px;
-    touch-action: none;
-    user-select: none;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px);
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .btn:active, .btn.active { background: rgba(255,255,255,0.5); transform: scale(0.9); }
-  .empty { pointer-events: none; opacity: 0; }
+  .dbtn:active, .dbtn.active {
+    background: rgba(255,255,255,0.4);
+    transform: scale(0.9);
+  }
 
-  @media (min-width: 800px) { #controls { bottom: 40px; left: 40px; } }
+  .dbtn-empty { pointer-events: none; }
 </style>
 </head>
 <body>
@@ -154,7 +151,7 @@
   <div id="map-container"></div>
   
   <div id="character-anchor">
-    <div id="char-sprite" class="char-visuals">
+    <div id="char-sprite" class="char-wrap">
       <div class="char-shadow"></div>
       <div class="char-body">
         <div class="char-head">
@@ -171,154 +168,226 @@
   </div>
 </div>
 
-<div id="controls">
-  <div class="empty"></div>
-  <div class="btn" id="up">▲</div>
-  <div class="empty"></div>
-  <div class="btn" id="left">◀</div>
-  <div class="btn" id="down">▼</div>
-  <div class="btn" id="right">▶</div>
+<div id="dpad">
+  <div class="dpad-grid">
+    <div class="dbtn-empty"></div>
+    <div class="dbtn" id="d-up">▲</div>
+    <div class="dbtn-empty"></div>
+    <div class="dbtn" id="d-left">◀</div>
+    <div class="dbtn" id="d-down">▼</div>
+    <div class="dbtn" id="d-right">▶</div>
+  </div>
 </div>
 
 <script>
+// ============================================================
+// CONFIGURATION
+// ============================================================
 const TILE_SIZE = 64;
-const MOVE_SPEED = 5; // ความเร็วในการเคลื่อนที่ (tiles ต่อวินาที)
+const MOVE_SPEED = 6; 
 
-const TILE_TYPES = {
-  '.': { name: 'grass', color: '#4CAF50', walkable: true },
-  '#': { name: 'wall', color: '#444', walkable: false },
-  '~': { name: 'water', color: '#2196F3', walkable: false },
-  'P': { name: 'path', color: '#8D6E63', walkable: true }
+const TILE_DEFS = {
+  grass1: { walkable: true, color: '#5a9940' },
+  grass2: { walkable: true, color: '#4a8835' },
+  path:   { walkable: true, color: '#8d6e63' },
+  tree:   { walkable: false, color: '#2d5a27' },
+  wall:   { walkable: false, color: '#333333' }
 };
 
-const MAP_DATA = [
-  "##########",
-  "#........#",
-  "#..P..#..#",
-  "#.PPP.#..#",
-  "#..P..#..#",
-  "#..P..#..#",
-  "#..PPPP..#",
-  "#..#..#..#",
-  "#........#",
-  "##########"
-];
-
-// สถานะเกม
-const state = {
-  px: 2, // ตำแหน่ง X ของผู้เล่น (ในหน่วย Tile)
-  py: 2, // ตำแหน่ง Y ของผู้เล่น
-  tx: 2, // เป้าหมาย X
-  ty: 2, // เป้าหมาย Y
-  isMoving: false,
-  progress: 0,
-  facing: 'down',
-  keys: {},
-  mobileDir: null
-};
-
-const mapContainer = document.getElementById('map-container');
-const charSprite = document.getElementById('char-sprite');
-
-function init() {
-  // สร้างแผนที่
-  MAP_DATA.forEach((row, r) => {
-    [...row].forEach((char, c) => {
-      const tileDef = TILE_TYPES[char] || TILE_TYPES['.'];
-      const el = document.createElement('div');
-      el.className = 'tile';
-      el.style.width = TILE_SIZE + 'px';
-      el.style.height = TILE_SIZE + 'px';
-      el.style.left = (c * TILE_SIZE) + 'px';
-      el.style.top = (r * TILE_SIZE) + 'px';
-      el.style.backgroundColor = tileDef.color;
-      mapContainer.appendChild(el);
-    });
-  });
-
-  // ระบบควบคุม
-  window.addEventListener('keydown', e => state.keys[e.key] = true);
-  window.addEventListener('keyup', e => delete state.keys[e.key]);
-
-  const setupBtn = (id, dir) => {
-    const el = document.getElementById(id);
-    const start = (e) => { e.preventDefault(); state.mobileDir = dir; el.classList.add('active'); };
-    const end = () => { if(state.mobileDir === dir) state.mobileDir = null; el.classList.remove('active'); };
-    el.addEventListener('touchstart', start);
-    el.addEventListener('touchend', end);
-    el.addEventListener('mousedown', start);
-    el.addEventListener('mouseup', end);
-  };
-
-  setupBtn('up', 'up');
-  setupBtn('down', 'down');
-  setupBtn('left', 'left');
-  setupBtn('right', 'right');
-
-  requestAnimationFrame(update);
+function getTileDef(name) {
+  if (TILE_DEFS[name]) return TILE_DEFS[name];
+  // Fallback สำหรับชื่อ Tile ที่ไม่ได้นิยามไว้
+  return { walkable: true, color: '#777' };
 }
 
-function isWalkable(x, y) {
-  if (y < 0 || y >= MAP_DATA.length || x < 0 || x >= MAP_DATA[0].length) return false;
-  const char = MAP_DATA[y][x];
-  return TILE_TYPES[char]?.walkable;
+// ============================================================
+// STATE
+// ============================================================
+let grid = [];
+let rows = 0, cols = 0;
+let px = 0, py = 0; // Current tile position
+let tx = 0, ty = 0; // Target tile position
+let isMoving = false;
+let moveT = 0;      // 0.0 to 1.0
+let lastFace = 'down';
+let lastTs = 0;
+
+const keys = {};
+let mobileDir = null;
+
+const mapEl = document.getElementById('map-container');
+const charEl = document.getElementById('char-sprite');
+
+// ============================================================
+// MAP PARSER (เหมือนต้นฉบับ)
+// ============================================================
+function parseMap(text) {
+  try {
+    const json = JSON.parse(text);
+    if (Array.isArray(json)) {
+      if (typeof json[0] === 'string') {
+        return json.map(line => [...line.matchAll(/\[([a-zA-Z0-9_]+)\]/g)].map(m => m[1].toLowerCase())).filter(r => r.length);
+      }
+      if (Array.isArray(json[0])) {
+        return json.map(row => row.map(v => String(v).toLowerCase()));
+      }
+    }
+  } catch (_) {}
+  return text.trim().split('\n').map(line => [...line.matchAll(/\[([a-zA-Z0-9_]+)\]/g)].map(m => m[1].toLowerCase())).filter(r => r.length);
 }
 
-function update(ts) {
-  if (!state.lastTs) state.lastTs = ts;
-  const dt = (ts - state.lastTs) / 1000;
-  state.lastTs = ts;
+function buildMap(g) {
+  grid = g;
+  rows = g.length;
+  cols = g[0]?.length || 0;
+  mapEl.innerHTML = '';
+  mapEl.style.width = (cols * TILE_SIZE) + 'px';
+  mapEl.style.height = (rows * TILE_SIZE) + 'px';
 
-  if (state.isMoving) {
-    state.progress += dt * MOVE_SPEED;
-    if (state.progress >= 1) {
-      state.px = state.tx;
-      state.py = state.ty;
-      state.isMoving = false;
-      state.progress = 0;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const name = g[r][c];
+      const def = getTileDef(name);
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.style.left = (c * TILE_SIZE) + 'px';
+      tile.style.top = (r * TILE_SIZE) + 'px';
+      tile.style.width = TILE_SIZE + 'px';
+      tile.style.height = TILE_SIZE + 'px';
+      tile.style.backgroundColor = def.color;
+      
+      // ลองโหลดรูป (ถ้ามี)
+      const img = new Image();
+      img.src = `img/map/${name}.png`;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.onerror = () => img.remove();
+      tile.appendChild(img);
+      
+      mapEl.appendChild(tile);
+    }
+  }
+}
+
+// ============================================================
+// GAME LOGIC
+// ============================================================
+function isWalkable(c, r) {
+  if (c < 0 || r < 0 || c >= cols || r >= rows) return false;
+  return getTileDef(grid[r][c]).walkable;
+}
+
+function getInput() {
+  if (mobileDir) return mobileDir;
+  if (keys['ArrowUp'] || keys['w'] || keys['W']) return 'up';
+  if (keys['ArrowDown'] || keys['s'] || keys['S']) return 'down';
+  if (keys['ArrowLeft'] || keys['a'] || keys['A']) return 'left';
+  if (keys['ArrowRight'] || keys['d'] || keys['D']) return 'right';
+  return null;
+}
+
+function loop(ts) {
+  const dt = Math.min((ts - lastTs) / 1000, 0.1);
+  lastTs = ts;
+
+  if (isMoving) {
+    moveT += dt * MOVE_SPEED;
+    if (moveT >= 1) {
+      px = tx; py = ty;
+      isMoving = false;
+      moveT = 0;
     }
   }
 
-  if (!state.isMoving) {
-    let dx = 0, dy = 0;
-    const dir = state.mobileDir || (state.keys['w'] || state.keys['ArrowUp'] ? 'up' : 
-                state.keys['s'] || state.keys['ArrowDown'] ? 'down' :
-                state.keys['a'] || state.keys['ArrowLeft'] ? 'left' :
-                state.keys['d'] || state.keys['ArrowRight'] ? 'right' : null);
-
+  if (!isMoving) {
+    const dir = getInput();
     if (dir) {
-      state.facing = dir;
+      lastFace = dir;
+      let dx = 0, dy = 0;
       if (dir === 'up') dy = -1;
       if (dir === 'down') dy = 1;
       if (dir === 'left') dx = -1;
       if (dir === 'right') dx = 1;
 
-      if (isWalkable(state.px + dx, state.py + dy)) {
-        state.tx = state.px + dx;
-        state.ty = state.py + dy;
-        state.isMoving = true;
+      if (isWalkable(px + dx, py + dy)) {
+        tx = px + dx; ty = py + dy;
+        isMoving = true;
+        moveT = 0;
       }
     }
   }
 
-  // คำนวณตำแหน่งแสดงผล (Interpolation)
-  const renderX = state.px + (state.tx - state.px) * state.progress;
-  const renderY = state.py + (state.ty - state.py) * state.progress;
+  // ตัวละครเดินแบบ Smooth (Interpolation)
+  const renderX = isMoving ? px + (tx - px) * moveT : px;
+  const renderY = isMoving ? py + (ty - py) * moveT : py;
 
-  // เลื่อน Map ให้สวนทางกับผู้เล่น (ทำหน้าที่เป็นกล้อง)
-  // สูตร: กึ่งกลางหน้าจอ - (ตำแหน่งผู้เล่น * ขนาด Tile) - (ครึ่ง Tile เพื่อให้กึ่งกลางตัวละคร)
+  // เลื่อน Map สวนทางกับตัวละครเพื่อให้ตัวละครอยู่กลางหน้าจอ
   const viewW = window.innerWidth;
   const viewH = window.innerHeight;
   const camX = (viewW / 2) - (renderX * TILE_SIZE) - (TILE_SIZE / 2);
   const camY = (viewH / 2) - (renderY * TILE_SIZE) - (TILE_SIZE / 2);
 
-  mapContainer.style.transform = `translate(${camX}px, ${camY}px)`;
+  mapEl.style.transform = `translate(${camX}px, ${camY}px)`;
   
-  // อัปเดตท่าทางตัวละคร
-  charSprite.classList.toggle('walking', state.isMoving);
-  charSprite.classList.toggle('face-left', state.facing === 'left');
+  // Animation ท่าเดิน
+  charEl.classList.toggle('walking', isMoving);
+  charEl.classList.toggle('face-left', lastFace === 'left');
 
-  requestAnimationFrame(update);
+  requestAnimationFrame(loop);
+}
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
+async function init() {
+  let mapText;
+  try {
+    const res = await fetch('maps/test.json');
+    if (!res.ok) throw new Error();
+    mapText = await res.text();
+  } catch (err) {
+    // Fallback แผนที่ตัวอย่าง
+    mapText = `
+[tree][tree][tree][tree][tree][tree][tree][tree][tree][tree]
+[tree][grass1][grass1][grass2][grass1][path][grass1][grass1][grass1][tree]
+[tree][grass2][wall][grass1][grass1][path][grass1][wall][grass2][tree]
+[tree][grass1][grass1][grass1][grass1][path][path][path][grass1][tree]
+[tree][path][path][path][path][path][grass1][grass2][grass1][tree]
+[tree][grass1][wall][grass2][grass1][path][grass1][wall][grass1][tree]
+[tree][tree][tree][tree][tree][tree][tree][tree][tree][tree]
+`.trim();
+  }
+
+  const g = parseMap(mapText);
+  buildMap(g);
+
+  // หาจุดเกิดแรกที่เดินได้
+  for (let r = 0; r < g.length; r++) {
+    for (let c = 0; c < g[r].length; c++) {
+      if (getTileDef(g[r][c]).walkable) {
+        px = tx = c; py = ty = r;
+        break;
+      }
+    }
+    if (px !== 0) break;
+  }
+
+  // ตั้งค่า D-Pad
+  const btns = { 'd-up':'up', 'd-down':'down', 'd-left':'left', 'd-right':'right' };
+  Object.entries(btns).forEach(([id, dir]) => {
+    const btn = document.getElementById(id);
+    const start = (e) => { e.preventDefault(); mobileDir = dir; btn.classList.add('active'); };
+    const end = (e) => { e.preventDefault(); if(mobileDir === dir) mobileDir = null; btn.classList.remove('active'); };
+    btn.addEventListener('touchstart', start);
+    btn.addEventListener('touchend', end);
+    btn.addEventListener('mousedown', start);
+    btn.addEventListener('mouseup', end);
+  });
+
+  window.addEventListener('keydown', e => keys[e.key] = true);
+  window.addEventListener('keyup', e => delete keys[e.key]);
+
+  requestAnimationFrame(ts => { lastTs = ts; loop(ts); });
 }
 
 init();
