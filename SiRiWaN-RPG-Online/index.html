@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Siriwan RPG 3D - ช่วงพัดทพนาและกูตกภาษาไทย</title>
+    <title>Siriwan RPG 3D - Billboard Sprite System</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
@@ -119,7 +119,7 @@
     // --- Configuration ---
     const TILE_SIZE = 1;
     const MOVE_SPEED = 0.12;
-    const SPRITE_ROWS = 4; // หน้า, ซ้าย, ขวา, หลัง
+    const SPRITE_ROWS = 4; // 1:หน้า, 2:ซ้าย, 3:ขวา, 4:หลัง
     const SPRITE_COLS = 4; // Animation frames
 
     let inventory = [{ id: 'hoe', count: 1 }, { id: 'seed', count: 10 }, { id: 'carrot', count: 2 }, null, null];
@@ -136,12 +136,12 @@
 
     let playerWorldPos = new THREE.Vector3(5, 0.6, 5);
     let targetPos = null;
-    let playerMoveDir = new THREE.Vector2(0, 1); // ทิศทางที่เดินล่าสุด
+    let playerMoveDir = new THREE.Vector2(0, 1); // ทิศทางเริ่มต้น (หันหน้า)
     
     // Animation State
     let animFrame = 0;
     let animTimer = 0;
-    const animSpeed = 0.15;
+    const animSpeed = 0.12;
 
     function startGame() {
         document.getElementById('startup-overlay').style.display = 'none';
@@ -172,10 +172,11 @@
 
     async function loadAssetsAndMap() {
         const loader = new THREE.TextureLoader();
+        // พยายามโหลดรูปภาพ
         const [grass1Tex, grass2Tex, charTex] = await Promise.all([
-            loader.loadAsync('img/map/grass1.png'),
-            loader.loadAsync('img/map/grass2.png'),
-            loader.loadAsync('img/player.png') // ใช้ไฟล์รูปที่อัปโหลดมา
+            loader.loadAsync('img/map/grass1.png').catch(() => createPlaceholderTex('#4caf50')),
+            loader.loadAsync('img/map/grass2.png').catch(() => createPlaceholderTex('#388e3c')),
+            loader.loadAsync('img/player.png').catch(() => createPlaceholderTex('#ffffff'))
         ]);
 
         [grass1Tex, grass2Tex, charTex].forEach(t => {
@@ -183,7 +184,7 @@
             t.minFilter = THREE.NearestFilter;
         });
 
-        // ตั้งค่า Texture ของตัวละครให้แบ่งเป็นช่อง
+        // ตั้งค่า Texture ของตัวละคร (Sprite Sheet 4x4)
         charTex.wrapS = charTex.wrapT = THREE.RepeatWrapping;
         charTex.repeat.set(1/SPRITE_COLS, 1/SPRITE_ROWS);
 
@@ -201,6 +202,16 @@
         document.getElementById('loading-screen').style.display = 'none';
         isGameStarted = true;
         animate();
+    }
+
+    // ฟังก์ชันสร้าง Texture สำรองถ้าโหลดรูปไม่ขึ้น
+    function createPlaceholderTex(color) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 64; canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, 64, 64);
+        return new THREE.CanvasTexture(canvas);
     }
 
     function createMap(g1, g2) {
@@ -221,19 +232,22 @@
 
     function createPlayer(tex) {
         const geometry = new THREE.PlaneGeometry(1.2, 1.2);
-        playerMaterial = new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.5 });
+        playerMaterial = new THREE.MeshBasicMaterial({ 
+            map: tex, 
+            transparent: true, 
+            alphaTest: 0.5,
+            side: THREE.DoubleSide 
+        });
         player = new THREE.Mesh(geometry, playerMaterial);
         player.position.copy(playerWorldPos);
         scene.add(player);
     }
 
-    // --- Logic Loop ---
     function animate() {
         requestAnimationFrame(animate);
         if (!isGameStarted) return;
 
-        const deltaTime = 0.016; // ประมาณการ
-        let isMovingNow = false;
+        const deltaTime = 0.016; 
 
         if (targetPos) {
             const dx = targetPos.x - player.position.x;
@@ -246,11 +260,8 @@
                 player.position.x += stepX;
                 player.position.z += stepZ;
                 
-                // เก็บค่าทิศทางปัจจุบัน (Vector2)
                 playerMoveDir.set(dx / dist, dz / dist);
-                isMovingNow = true;
 
-                // เล่น Animation
                 animTimer += deltaTime;
                 if (animTimer > animSpeed) {
                     animFrame = (animFrame + 1) % SPRITE_COLS;
@@ -258,7 +269,7 @@
                 }
             } else {
                 targetPos = null;
-                animFrame = 0; // หยุดเดิน กลับเฟรมแรก
+                animFrame = 0; 
             }
         } else {
             animFrame = 0;
@@ -270,33 +281,41 @@
     }
 
     function updatePlayerSprite() {
-        // 1. ทำให้ตัวละครหันหน้าเข้ากล้องเสมอ (Billboard)
+        // --- ส่วนที่ 1: หันแผ่นตัวละครเข้าหากล้องตลอดเวลา (Billboard) ---
+        // ใช้ quaternion ของกล้องตรงๆ ทำให้แผ่นตัวละครขนานกับระนาบหน้าจอเสมอ
         player.quaternion.copy(camera.quaternion);
-        player.rotation.x = 0;
-        player.rotation.z = 0;
+        
+        // --- ส่วนที่ 2: คำนวณหาแถวของ Sprite (ทิศทาง) ตามแนวการมองแบบ RO ---
+        // มุมกล้องบนระนาบ XZ (ทิศทางที่กล้องกำลังมองไปหาตัวละคร)
+        const camDirX = player.position.x - camera.position.x;
+        const camDirZ = player.position.z - camera.position.z;
+        const camAngle = Math.atan2(camDirX, camDirZ);
 
-        // 2. คำนวณหา "แถว" ของ Sprite (ทิศทาง)
-        // หามุมของกล้องบนระนาบ XZ
-        const camAngle = Math.atan2(
-            camera.position.x - player.position.x,
-            camera.position.z - player.position.z
-        );
-
-        // หามุมที่ตัวละครหันไป (จากการเดิน)
+        // มุมที่ตัวละครกำลังเดิน/หันไป
         const moveAngle = Math.atan2(playerMoveDir.x, playerMoveDir.y);
 
-        // หาผลต่างของมุม เพื่อดูว่าเมื่อเทียบกับกล้องแล้ว ตัวละครหันไปทางไหน
+        // หาความต่างของมุม (Relative Angle)
+        // 0 = หันหลังให้กล้อง, PI = หันหน้าเข้าหากล้อง
         let diff = (moveAngle - camAngle + Math.PI * 2) % (Math.PI * 2);
 
-        let row = 0; // หน้า
-        if (diff > Math.PI * 0.25 && diff <= Math.PI * 0.75) row = 2; // ขวา
-        else if (diff > Math.PI * 0.75 && diff <= Math.PI * 1.25) row = 3; // หลัง
-        else if (diff > Math.PI * 1.25 && diff <= Math.PI * 1.75) row = 1; // ซ้าย
+        let row = 0; // Default: หน้า (Row 1)
+        
+        // แบ่งเป็น 4 ช่วง (หน้า, ซ้าย, ขวา, หลัง)
+        // หมายเหตุ: ลำดับแถวในไฟล์รูปต้องเรียงตามที่คุณต้องการ 
+        // ปกติ: 0=หน้า, 1=ซ้าย, 2=ขวา, 3=หลัง
+        if (diff >= Math.PI * 0.75 && diff < Math.PI * 1.25) {
+            row = 0; // หันหน้าเข้าหากล้อง
+        } else if (diff >= Math.PI * 0.25 && diff < Math.PI * 0.75) {
+            row = 2; // หันขวา (เทียบกับกล้อง)
+        } else if (diff >= Math.PI * 1.75 || diff < Math.PI * 0.25) {
+            row = 3; // หันหลังให้กล้อง
+        } else {
+            row = 1; // หันซ้าย (เทียบกับกล้อง)
+        }
 
-        // 3. อัปเดต Texture Offset (UV Mapping)
-        // คอลัมน์ (Frame): animFrame, แถว (Direction): row
-        // ลำดับแถวในรูปคือ: บนลงล่าง (หน้า=0, ซ้าย=1, ขวา=2, หลัง=3)
-        // ใน Three.js UV เริ่มจากซ้ายล่าง ดังนั้นต้องกลับด้านแกน Y
+        // --- ส่วนที่ 3: อัปเดตพิกัด UV ---
+        // x: เลื่อนตามเฟรม (คอลัมน์)
+        // y: เลื่อนตามทิศทาง (แถว) โดย Three.js นับ 0 จากล่างขึ้นบน
         playerMaterial.map.offset.x = animFrame / SPRITE_COLS;
         playerMaterial.map.offset.y = (SPRITE_ROWS - 1 - row) / SPRITE_ROWS;
     }
@@ -306,7 +325,7 @@
         const y = player.position.y + cameraDistance * Math.cos(cameraRotation.phi);
         const z = player.position.z + cameraDistance * Math.sin(cameraRotation.phi) * Math.sin(cameraRotation.theta);
         camera.position.set(x, y, z);
-        camera.lookAt(player.position);
+        camera.lookAt(player.position.x, player.position.y, player.position.z);
     }
 
     function setupInputHandlers() {
@@ -329,16 +348,14 @@
         });
 
         window.addEventListener('mouseup', (e) => { if (e.button === 2) isRightMouseDown = false; });
-
         window.addEventListener('mousemove', (e) => {
             if (isRightMouseDown) {
                 cameraRotation.theta -= (e.clientX - lastMousePos.x) * 0.01;
                 cameraRotation.phi -= (e.clientY - lastMousePos.y) * 0.01;
-                cameraRotation.phi = Math.max(0.1, Math.min(Math.PI / 2.2, cameraRotation.phi));
+                cameraRotation.phi = Math.max(0.1, Math.min(Math.PI / 2.1, cameraRotation.phi));
                 lastMousePos = { x: e.clientX, y: e.clientY };
             }
         });
-
         window.addEventListener('wheel', (e) => {
             cameraDistance = Math.max(5, Math.min(30, cameraDistance + e.deltaY * 0.02));
         });
@@ -348,7 +365,7 @@
         for (let i = 0; i < 5; i++) {
             const slot = document.getElementById(`slot-${i}`);
             slot.classList.toggle('active', i === activeSlot);
-            slot.innerHTML = inventory[i] ? `<div class="item-icon" style="background-position: -${7*32}px -${4*32}px"></div>` : '';
+            slot.innerHTML = inventory[i] ? `<div class="item-icon" style="background-position: 0 0"></div>` : '';
         }
     }
 
