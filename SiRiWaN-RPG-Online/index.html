@@ -2,382 +2,254 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Siriwan RPG - Full Assets</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Siriwan RPG 3D - RO Style</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
-            --tile-size: 48px;
-            --sprite-size: 32px;
-            --grid-cols: 16;
+            --ui-blue: #00d2ff;
         }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-        body {
-            background-color: #000;
-            background-image: url('img/bg/sky1.jpg'); /* ท้องฟ้าจริงจากเครื่อง */
-            background-size: 110% 110%;
-            background-position: center;
-            background-attachment: fixed;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            font-family: sans-serif;
-            color: white;
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Tahoma', sans-serif; }
+        
+        /* Loading Overlay */
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0d0d1a; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 3000;
+            transition: opacity 0.5s;
         }
+        .progress-bar { width: 200px; height: 10px; background: #222; border-radius: 5px; margin-top: 10px; overflow: hidden; }
+        #progress-fill { width: 0%; height: 100%; background: var(--ui-blue); transition: width 0.2s; }
 
-        /* ----- Overlay บังคับหมุนจอและเริ่มเกม ----- */
-        #startup-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(13, 13, 26, 0.98);
-            z-index: 2000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+        /* Game UI */
+        #ui-layer {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 100;
         }
-
-        .portrait-msg { display: none; }
-        @media screen and (orientation: portrait) {
-            .portrait-msg { display: block; }
-            .start-btn { display: none; }
+        #inventory {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 8px; background: rgba(0,0,0,0.6); padding: 10px;
+            border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); pointer-events: auto;
         }
-
-        .phone-icon {
-            width: 50px; height: 80px;
-            border: 3px solid #00d2ff;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            animation: rotatePhone 2s infinite ease-in-out;
-        }
-
-        @keyframes rotatePhone {
-            0% { transform: rotate(0deg); }
-            50% { transform: rotate(-90deg); }
-            100% { transform: rotate(0deg); }
-        }
-
-        .start-btn {
-            padding: 15px 40px;
-            background: #00d2ff;
-            color: #000;
-            border: none;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 20px;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
-        }
-
-        /* ----- พื้นที่เกม ----- */
-        #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            display: none; /* ซ่อนไว้จนกว่าจะกด Start */
-        }
-
-        #map-layer {
-            position: absolute;
-            top: 0; left: 0;
-            will-change: transform;
-        }
-
-        .tile {
-            position: absolute;
-            width: var(--tile-size);
-            height: var(--tile-size);
-            image-rendering: pixelated;
-            background-size: cover;
-        }
-
-        /* ----- ตัวละคร ----- */
-        #player {
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 100;
-            pointer-events: none;
-        }
-
-        .player-sprite {
-            width: 48px;
-            height: 48px;
-            background: #ffcc00; /* หากไม่มีรูปจริงจะเป็นสีเหลืองไว้ก่อน */
-            border-radius: 4px;
-            border: 2px solid #997700;
-            /* ปลดล็อกถ้ามีรูปตัวละครจริง: background-image: url('img/char/hero.png'); */
-            image-rendering: pixelated;
-        }
-
-        /* ----- Inventory ----- */
-        #inventory-ui {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            padding: 10px;
-            background: rgba(0,0,0,0.7);
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.2);
-            backdrop-filter: blur(5px);
-            z-index: 500;
-        }
-
         .slot {
-            width: 52px; height: 52px;
-            background: rgba(255,255,255,0.1);
-            border: 2px solid #555;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            cursor: pointer;
+            width: 45px; height: 45px; background: rgba(255,255,255,0.1);
+            border: 2px solid #444; border-radius: 5px; cursor: pointer;
         }
+        .slot.active { border-color: var(--ui-blue); box-shadow: 0 0 10px var(--ui-blue); }
 
-        .slot.active {
-            border-color: #00d2ff;
-            background: rgba(0, 210, 255, 0.2);
-            box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
-        }
-
-        .item-icon {
-            width: var(--sprite-size);
-            height: var(--sprite-size);
-            background-image: url('icons2.png');
-            background-size: calc(var(--sprite-size) * var(--grid-cols)) auto;
-            image-rendering: pixelated;
-            pointer-events: none;
-        }
-
-        .item-count {
-            position: absolute;
-            bottom: 2px; right: 4px;
-            font-size: 11px; font-weight: bold;
-            text-shadow: 1px 1px 1px #000;
-        }
-
-        /* ----- ปุ่มควบคุม D-Pad ----- */
-        #dpad {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            display: none;
-            grid-template-columns: repeat(3, 60px);
-            grid-template-rows: repeat(3, 60px);
-            gap: 5px;
-            z-index: 600;
-        }
-
-        .d-btn {
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            user-select: none;
-        }
-
-        @media (pointer: coarse) {
-            #dpad { display: grid; }
-            #inventory-ui { bottom: auto; top: 10px; right: 10px; left: auto; transform: none; flex-direction: column; }
-        }
+        canvas { display: block; }
     </style>
 </head>
 <body>
 
-<div id="startup-overlay">
-    <div class="portrait-msg">
-        <div class="phone-icon"></div>
-        <h2>กรุณาหมุนหน้าจอเป็นแนวนอน</h2>
-        <p>เพื่อเปิดโหมดเต็มหน้าจอ</p>
+<div id="loader">
+    <h2 style="color: white;">กำลังโหลดแมพและอาเซท...</h2>
+    <div class="progress-bar"><div id="progress-fill"></div></div>
+</div>
+
+<div id="ui-layer">
+    <div id="inventory">
+        <div class="slot active" onclick="selectSlot(0)"></div>
+        <div class="slot" onclick="selectSlot(1)"></div>
+        <div class="slot" onclick="selectSlot(2)"></div>
+        <div class="slot" onclick="selectSlot(3)"></div>
+        <div class="slot" onclick="selectSlot(4)"></div>
     </div>
-    <button class="start-btn" onclick="startGame()">เริ่มเล่นเกม (Start Game)</button>
-</div>
-
-<div id="game-container">
-    <div id="map-layer"></div>
-    <div id="player">
-        <div class="player-sprite"></div>
-    </div>
-</div>
-
-<div id="inventory-ui">
-    <div class="slot" id="slot-0" onclick="selectSlot(0)"></div>
-    <div class="slot" id="slot-1" onclick="selectSlot(1)"></div>
-    <div class="slot" id="slot-2" onclick="selectSlot(2)"></div>
-    <div class="slot" id="slot-3" onclick="selectSlot(3)"></div>
-    <div class="slot" id="slot-4" onclick="selectSlot(4)"></div>
-</div>
-
-<div id="dpad">
-    <div></div><div class="d-btn" id="btn-up">▲</div><div></div>
-    <div class="d-btn" id="btn-left">◀</div><div></div><div class="d-btn" id="btn-right">▶</div>
-    <div></div><div class="d-btn" id="btn-down">▼</div><div></div>
 </div>
 
 <script>
-    const TILE_SIZE = 48;
-    const MAP_COLS = 20;
-    const MAP_ROWS = 20;
-    const MOVE_SPEED = 0.16;
-
-    // แก้ไขพิกัดให้ตรงกับ icons2.png (Column X, Row Y)
-    const ITEM_MAP = {
-        'hoe': { x: 7, y: 4 },
-        'seed': { x: 1, y: 8 },
-        'carrot': { x: 0, y: 0 },
-        'water': { x: 4, y: 11 }
+    // Configuration & State
+    const TILE_SIZE = 2; 
+    let mapData = [];
+    let player = {
+        pos: { x: 5, y: 5 },
+        target: null,
+        mesh: null,
+        speed: 0.15
     };
 
-    let inventory = [
-        { id: 'hoe', count: 1 },
-        { id: 'seed', count: 10 },
-        { id: 'carrot', count: 2 },
-        null, null
-    ];
+    // Camera Controls State
+    let isRightMouseDown = false;
+    let cameraRotation = { theta: 0, phi: Math.PI / 4, radius: 25 };
+    let mouseLastPos = { x: 0, y: 0 };
 
-    let playerPos = { x: 5, y: 5 };
-    let isMoving = false;
-    let activeSlot = 0;
-    let keys = {};
+    // Three.js Core
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    document.body.appendChild(renderer.domElement);
 
-    const mapLayer = document.getElementById('map-layer');
-    const startupOverlay = document.getElementById('startup-overlay');
-    const gameContainer = document.getElementById('game-container');
+    const textureLoader = new THREE.TextureLoader();
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
 
-    // ฟังก์ชันเข้าโหมดเต็มจอ
-    function enterFullscreen() {
-        const doc = document.documentElement;
-        if (doc.requestFullscreen) doc.requestFullscreen();
-        else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
-        else if (doc.mozRequestFullScreen) doc.mozRequestFullScreen();
-    }
-
-    // เริ่มเกม
-    function startGame() {
-        enterFullscreen();
-        startupOverlay.style.display = 'none';
-        gameContainer.style.display = 'block';
-        initMap();
-        updateInventoryUI();
-        updateCamera(true);
-    }
-
-    function initMap() {
-        mapLayer.innerHTML = '';
-        mapLayer.style.width = `${MAP_COLS * TILE_SIZE}px`;
-        mapLayer.style.height = `${MAP_ROWS * TILE_SIZE}px`;
-
-        for (let r = 0; r < MAP_ROWS; r++) {
-            for (let c = 0; c < MAP_COLS; c++) {
-                const tile = document.createElement('div');
-                tile.className = 'tile';
-                tile.style.left = `${c * TILE_SIZE}px`;
-                tile.style.top = `${r * TILE_SIZE}px`;
-                
-                // สลับรูปพื้นหญ้าจริงจาก path
-                const imgName = (r + c) % 2 === 0 ? 'grass1.png' : 'grass2.png';
-                tile.style.backgroundImage = `url('img/map/${imgName}')`;
-                
-                // Fallback หากไม่มีรูป
-                tile.style.backgroundColor = (r + c) % 2 === 0 ? '#4a7a3a' : '#528a42';
-                
-                mapLayer.appendChild(tile);
-            }
+    // 1. Asset Loading System (Optimization)
+    const loadAssets = async () => {
+        const fill = document.getElementById('progress-fill');
+        
+        // Mocking Map Data Loading from maps/test.json
+        // In real environment use: fetch('maps/test.json').then(r => r.json())
+        // For this demo, we simulate the JSON structure
+        try {
+            // จำลองการดึงไฟล์
+            const response = await Promise.resolve({
+                grid: Array(20).fill().map(() => Array(20).fill().map(() => Math.random() > 0.5 ? 'grass1' : 'grass2'))
+            });
+            mapData = response.grid;
+            fill.style.width = '50%';
+            
+            initGame();
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => document.getElementById('loader').remove(), 500);
+        } catch (e) {
+            console.error("Map load failed", e);
         }
+    };
+
+    // 2. Initialize 3D Scene
+    function initGame() {
+        // Lighting
+        const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambient);
+        const sun = new THREE.DirectionalLight(0xffffff, 0.5);
+        sun.position.set(10, 20, 10);
+        scene.add(sun);
+
+        // Ground Tiles (จาก JSON)
+        const planeGeo = new THREE.PlaneGeometry(TILE_SIZE, TILE_SIZE);
+        
+        // เราใช้เทคนิค InstancedMesh หรือสร้าง Merge Geometry จะโหลดเร็วขึ้น 
+        // แต่เพื่อความเข้าใจง่ายในที่นี้จะสร้าง Group ครับ
+        const mapGroup = new THREE.Group();
+        
+        mapData.forEach((row, r) => {
+            row.forEach((tileType, c) => {
+                const color = tileType === 'grass1' ? 0x5a8a4a : 0x4a7a3a;
+                const mat = new THREE.MeshStandardMaterial({ 
+                    color: color,
+                    // side: THREE.DoubleSide
+                });
+                const tile = new THREE.Mesh(planeGeo, mat);
+                tile.rotation.x = -Math.PI / 2;
+                tile.position.set(c * TILE_SIZE, 0, r * TILE_SIZE);
+                tile.userData = { gridX: c, gridY: r }; // เก็บพิกัดไว้เช็คคลิก
+                mapGroup.add(tile);
+            });
+        });
+        scene.add(mapGroup);
+
+        // Player (2.5D Billboard)
+        const playerTex = textureLoader.load('https://i.imgur.com/vHq0u66.png'); // รูปตัวอย่าง
+        playerTex.magFilter = THREE.NearestFilter;
+        const playerMat = new THREE.SpriteMaterial({ map: playerTex });
+        player.mesh = new THREE.Sprite(playerMat);
+        player.mesh.scale.set(2, 2, 1);
+        player.mesh.position.set(player.pos.x * TILE_SIZE, 1.2, player.pos.y * TILE_SIZE);
+        scene.add(player.mesh);
+
+        updateCameraPosition();
+        animate();
     }
 
-    function updateInventoryUI() {
-        for (let i = 0; i < 5; i++) {
-            const slot = document.getElementById(`slot-${i}`);
-            slot.classList.toggle('active', i === activeSlot);
-            slot.innerHTML = '';
-            if (inventory[i]) {
-                const icon = document.createElement('div');
-                icon.className = 'item-icon';
-                const ref = ITEM_MAP[inventory[i].id];
-                icon.style.backgroundPosition = `-${ref.x * 32}px -${ref.y * 32}px`;
-                slot.appendChild(icon);
-                if (inventory[i].count > 1) {
-                    const count = document.createElement('div');
-                    count.className = 'item-count';
-                    count.innerText = inventory[i].count;
-                    slot.appendChild(count);
+    // 3. Mouse Interaction Logic
+    window.addEventListener('mousedown', (e) => {
+        if (e.button === 0) { // Left Click - Walk
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(scene.children, true);
+            
+            if (intersects.length > 0) {
+                const target = intersects.find(i => i.object.userData.gridX !== undefined);
+                if (target) {
+                    player.target = { 
+                        x: target.object.userData.gridX, 
+                        y: target.object.userData.gridY 
+                    };
                 }
             }
+        } else if (e.button === 2) { // Right Click - Rotate Camera
+            isRightMouseDown = true;
+            mouseLastPos = { x: e.clientX, y: e.clientY };
         }
-    }
-
-    function selectSlot(i) { activeSlot = i; updateInventoryUI(); }
-
-    function updateCamera(instant = false) {
-        const vw = window.innerWidth, vh = window.innerHeight;
-        const targetX = (vw / 2) - (playerPos.x * TILE_SIZE + TILE_SIZE / 2);
-        const targetY = (vh / 2) - (playerPos.y * TILE_SIZE + TILE_SIZE / 2);
-        
-        mapLayer.style.transition = instant ? 'none' : `transform ${MOVE_SPEED}s linear`;
-        mapLayer.style.transform = `translate3d(${targetX}px, ${targetY}px, 0)`;
-        
-        // ขยับพื้นหลังนิดหน่อย (Parallax)
-        document.body.style.backgroundPosition = `${50 + (targetX*0.02)}% ${50 + (targetY*0.02)}%`;
-    }
-
-    function move(dx, dy) {
-        if (isMoving) return;
-        const nx = playerPos.x + dx, ny = playerPos.y + dy;
-        if (nx >= 0 && nx < MAP_COLS && ny >= 0 && ny < MAP_ROWS) {
-            isMoving = true;
-            playerPos.x = nx; playerPos.y = ny;
-            updateCamera();
-            setTimeout(() => { isMoving = false; checkKeyMove(); }, MOVE_SPEED * 1000);
-        }
-    }
-
-    function checkKeyMove() {
-        if (keys['w'] || keys['ArrowUp']) move(0, -1);
-        else if (keys['s'] || keys['ArrowDown']) move(0, 1);
-        else if (keys['a'] || keys['ArrowLeft']) move(-1, 0);
-        else if (keys['d'] || keys['ArrowRight']) move(1, 0);
-    }
-
-    window.addEventListener('keydown', e => {
-        keys[e.key] = true;
-        if (e.key >= '1' && e.key <= '5') selectSlot(parseInt(e.key)-1);
-        checkKeyMove();
     });
-    window.addEventListener('keyup', e => keys[e.key] = false);
 
-    // D-Pad
-    const setupDpad = () => {
-        [['up',0,-1], ['down',0,1], ['left',-1,0], ['right',1,0]].forEach(([id, dx, dy]) => {
-            const btn = document.getElementById('btn-'+id);
-            const trigger = (e) => { e.preventDefault(); move(dx, dy); };
-            btn.addEventListener('touchstart', trigger);
-            btn.addEventListener('mousedown', trigger);
+    window.addEventListener('mouseup', () => {
+        isRightMouseDown = false;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (isRightMouseDown) {
+            const dx = e.clientX - mouseLastPos.x;
+            const dy = e.clientY - mouseLastPos.y;
+            
+            cameraRotation.theta -= dx * 0.01;
+            cameraRotation.phi = Math.max(0.2, Math.min(Math.PI / 2.1, cameraRotation.phi + dy * 0.01));
+            
+            mouseLastPos = { x: e.clientX, y: e.clientY };
+            updateCameraPosition();
+        }
+    });
+
+    // Zoom
+    window.addEventListener('wheel', (e) => {
+        cameraRotation.radius = Math.max(10, Math.min(60, cameraRotation.radius + e.deltaY * 0.05));
+        updateCameraPosition();
+    });
+
+    // Disable context menu for right click
+    window.addEventListener('contextmenu', e => e.preventDefault());
+
+    function updateCameraPosition() {
+        camera.position.x = player.mesh.position.x + cameraRotation.radius * Math.sin(cameraRotation.theta) * Math.cos(cameraRotation.phi);
+        camera.position.z = player.mesh.position.z + cameraRotation.radius * Math.cos(cameraRotation.theta) * Math.cos(cameraRotation.phi);
+        camera.position.y = player.mesh.position.y + cameraRotation.radius * Math.sin(cameraRotation.phi);
+        camera.lookAt(player.mesh.position);
+    }
+
+    // 4. Game Loop & Movement
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // Player Auto Movement
+        if (player.target) {
+            const targetX = player.target.x * TILE_SIZE;
+            const targetY = player.target.y * TILE_SIZE;
+            
+            const dx = targetX - player.mesh.position.x;
+            const dz = targetY - player.mesh.position.z;
+            const dist = Math.sqrt(dx * dx + dz * dz);
+
+            if (dist > 0.1) {
+                player.mesh.position.x += (dx / dist) * player.speed;
+                player.mesh.position.z += (dz / dist) * player.speed;
+                updateCameraPosition();
+            } else {
+                player.target = null;
+            }
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    // Utility
+    function selectSlot(i) {
+        document.querySelectorAll('.slot').forEach((s, idx) => {
+            s.classList.toggle('active', idx === i);
         });
-    };
+    }
 
-    setupDpad();
-    window.onresize = () => updateCamera(true);
-
-    // ตรวจสอบการเปลี่ยนทิศทางจอเพื่อขอ Fullscreen อัตโนมัติ (ถ้าเคยมี Interaction แล้ว)
-    window.screen.orientation?.addEventListener('change', () => {
-        if (window.screen.orientation.type.startsWith('landscape')) {
-            enterFullscreen();
-        }
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+    // Start
+    loadAssets();
 </script>
 </body>
 </html>
-
