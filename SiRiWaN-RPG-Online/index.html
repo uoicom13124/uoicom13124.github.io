@@ -2,254 +2,395 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Siriwan RPG 3D - RO Style</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Siriwan RPG 3D - Ragnarok Style</title>
+    <!-- นำเข้า Three.js จาก CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
-            --ui-blue: #00d2ff;
+            --sprite-size: 32px;
+            --grid-cols: 16;
         }
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Tahoma', sans-serif; }
-        
-        /* Loading Overlay */
-        #loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #0d0d1a; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 3000;
-            transition: opacity 0.5s;
-        }
-        .progress-bar { width: 200px; height: 10px; background: #222; border-radius: 5px; margin-top: 10px; overflow: hidden; }
-        #progress-fill { width: 0%; height: 100%; background: var(--ui-blue); transition: width 0.2s; }
 
-        /* Game UI */
-        #ui-layer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 100;
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: #000;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            font-family: 'Tahoma', sans-serif;
+            color: white;
         }
-        #inventory {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            display: flex; gap: 8px; background: rgba(0,0,0,0.6); padding: 10px;
-            border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); pointer-events: auto;
-        }
-        .slot {
-            width: 45px; height: 45px; background: rgba(255,255,255,0.1);
-            border: 2px solid #444; border-radius: 5px; cursor: pointer;
-        }
-        .slot.active { border-color: var(--ui-blue); box-shadow: 0 0 10px var(--ui-blue); }
 
         canvas { display: block; }
+
+        /* ----- UI Overlay ----- */
+        #startup-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle, #1a1a2e 0%, #000 100%);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .start-btn {
+            padding: 15px 50px;
+            background: #00d2ff;
+            color: #000;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
+            transition: transform 0.2s;
+        }
+
+        .start-btn:hover { transform: scale(1.05); }
+
+        #inventory-ui {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(0,0,0,0.75);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            z-index: 500;
+        }
+
+        .slot {
+            width: 55px; height: 55px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid #444;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .slot.active {
+            border-color: #00d2ff;
+            background: rgba(0, 210, 255, 0.15);
+            box-shadow: inset 0 0 10px rgba(0, 210, 255, 0.3);
+        }
+
+        .item-icon {
+            width: var(--sprite-size);
+            height: var(--sprite-size);
+            background-image: url('icons2.png');
+            background-size: calc(var(--sprite-size) * var(--grid-cols)) auto;
+            image-rendering: pixelated;
+        }
+
+        .item-count {
+            position: absolute;
+            bottom: 3px; right: 5px;
+            font-size: 12px; font-weight: bold;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        #loading-screen {
+            position: fixed;
+            top: 10px; left: 10px;
+            padding: 5px 15px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            font-size: 12px;
+            display: none;
+            z-index: 1000;
+        }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;"> <!-- ปิดเมนูคลิกขวาพื้นฐาน -->
 
-<div id="loader">
-    <h2 style="color: white;">กำลังโหลดแมพและอาเซท...</h2>
-    <div class="progress-bar"><div id="progress-fill"></div></div>
+<div id="startup-overlay">
+    <h1 style="margin-bottom: 20px;">Siriwan RPG 3D</h1>
+    <button class="start-btn" onclick="startGame()">เริ่มเล่นเกม (START)</button>
+    <p style="margin-top: 20px; font-size: 14px; opacity: 0.7;">คลิกซ้าย: เดิน | คลิกขวาค้าง: หมุนกล้อง | สกอร์เมาส์: ซูม</p>
 </div>
 
-<div id="ui-layer">
-    <div id="inventory">
-        <div class="slot active" onclick="selectSlot(0)"></div>
-        <div class="slot" onclick="selectSlot(1)"></div>
-        <div class="slot" onclick="selectSlot(2)"></div>
-        <div class="slot" onclick="selectSlot(3)"></div>
-        <div class="slot" onclick="selectSlot(4)"></div>
-    </div>
+<div id="loading-screen">กำลังโหลดทรัพยากร...</div>
+
+<div id="inventory-ui">
+    <div class="slot" id="slot-0" onclick="selectSlot(0)"></div>
+    <div class="slot" id="slot-1" onclick="selectSlot(1)"></div>
+    <div class="slot" id="slot-2" onclick="selectSlot(2)"></div>
+    <div class="slot" id="slot-3" onclick="selectSlot(3)"></div>
+    <div class="slot" id="slot-4" onclick="selectSlot(4)"></div>
 </div>
 
 <script>
-    // Configuration & State
-    const TILE_SIZE = 2; 
+    // --- Configuration ---
+    const TILE_SIZE = 1; // ในโลก 3D ใช้ 1 unit ต่อ 1 tile
+    const ITEM_MAP = {
+        'hoe': { x: 7, y: 4 },
+        'seed': { x: 1, y: 8 },
+        'carrot': { x: 0, y: 0 },
+        'water': { x: 4, y: 11 }
+    };
+
+    let inventory = [
+        { id: 'hoe', count: 1 },
+        { id: 'seed', count: 10 },
+        { id: 'carrot', count: 2 },
+        null, null
+    ];
+
+    let activeSlot = 0;
     let mapData = [];
-    let player = {
-        pos: { x: 5, y: 5 },
-        target: null,
-        mesh: null,
-        speed: 0.15
-    };
+    let scene, camera, renderer, player, groundGroup;
+    let isGameStarted = false;
 
-    // Camera Controls State
+    // --- Camera Control State ---
+    let cameraRotation = { theta: Math.PI / 4, phi: Math.PI / 3 }; // มุมมองเบื้องต้น
+    let cameraDistance = 15;
     let isRightMouseDown = false;
-    let cameraRotation = { theta: 0, phi: Math.PI / 4, radius: 25 };
-    let mouseLastPos = { x: 0, y: 0 };
+    let lastMousePos = { x: 0, y: 0 };
 
-    // Three.js Core
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
-    document.body.appendChild(renderer.domElement);
+    // --- Movement State ---
+    let playerPos = { x: 0, z: 0 }; // โลก 3D ใช้ X และ Z เป็นระนาบพื้น
+    let targetPos = null;
+    const moveSpeed = 0.15;
 
-    const textureLoader = new THREE.TextureLoader();
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
+    // --- Initializations ---
+    function startGame() {
+        document.getElementById('startup-overlay').style.display = 'none';
+        document.getElementById('loading-screen').style.display = 'block';
+        init3D();
+        loadAssetsAndMap();
+    }
 
-    // 1. Asset Loading System (Optimization)
-    const loadAssets = async () => {
-        const fill = document.getElementById('progress-fill');
+    function init3D() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87ceeb); // ท้องฟ้าจำลอง
+
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         
-        // Mocking Map Data Loading from maps/test.json
-        // In real environment use: fetch('maps/test.json').then(r => r.json())
-        // For this demo, we simulate the JSON structure
-        try {
-            // จำลองการดึงไฟล์
-            const response = await Promise.resolve({
-                grid: Array(20).fill().map(() => Array(20).fill().map(() => Math.random() > 0.5 ? 'grass1' : 'grass2'))
-            });
-            mapData = response.grid;
-            fill.style.width = '50%';
-            
-            initGame();
-            document.getElementById('loader').style.opacity = '0';
-            setTimeout(() => document.getElementById('loader').remove(), 500);
-        } catch (e) {
-            console.error("Map load failed", e);
-        }
-    };
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
 
-    // 2. Initialize 3D Scene
-    function initGame() {
-        // Lighting
-        const ambient = new THREE.AmbientLight(0xffffff, 0.8);
-        scene.add(ambient);
-        const sun = new THREE.DirectionalLight(0xffffff, 0.5);
-        sun.position.set(10, 20, 10);
-        scene.add(sun);
+        // แสงสว่าง
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
+        const sunLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        sunLight.position.set(10, 20, 10);
+        scene.add(sunLight);
 
-        // Ground Tiles (จาก JSON)
-        const planeGeo = new THREE.PlaneGeometry(TILE_SIZE, TILE_SIZE);
-        
-        // เราใช้เทคนิค InstancedMesh หรือสร้าง Merge Geometry จะโหลดเร็วขึ้น 
-        // แต่เพื่อความเข้าใจง่ายในที่นี้จะสร้าง Group ครับ
-        const mapGroup = new THREE.Group();
-        
-        mapData.forEach((row, r) => {
-            row.forEach((tileType, c) => {
-                const color = tileType === 'grass1' ? 0x5a8a4a : 0x4a7a3a;
-                const mat = new THREE.MeshStandardMaterial({ 
-                    color: color,
-                    // side: THREE.DoubleSide
-                });
-                const tile = new THREE.Mesh(planeGeo, mat);
-                tile.rotation.x = -Math.PI / 2;
-                tile.position.set(c * TILE_SIZE, 0, r * TILE_SIZE);
-                tile.userData = { gridX: c, gridY: r }; // เก็บพิกัดไว้เช็คคลิก
-                mapGroup.add(tile);
-            });
+        groundGroup = new THREE.Group();
+        scene.add(groundGroup);
+
+        window.addEventListener('resize', onWindowResize, false);
+        setupInputHandlers();
+    }
+
+    async function loadAssetsAndMap() {
+        const loader = new THREE.TextureLoader();
+        // โหลด Texture พร้อมกันเพื่อความเร็ว
+        const [grass1Tex, grass2Tex, charTex] = await Promise.all([
+            loader.loadAsync('img/map/grass1.png'),
+            loader.loadAsync('img/map/grass2.png'),
+            loader.loadAsync('img/char/hero.png').catch(() => null) // กันพังถ้าไม่มีไฟล์
+        ]);
+
+        // ตั้งค่า Texture ให้เป็น Pixel Art
+        [grass1Tex, grass2Tex].forEach(t => {
+            t.magFilter = THREE.NearestFilter;
+            t.minFilter = THREE.NearestFilter;
         });
-        scene.add(mapGroup);
 
-        // Player (2.5D Billboard)
-        const playerTex = textureLoader.load('https://i.imgur.com/vHq0u66.png'); // รูปตัวอย่าง
-        playerTex.magFilter = THREE.NearestFilter;
-        const playerMat = new THREE.SpriteMaterial({ map: playerTex });
-        player.mesh = new THREE.Sprite(playerMat);
-        player.mesh.scale.set(2, 2, 1);
-        player.mesh.position.set(player.pos.x * TILE_SIZE, 1.2, player.pos.y * TILE_SIZE);
-        scene.add(player.mesh);
+        // ดึงข้อมูลแมพ
+        try {
+            const response = await fetch('maps/test.json');
+            mapData = await response.json();
+        } catch (e) {
+            console.warn("Failed to load maps/test.json, using default grid.");
+            // สร้างแมพจำลองถ้าโหลดไม่สำเร็จ
+            mapData = Array(20).fill().map(() => Array(20).fill('grass1'));
+        }
 
-        updateCameraPosition();
+        createMap(grass1Tex, grass2Tex);
+        createPlayer(charTex);
+        updateInventoryUI();
+        
+        document.getElementById('loading-screen').style.display = 'none';
+        isGameStarted = true;
         animate();
     }
 
-    // 3. Mouse Interaction Logic
-    window.addEventListener('mousedown', (e) => {
-        if (e.button === 0) { // Left Click - Walk
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-            
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(scene.children, true);
-            
-            if (intersects.length > 0) {
-                const target = intersects.find(i => i.object.userData.gridX !== undefined);
-                if (target) {
-                    player.target = { 
-                        x: target.object.userData.gridX, 
-                        y: target.object.userData.gridY 
-                    };
-                }
+    function createMap(g1, g2) {
+        const geometry = new THREE.PlaneGeometry(TILE_SIZE, TILE_SIZE);
+        const mat1 = new THREE.MeshLambertMaterial({ map: g1 });
+        const mat2 = new THREE.MeshLambertMaterial({ map: g2 });
+
+        for (let r = 0; r < mapData.length; r++) {
+            for (let c = 0; c < mapData[r].length; c++) {
+                const type = mapData[r][c];
+                // Logic หญ้าเดิม (สลับตามตำแหน่ง)
+                const material = (r + c) % 2 === 0 ? mat1 : mat2;
+                const tile = new THREE.Mesh(geometry, material);
+                
+                tile.position.set(c * TILE_SIZE, 0, r * TILE_SIZE);
+                tile.rotation.x = -Math.PI / 2; // วางนอนพื้น
+                tile.userData = { gridX: c, gridZ: r };
+                groundGroup.add(tile);
             }
-        } else if (e.button === 2) { // Right Click - Rotate Camera
-            isRightMouseDown = true;
-            mouseLastPos = { x: e.clientX, y: e.clientY };
         }
-    });
-
-    window.addEventListener('mouseup', () => {
-        isRightMouseDown = false;
-    });
-
-    window.addEventListener('mousemove', (e) => {
-        if (isRightMouseDown) {
-            const dx = e.clientX - mouseLastPos.x;
-            const dy = e.clientY - mouseLastPos.y;
-            
-            cameraRotation.theta -= dx * 0.01;
-            cameraRotation.phi = Math.max(0.2, Math.min(Math.PI / 2.1, cameraRotation.phi + dy * 0.01));
-            
-            mouseLastPos = { x: e.clientX, y: e.clientY };
-            updateCameraPosition();
-        }
-    });
-
-    // Zoom
-    window.addEventListener('wheel', (e) => {
-        cameraRotation.radius = Math.max(10, Math.min(60, cameraRotation.radius + e.deltaY * 0.05));
-        updateCameraPosition();
-    });
-
-    // Disable context menu for right click
-    window.addEventListener('contextmenu', e => e.preventDefault());
-
-    function updateCameraPosition() {
-        camera.position.x = player.mesh.position.x + cameraRotation.radius * Math.sin(cameraRotation.theta) * Math.cos(cameraRotation.phi);
-        camera.position.z = player.mesh.position.z + cameraRotation.radius * Math.cos(cameraRotation.theta) * Math.cos(cameraRotation.phi);
-        camera.position.y = player.mesh.position.y + cameraRotation.radius * Math.sin(cameraRotation.phi);
-        camera.lookAt(player.mesh.position);
+        // เลื่อนแมพให้ตรงจุดเริ่มต้น
+        groundGroup.position.set(0, 0, 0);
     }
 
-    // 4. Game Loop & Movement
+    function createPlayer(tex) {
+        // ตัวละครแบบ Billboard (2D ที่หันหน้าเข้ากล้องตลอดเวลา)
+        const geometry = new THREE.PlaneGeometry(1, 1);
+        let material;
+        if (tex) {
+            tex.magFilter = THREE.NearestFilter;
+            material = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide });
+        } else {
+            material = new THREE.MeshBasicMaterial({ color: 0xffcc00 });
+        }
+        
+        player = new THREE.Mesh(geometry, material);
+        player.position.set(5, 0.5, 5); // ยกขึ้นจากพื้นเล็กน้อย
+        scene.add(player);
+        playerPos = { x: 5, z: 5 };
+    }
+
+    // --- Logic & Loop ---
     function animate() {
         requestAnimationFrame(animate);
+        if (!isGameStarted) return;
 
-        // Player Auto Movement
-        if (player.target) {
-            const targetX = player.target.x * TILE_SIZE;
-            const targetY = player.target.y * TILE_SIZE;
-            
-            const dx = targetX - player.mesh.position.x;
-            const dz = targetY - player.mesh.position.z;
-            const dist = Math.sqrt(dx * dx + dz * dz);
+        // ระบบเดินอัตโนมัติ
+        if (targetPos) {
+            const dx = targetPos.x - player.position.x;
+            const dz = targetPos.z - player.position.z;
+            const dist = Math.sqrt(dx*dx + dz*dz);
 
             if (dist > 0.1) {
-                player.mesh.position.x += (dx / dist) * player.speed;
-                player.mesh.position.z += (dz / dist) * player.speed;
-                updateCameraPosition();
+                player.position.x += (dx / dist) * moveSpeed;
+                player.position.z += (dz / dist) * moveSpeed;
+                playerPos.x = player.position.x;
+                playerPos.z = player.position.z;
             } else {
-                player.target = null;
+                targetPos = null;
             }
         }
 
+        // ตัวละครหันเข้ากล้องตลอดเวลา (Billboard Effect แบบ RO)
+        player.quaternion.copy(camera.quaternion);
+        // ล็อกไม่ให้ตัวละครเอียงตามมุมก้มเงยมากเกินไป
+        player.rotation.x = 0; 
+        player.rotation.z = 0;
+
+        updateCameraPosition();
         renderer.render(scene, camera);
     }
 
-    // Utility
-    function selectSlot(i) {
-        document.querySelectorAll('.slot').forEach((s, idx) => {
-            s.classList.toggle('active', idx === i);
+    function updateCameraPosition() {
+        // คำนวณตำแหน่งกล้องแบบ Spherical Coordinates รอบตัวละคร
+        const x = player.position.x + cameraDistance * Math.sin(cameraRotation.phi) * Math.cos(cameraRotation.theta);
+        const y = player.position.y + cameraDistance * Math.cos(cameraRotation.phi);
+        const z = player.position.z + cameraDistance * Math.sin(cameraRotation.phi) * Math.sin(cameraRotation.theta);
+
+        camera.position.set(x, y, z);
+        camera.lookAt(player.position);
+    }
+
+    // --- Input Handling ---
+    function setupInputHandlers() {
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        window.addEventListener('mousedown', (e) => {
+            if (e.button === 0) { // คลิกซ้าย: เดิน
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(groundGroup.children);
+                if (intersects.length > 0) {
+                    const point = intersects[0].point;
+                    targetPos = { x: point.x, z: point.z };
+                }
+            } else if (e.button === 2) { // คลิกขวา: เริ่มหมุน
+                isRightMouseDown = true;
+                lastMousePos = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        window.addEventListener('mouseup', (e) => {
+            if (e.button === 2) isRightMouseDown = false;
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (isRightMouseDown) {
+                const dx = e.clientX - lastMousePos.x;
+                const dy = e.clientY - lastMousePos.y;
+
+                cameraRotation.theta -= dx * 0.01;
+                cameraRotation.phi -= dy * 0.01;
+
+                // จำกัดมุมก้มเงย
+                cameraRotation.phi = Math.max(0.1, Math.min(Math.PI / 2.2, cameraRotation.phi));
+                
+                lastMousePos = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        window.addEventListener('wheel', (e) => {
+            cameraDistance += e.deltaY * 0.01;
+            cameraDistance = Math.max(5, Math.min(40, cameraDistance));
+        });
+
+        window.addEventListener('keydown', e => {
+            if (e.key >= '1' && e.key <= '5') selectSlot(parseInt(e.key)-1);
         });
     }
 
-    window.addEventListener('resize', () => {
+    // --- UI Helpers ---
+    function updateInventoryUI() {
+        for (let i = 0; i < 5; i++) {
+            const slot = document.getElementById(`slot-${i}`);
+            slot.classList.toggle('active', i === activeSlot);
+            slot.innerHTML = '';
+            if (inventory[i]) {
+                const icon = document.createElement('div');
+                icon.className = 'item-icon';
+                const ref = ITEM_MAP[inventory[i].id];
+                icon.style.backgroundPosition = `-${ref.x * 32}px -${ref.y * 32}px`;
+                slot.appendChild(icon);
+                if (inventory[i].count > 1) {
+                    const count = document.createElement('div');
+                    count.className = 'item-count';
+                    count.innerText = inventory[i].count;
+                    slot.appendChild(count);
+                }
+            }
+        }
+    }
+
+    function selectSlot(i) { activeSlot = i; updateInventoryUI(); }
+    function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-
-    // Start
-    loadAssets();
+    }
 </script>
 </body>
 </html>
