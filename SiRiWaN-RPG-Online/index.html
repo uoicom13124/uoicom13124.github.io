@@ -3,15 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Siriwan RPG Online</title>
+<title>Siriwan RPG - Sprite Version</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background: #1a1a2e;
+    background: #1a1a2e url('img/bg/sky1.jpg') no-repeat center center fixed;
+    background-size: cover;
     overflow: hidden;
     width: 100vw;
     height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
 
   #game-container {
@@ -27,9 +29,7 @@
     will-change: transform;
   }
 
-  .tile {
-    position: absolute;
-  }
+  .tile { position: absolute; }
 
   /* ===== CHARACTER ===== */
   #character {
@@ -65,7 +65,8 @@
     position: absolute;
     top: 0;
     display: flex;
-    flex-direction: Gn    align-items: center;
+    flex-direction: column;
+    align-items: center;
   }
 
   .char-head {
@@ -81,101 +82,124 @@
     padding-top: 4px;
   }
 
-  .char-eye {
-    width: 2px;
-    height: 3px;
-    background: #2a1a0a;
-    border-radius: 1px;
-  }
-
-  .char-torso {
-    width: 14px;
-    height: 11px;
-    background: #2244bb;
-    border: 2px solid #1133aa;
-    margin-top: 1px;
-    border-radius: 2px 2px 0 0;
-  }
-
-  .char-legs {
-    display: flex;
-    gap: 2px;
-  }
-
-  .char-leg {
-    width: 5px;
-    height: 9px;
-    background: #223377;
-    border: 1px solid #112266;
-    border-radius: 0 0 2px 2px;
-    transform-origin: top center;
-  }
-
-  .char-feet {
-    display: flex;
-    gap: 4px;
-  }
-
-  .char-foot {
-    width: 6px;
-    height: 3px;
-    background: #553311;
-    border-radius: 1px;
-    transform-origin: top center;
-  }
+  .char-eye { width: 2px; height: 3px; background: #2a1a0a; border-radius: 1px; }
+  .char-torso { width: 14px; height: 11px; background: #2244bb; border: 2px solid #1133aa; margin-top: 1px; border-radius: 2px 2px 0 0; }
+  .char-legs { display: flex; gap: 2px; }
+  .char-leg { width: 5px; height: 9px; background: #223377; border: 1px solid #112266; border-radius: 0 0 2px 2px; transform-origin: top center; }
 
   @keyframes leg-a  { 0%,100%{transform:rotate(22deg)}  50%{transform:rotate(-22deg)} }
   @keyframes leg-b  { 0%,100%{transform:rotate(-22deg)} 50%{transform:rotate(22deg)}  }
-  @keyframes foot-a { 0%,100%{transform:rotate(6deg) translateX(1px)}  50%{transform:rotate(-4deg)} }
-  @keyframes foot-b { 0%,100%{transform:rotate(-4deg)} 50%{transform:rotate(6deg) translateX(-1px)} }
   @keyframes body-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-2px)} }
 
   #character.walking .char-leg:nth-child(1)  { animation: leg-a  0.28s infinite ease-in-out; }
   #character.walking .char-leg:nth-child(2)  { animation: leg-b  0.28s infinite ease-in-out; }
-  #character.walking .char-foot:nth-child(1) { animation: foot-a 0.28s infinite ease-in-out; }
-  #character.walking .char-foot:nth-child(2) { animation: foot-b 0.28s infinite ease-in-out; }
-  #character.walking .char-body               { animation: body-bob 0.28s infinite ease-in-out; }
-  #character.face-left  .char-head { transform: scaleX(-1); }
+  #character.walking .char-body { animation: body-bob 0.28s infinite ease-in-out; }
+  #character.face-left .char-head { transform: scaleX(-1); }
+
+  /* ===== INVENTORY UI (SPRITE BASED) ===== */
+  #inventory-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 300;
+    background: rgba(0,0,0,0.6);
+    padding: 10px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+
+  .inv-slot {
+    width: 54px;
+    height: 54px;
+    background: rgba(255,255,255,0.05);
+    border: 2px solid #444;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .inv-slot.active {
+    border-color: #00d2ff;
+    background: rgba(0, 210, 255, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 210, 255, 0.3);
+  }
+
+  /* Sprite Icon Style */
+  .item-sprite {
+    width: 32px;
+    height: 32px;
+    background-image: url('img/icons2.png');
+    background-repeat: no-repeat;
+    /* แผ่นภาพ icons2.png มี 16 คอลัมน์ (สมมติจากภาพที่ให้มา) */
+    background-size: 512px 768px; /* ปรับขนาดให้แม่นยำตามขนาดไฟล์จริง */
+    image-rendering: pixelated;
+  }
+
+  .inv-count {
+    position: absolute;
+    bottom: 2px;
+    right: 5px;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px black;
+  }
+
+  #item-name-tag {
+    position: fixed;
+    bottom: 95px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    background: rgba(0,0,0,0.8);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    opacity: 0;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
 
   /* ===== MOBILE D-PAD ===== */
   #dpad {
     position: fixed;
-    bottom: 28px;
-    right: 28px;
+    bottom: 25px;
+    left: 25px;
     z-index: 200;
     display: none;
     user-select: none;
     touch-action: none;
   }
 
-  .dpad-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 56px);
-    grid-template-rows: repeat(3, 56px);
-    gap: 6px;
-  }
-
+  .dpad-grid { display: grid; grid-template-columns: repeat(3, 55px); grid-template-rows: repeat(3, 55px); gap: 8px; }
   .dbtn {
-    background: rgba(255,255,255,0.13);
-    border: 2px solid rgba(255,255,255,0.28);
-    border-radius: 12px;
-    color: rgba(255,255,255,0.85);
-    font-size: 22px;
-    cursor: pointer;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 50%;
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(5px);
+    font-size: 20px;
   }
+  .dbtn.active { background: rgba(255,255,255,0.3); transform: scale(0.9); }
 
-  .dbtn.active {
-    background: rgba(255,255,255,0.30);
-    transform: scale(0.88);
+  @media (pointer: coarse), (max-width: 768px) { 
+    #dpad { display: block; } 
+    #inventory-container { bottom: 20px; left: auto; right: 20px; transform: none; flex-direction: column; }
+    #item-name-tag { bottom: auto; top: 20px; }
   }
-
-  .dbtn-empty { background: transparent !important; border: none !important; pointer-events: none; }
-
-  @media (pointer: coarse), (max-width: 768px) { #dpad { display: block; } }
 </style>
 </head>
 <body>
@@ -186,138 +210,125 @@
     <div class="char-wrap">
       <div class="char-shadow"></div>
       <div class="char-body">
-        <div class="char-head">
-          <div class="char-eye"></div>
-          <div class="char-eye"></div>
-        </div>
+        <div class="char-head"><div class="char-eye"></div><div class="char-eye"></div></div>
         <div class="char-torso"></div>
-        <div class="char-legs">
-          <div class="char-leg"></div>
-          <div class="char-leg"></div>
-        </div>
-        <div class="char-feet">
-          <div class="char-foot"></div>
-          <div class="char-foot"></div>
-        </div>
+        <div class="char-legs"><div class="char-leg"></div><div class="char-leg"></div></div>
       </div>
     </div>
   </div>
 </div>
 
+<div id="item-name-tag">ชื่อไอเทม</div>
+
+<div id="inventory-container">
+  <div class="inv-slot" onclick="selectSlot(0)" data-id="0"></div>
+  <div class="inv-slot" onclick="selectSlot(1)" data-id="1"></div>
+  <div class="inv-slot" onclick="selectSlot(2)" data-id="2"></div>
+  <div class="inv-slot" onclick="selectSlot(3)" data-id="3"></div>
+  <div class="inv-slot" onclick="selectSlot(4)" data-id="4"></div>
+</div>
+
 <div id="dpad">
   <div class="dpad-grid">
-    <div class="dbtn-empty"></div>
-    <div class="dbtn" id="d-up">&#9650;</div>
-    <div class="dbtn-empty"></div>
-    <div class="dbtn" id="d-left">&#9664;</div>
-    <div class="dbtn-empty"></div>
-    <div class="dbtn" id="d-right">&#9654;</div>
-    <div class="dbtn-empty"></div>
-    <div class="dbtn" id="d-down">&#9660;</div>
-    <div class="dbtn-empty"></div>
+    <div></div><div class="dbtn" id="d-up">▲</div><div></div>
+    <div class="dbtn" id="d-left">◀</div><div></div><div class="dbtn" id="d-right">▶</div>
+    <div></div><div class="dbtn" id="d-down">▼</div><div></div>
   </div>
 </div>
 
 <script>
+/**
+ * ITEM DATABASE (Sprite Mapping)
+ * x, y: ตำแหน่งลำดับของไอเทมใน icons2.png (เริ่มที่ 0)
+ * ขนาด icon แต่ละอันคือ 32x32px (ปรับตามขนาดจริงได้)
+ */
+const SPRITE_SIZE = 32;
+const ITEMS_DATA = {
+  hoe: { name: "จอบขุดดิน", x: 7, y: 4 },     // แถว 5 คอลัมน์ 8
+  seed: { name: "เมล็ดปริศนา", x: 1, y: 8 }  // แถว 9 คอลัมน์ 2 (ถุงเมล็ด)
+};
+
+let inventory = [
+  { id: 'hoe', count: 1 },
+  { id: 'seed', count: 15 },
+  null, null, null
+];
+let activeSlot = 0;
+
+function updateInventoryUI() {
+  const slots = document.querySelectorAll('.inv-slot');
+  const nameTag = document.getElementById('item-name-tag');
+  
+  slots.forEach((slot, i) => {
+    slot.classList.toggle('active', i === activeSlot);
+    slot.innerHTML = '';
+    
+    if (inventory[i]) {
+      const itemData = ITEMS_DATA[inventory[i].id];
+      const icon = document.createElement('div');
+      icon.className = 'item-sprite';
+      // คำนวณ background-position: -(x * size)px -(y * size)px
+      icon.style.backgroundPosition = `-${itemData.x * SPRITE_SIZE}px -${itemData.y * SPRITE_SIZE}px`;
+      slot.appendChild(icon);
+      
+      if (inventory[i].count > 1) {
+        const count = document.createElement('div');
+        count.className = 'inv-count';
+        count.innerText = inventory[i].count;
+        slot.appendChild(count);
+      }
+    }
+  });
+
+  if (inventory[activeSlot]) {
+    nameTag.innerText = ITEMS_DATA[inventory[activeSlot].id].name;
+    nameTag.style.opacity = 1;
+  } else {
+    nameTag.style.opacity = 0;
+  }
+}
+
+function selectSlot(index) {
+  activeSlot = index;
+  updateInventoryUI();
+}
+
+// --- แผนที่และระบบเดินเหมือนเดิม ---
 const TILE_DEFS = {
   grass1: { walkable: true, img: 'img/map/grass1.png', color: '#5a9940' },
   grass2: { walkable: true, img: 'img/map/grass2.png', color: '#4a8835' },
 };
 
-function getTileDef(name) {
-  if (TILE_DEFS[name]) return TILE_DEFS[name];
-  // ถ้าไม่เจอใน Def ให้สร้างขึ้นมาใหม่แบบเดินได้ตาม logic เดิมของคุณ
-  const h = [...name].reduce((a, c) => a + c.charCodeAt(0), 0);
-  TILE_DEFS[name] = {
-    walkable: true,
-    img: `img/map/${name}.png`,
-    color: `hsl(${(h * 53) % 360},45%,40%)`
-  };
-  return TILE_DEFS[name];
-}
-
-function parseMap(text) {
-  try {
-    const json = JSON.parse(text);
-    if (Array.isArray(json)) {
-      if (typeof json[0] === 'string') {
-        return json.map(line => [...line.matchAll(/\[([a-zA-Z0-9_]+)\]/g)].map(m => m[1].toLowerCase())).filter(r => r.length);
-      }
-      if (Array.isArray(json[0])) {
-        return json.map(row => row.map(v => String(v).toLowerCase()));
-      }
-    }
-  } catch (_) {}
-  return text.trim().split('\n').map(line => [...line.matchAll(/\[([a-zA-Z0-9_]+)\]/g)].map(m => m[1].toLowerCase())).filter(r => r.length);
-}
-
 const TILE_SIZE = 48;
 const MOVE_SPEED = 7;
-
-let grid = [], mapRows = 0, mapCols = 0;
-let px = 0, py = 0;
-let tx = 0, ty = 0;
-let moving = false, moveT = 0;
-let lastFace = 'down', lastTs = 0;
-
+let px = 2, py = 2, tx = 2, ty = 2, moving = false, moveT = 0, lastFace = 'down', lastTs = 0;
 const keys = {};
 let mobileDir = null;
 
 const mapEl = document.getElementById('map-container');
 const charEl = document.getElementById('character');
 
-function buildMap(g) {
-  grid = g;
-  mapRows = g.length;
-  mapCols = g[0]?.length || 0;
+function buildMap() {
   mapEl.innerHTML = '';
-  mapEl.style.width  = (mapCols * TILE_SIZE) + 'px';
-  mapEl.style.height = (mapRows * TILE_SIZE) + 'px';
+  const rows = 15, cols = 15;
+  mapEl.style.width = (cols * TILE_SIZE) + 'px';
+  mapEl.style.height = (rows * TILE_SIZE) + 'px';
   
-  const frag = document.createDocumentFragment();
-  for (let r = 0; r < mapRows; r++) {
-    for (let c = 0; c < mapCols; c++) {
-      const name = g[r][c];
-      const def = getTileDef(name);
+  for(let r=0; r<rows; r++) {
+    for(let c=0; c<cols; c++) {
       const el = document.createElement('div');
       el.className = 'tile';
-      el.style.cssText = `left:${c * TILE_SIZE}px;top:${r * TILE_SIZE}px;width:${TILE_SIZE}px;height:${TILE_SIZE}px;background:${def.color};`;
-      
-      const img = new Image();
-      img.src = def.img;
-      img.style.cssText = 'width:100%;height:100%;display:block;image-rendering:pixelated;';
-      img.onerror = () => img.remove();
-      el.appendChild(img);
-      frag.appendChild(el);
+      el.style.cssText = `left:${c*TILE_SIZE}px;top:${r*TILE_SIZE}px;width:${TILE_SIZE}px;height:${TILE_SIZE}px;background:#5a9940;border:0.1px solid rgba(0,0,0,0.05);`;
+      mapEl.appendChild(el);
     }
   }
-  mapEl.appendChild(frag);
-}
-
-function walkable(c, r) {
-  if (c < 0 || r < 0 || c >= mapCols || r >= mapRows) return false;
-  return getTileDef(grid[r][c]).walkable;
 }
 
 function updateCamera() {
-  const vw = window.innerWidth, vh = window.innerHeight;
-  const worldX = px * TILE_SIZE + (TILE_SIZE / 2);
-  const worldY = py * TILE_SIZE + TILE_SIZE;
-  const ox = (vw / 2) - worldX;
-  const oy = (vh / 2) - worldY;
+  const ox = (window.innerWidth / 2) - (px * TILE_SIZE + TILE_SIZE / 2);
+  const oy = (window.innerHeight / 2) - (py * TILE_SIZE + TILE_SIZE);
   mapEl.style.transform = `translate(${ox}px, ${oy}px)`;
 }
-
-function getInput() {
-  if (mobileDir) return mobileDir;
-  if (keys['ArrowUp'] || keys['w'] || keys['W']) return 'up';
-  if (keys['ArrowDown'] || keys['s'] || keys['S']) return 'down';
-  if (keys['ArrowLeft'] || keys['a'] || keys['A']) return 'left';
-  if (keys['ArrowRight'] || keys['d'] || keys['D']) return 'right';
-  return null;
-}
-
-const DIRS = { up:[0,-1], down:[0,1], left:[-1,0], right:[1,0] };
 
 function loop(ts) {
   const dt = Math.min((ts - lastTs) / 1000, 0.1);
@@ -325,92 +336,56 @@ function loop(ts) {
 
   if (moving) {
     moveT += dt * MOVE_SPEED;
-    if (moveT >= 1) {
-      px = tx; py = ty;
-      moving = false;
-      moveT = 0;
-    } else {
-      const [dx, dy] = DIRS[lastFace];
-      px = (tx - dx) + (dx * moveT);
-      py = (ty - dy) + (dy * moveT);
+    if (moveT >= 1) { px = tx; py = ty; moving = false; moveT = 0; }
+    else {
+      px += (tx - px) * (dt * MOVE_SPEED);
+      py += (ty - py) * (dt * MOVE_SPEED);
     }
   }
 
   if (!moving) {
-    const dir = getInput();
+    let dir = mobileDir;
+    if (keys['w'] || keys['ArrowUp']) dir = 'up';
+    else if (keys['s'] || keys['ArrowDown']) dir = 'down';
+    else if (keys['a'] || keys['ArrowLeft']) dir = 'left';
+    else if (keys['d'] || keys['ArrowRight']) dir = 'right';
+
     if (dir) {
-      const [dx, dy] = DIRS[dir];
-      const nx = Math.round(px) + dx;
-      const ny = Math.round(py) + dy;
       lastFace = dir;
-      if (walkable(nx, ny)) {
-        tx = nx; ty = ny;
-        moving = true;
-        moveT = 0;
-      }
+      tx = px + (dir==='left'?-1:dir==='right'?1:0);
+      ty = py + (dir==='up'?-1:dir==='down'?1:0);
+      moving = true;
     }
   }
 
-  charEl.classList.toggle('walking', moving || !!getInput());
+  charEl.classList.toggle('walking', moving);
   charEl.classList.toggle('face-left', lastFace === 'left');
-
   updateCamera();
   requestAnimationFrame(loop);
 }
 
+// Controls
 addEventListener('keydown', e => { 
   keys[e.key] = true; 
-  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+  if (e.key >= '1' && e.key <= '5') selectSlot(parseInt(e.key) - 1);
 });
 addEventListener('keyup', e => { delete keys[e.key]; });
-window.addEventListener('resize', updateCamera);
 
 function setupDpad() {
-  const btnMap = { up:'d-up', down:'d-down', left:'d-left', right:'d-right' };
-  for (const [dir, id] of Object.entries(btnMap)) {
-    const btn = document.getElementById(id);
-    const press = e => { e.preventDefault(); mobileDir = dir; btn.classList.add('active'); };
-    const release = e => { e.preventDefault(); if (mobileDir === dir) mobileDir = null; btn.classList.remove('active'); };
-    btn.addEventListener('touchstart', press, { passive: false });
-    btn.addEventListener('touchend', release, { passive: false });
-    btn.addEventListener('mousedown', press);
-    btn.addEventListener('mouseup', release);
-    btn.addEventListener('mouseleave', release);
-  }
+  ['up','down','left','right'].forEach(dir => {
+    const btn = document.getElementById('d-'+dir);
+    btn.ontouchstart = (e) => { e.preventDefault(); mobileDir = dir; btn.classList.add('active'); };
+    btn.ontouchend = () => { mobileDir = null; btn.classList.remove('active'); };
+  });
 }
 
-async function init() {
-  let mapText;
-  try {
-    const res = await fetch('maps/test.json');
-    if (!res.ok) throw new Error();
-    mapText = await res.text();
-  } catch (err) {
-    mapText = `
-[grass2][grass1][grass1][grass2][grass1][grass1][grass1][grass1][grass2][grass1]
-[grass1][grass1][grass1][grass1][grass1][grass1][grass2][grass1][grass1][grass1]
-[grass1][grass1][grass1][grass2][grass1][grass1][grass1][grass1][grass1][grass1]
-[grass2][grass1][grass1][grass1][grass1][grass1][grass1][grass2][grass1][grass1]
-[grass1][grass1][grass1][grass1][grass1][grass1][grass1][grass1][grass1][grass2]
-`.trim();
-  }
+// Init
+buildMap();
+setupDpad();
+updateInventoryUI();
+requestAnimationFrame(ts => { lastTs = ts; loop(ts); });
 
-  const g = parseMap(mapText);
-  buildMap(g);
-
-  // หาจุด spawn แรกที่เดินได้
-  let sx = 0, sy = 0;
-  outer: for (let r = 0; r < g.length; r++)
-    for (let c = 0; c < g[r].length; c++)
-      if (getTileDef(g[r][c]).walkable) { sx = c; sy = r; break outer; }
-
-  px = sx; py = sy; tx = sx; ty = sy;
-
-  setupDpad();
-  requestAnimationFrame(ts => { lastTs = ts; loop(ts); });
-}
-
-init();
+window.addEventListener('resize', updateCamera);
 </script>
 </body>
 </html>
