@@ -49,16 +49,8 @@
             100% { transform: rotate(0deg); }
         }
 
-        #rotate-overlay h2 {
-            font-size: 22px;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
-
-        #rotate-overlay p {
-            font-size: 14px;
-            color: rgba(255,255,255,0.6);
-        }
+        #rotate-overlay h2 { font-size: 22px; margin-bottom: 10px; letter-spacing: 1px; }
+        #rotate-overlay p { font-size: 14px; color: rgba(255,255,255,0.6); }
 
         /* UI Overlay */
         #startup-overlay {
@@ -78,7 +70,7 @@
             box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
         }
 
-        /* ระบบ Inventory */
+        /* Inventory */
         #inventory-ui {
             position: fixed;
             bottom: 20px;
@@ -91,7 +83,7 @@
             backdrop-filter: blur(5px);
             border-radius: 12px;
             z-index: 500;
-            max-width: 95vw;
+            max-width: 60vw;
             overflow-x: auto;
         }
 
@@ -99,8 +91,8 @@
             width: var(--slot-size);
             height: var(--slot-size);
             background-image: url('img/ui/inventory');
-            background-size: 800px 400px; 
-            background-position: -210px -10px; 
+            background-size: 800px 400px;
+            background-position: -210px -10px;
             image-rendering: pixelated;
             display: flex;
             align-items: center;
@@ -123,31 +115,15 @@
             pointer-events: none;
         }
 
-        .item-icon {
-            width: 70%;
-            height: 70%;
-            border-radius: 4px;
-            pointer-events: none;
-        }
-
+        .item-icon { width: 70%; height: 70%; border-radius: 4px; pointer-events: none; }
         .item-count {
-            position: absolute;
-            bottom: 4px;
-            right: 6px;
-            font-size: 12px;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 1px 1px 1px #000;
-            pointer-events: none;
+            position: absolute; bottom: 4px; right: 6px;
+            font-size: 12px; font-weight: bold; color: #fff;
+            text-shadow: 1px 1px 1px #000; pointer-events: none;
         }
-
         .slot-key {
-            position: absolute;
-            top: 4px;
-            left: 6px;
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.6);
-            pointer-events: none;
+            position: absolute; top: 4px; left: 6px;
+            font-size: 10px; color: rgba(255,255,255,0.6); pointer-events: none;
         }
 
         #loading-screen {
@@ -157,32 +133,65 @@
             color: white; font-size: 13px; z-index: 1000; display: none;
         }
 
-        /* คำแนะนำ Touch บนมือถือ */
-        #touch-hint {
+        /* =================== D-Pad =================== */
+        #dpad {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.5);
-            color: rgba(255,255,255,0.7);
-            padding: 8px 12px;
-            border-radius: 10px;
-            font-size: 11px;
-            z-index: 500;
+            left: 24px;
+            bottom: 24px;
+            width: 140px;
+            height: 140px;
+            z-index: 600;
             display: none;
-            text-align: center;
-            line-height: 1.6;
-            pointer-events: none;
+            user-select: none;
+            touch-action: none;
         }
+
+        #dpad-bg {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(4px);
+            border: 2px solid rgba(255,255,255,0.15);
+        }
+
+        .dpad-btn {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.12);
+            border: 1.5px solid rgba(255,255,255,0.25);
+            font-size: 20px;
+            color: white;
+            cursor: pointer;
+            touch-action: none;
+        }
+
+        .dpad-btn.pressed {
+            background: rgba(0, 210, 255, 0.35);
+            border-color: #00d2ff;
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.5);
+        }
+
+        #btn-up    { top: 4px;    left: 50%; transform: translateX(-50%); }
+        #btn-down  { bottom: 4px; left: 50%; transform: translateX(-50%); }
+        #btn-left  { left: 4px;   top: 50%;  transform: translateY(-50%); }
+        #btn-right { right: 4px;  top: 50%;  transform: translateY(-50%); }
+        /* ============================================= */
 
         @media (max-width: 900px) {
             :root { --slot-size: 50px; }
-            #inventory-ui { bottom: 10px; gap: 5px; padding: 8px; }
+            #inventory-ui { bottom: 14px; gap: 5px; padding: 8px; }
         }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-<!-- หน้าจอแจ้งให้หมุนโทรศัพท์ -->
 <div id="rotate-overlay">
     <span class="rotate-icon">📱</span>
     <h2>กรุณาหมุนหน้าจอ</h2>
@@ -205,29 +214,30 @@
     <div class="slot" id="slot-4" onclick="selectSlot(4)"><span class="slot-key">5</span></div>
 </div>
 
-<!-- คำแนะนำ Touch -->
-<div id="touch-hint">
-    👆 แตะ = เดิน<br>
-    ✌️ ลากสองนิ้ว = หมุนกล้อง<br>
-    🤏 Pinch = ซูม
+<!-- D-Pad (แสดงเฉพาะมือถือ) -->
+<div id="dpad">
+    <div id="dpad-bg"></div>
+    <div class="dpad-btn" id="btn-up">▲</div>
+    <div class="dpad-btn" id="btn-down">▼</div>
+    <div class="dpad-btn" id="btn-left">◀</div>
+    <div class="dpad-btn" id="btn-right">▶</div>
 </div>
 
 <script>
-    // --- Configuration ---
     const TILE_SIZE = 1;
     const MOVE_SPEED = 0.12;
-    const SPRITE_ROWS = 4; 
-    const SPRITE_COLS = 4; 
+    const SPRITE_ROWS = 4;
+    const SPRITE_COLS = 4;
 
     let scene, camera, renderer, player, groundGroup, playerMaterial;
-    let textures = {}; 
+    let textures = {};
     let isGameStarted = false;
     let activeSlot = 0;
 
     let inventory = [
-        { id: 'hoe', count: 1, color: '#ff5555' }, 
-        { id: 'seed', count: 64, color: '#55ff55' }, 
-        { id: 'carrot', count: 12, color: '#ffaa00' }, 
+        { id: 'hoe',    count: 1,  color: '#ff5555' },
+        { id: 'seed',   count: 64, color: '#55ff55' },
+        { id: 'carrot', count: 12, color: '#ffaa00' },
         null, null
     ];
 
@@ -238,52 +248,65 @@
 
     let playerWorldPos = new THREE.Vector3(10, 0.6, 10);
     let targetPos = null;
-    let playerMoveDir = new THREE.Vector2(0, 1); 
+    let playerMoveDir = new THREE.Vector2(0, 1);
     let animFrame = 0, animTimer = 0, animSpeed = 0.12;
 
-    // ระบบจัดการ Key State สำหรับ WASD
     const keys = { w: false, a: false, s: false, d: false };
 
-    // --- ตรวจสอบว่าเป็นมือถือ/แท็บเล็ตหรือไม่ ---
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
         || (navigator.maxTouchPoints > 1);
 
-    // --- ระบบตรวจจับแนวหน้าจอ ---
+    // ---- ตรวจแนวหน้าจอ ----
     function checkOrientation() {
         const rotateOverlay = document.getElementById('rotate-overlay');
         const startupOverlay = document.getElementById('startup-overlay');
-        
-        if (!isMobile) {
-            rotateOverlay.style.display = 'none';
-            return;
-        }
-
+        if (!isMobile) { rotateOverlay.style.display = 'none'; return; }
         const isLandscape = window.innerWidth > window.innerHeight;
-        
         if (!isLandscape) {
             rotateOverlay.style.display = 'flex';
-            // ซ่อน startup ด้วยถ้ายังไม่ได้เริ่ม
-            if (!isGameStarted) {
-                startupOverlay.style.display = 'none';
-            }
+            if (!isGameStarted) startupOverlay.style.display = 'none';
         } else {
             rotateOverlay.style.display = 'none';
-            if (!isGameStarted) {
-                startupOverlay.style.display = 'flex';
-            }
+            if (!isGameStarted) startupOverlay.style.display = 'flex';
         }
     }
 
-    window.addEventListener('resize', checkOrientation);
-    window.addEventListener('orientationchange', () => {
-        setTimeout(checkOrientation, 200);
+    // ---- บังคับ Fullscreen เมื่อหมุนเป็นแนวนอนบนมือถือ ----
+    function requestFullscreen() {
+        const el = document.documentElement;
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
+        else if (el.msRequestFullscreen) el.msRequestFullscreen();
+    }
+
+    window.addEventListener('resize', () => {
+        checkOrientation();
+        if (isMobile && window.innerWidth > window.innerHeight) {
+            // ขอ fullscreen ทันทีที่เป็น landscape
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                requestFullscreen();
+            }
+        }
     });
-    // เช็กตอนโหลดหน้า
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+            checkOrientation();
+            if (isMobile && window.innerWidth > window.innerHeight) {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    requestFullscreen();
+                }
+            }
+        }, 200);
+    });
     checkOrientation();
 
     function startGame() {
+        // ขอ Fullscreen ตอนกดปุ่ม START (ต้องเป็น user gesture)
+        if (isMobile) requestFullscreen();
         document.getElementById('startup-overlay').style.display = 'none';
         document.getElementById('loading-screen').style.display = 'block';
+        if (isMobile) document.getElementById('dpad').style.display = 'block';
         init3D();
         loadAssetsAndMap();
     }
@@ -307,38 +330,64 @@
         scene.add(groundGroup);
 
         window.addEventListener('resize', onWindowResize);
-        
-        // Key Listeners สำหรับ Slot และ WASD
+
         window.addEventListener('keydown', (e) => {
             const k = e.key.toLowerCase();
             if (k >= '1' && k <= '5') selectSlot(parseInt(k) - 1);
-            if (k in keys) {
-                keys[k] = true;
-                targetPos = null;
-            }
+            if (k in keys) { keys[k] = true; targetPos = null; }
         });
         window.addEventListener('keyup', (e) => {
             const k = e.key.toLowerCase();
             if (k in keys) keys[k] = false;
         });
 
+        setupDPad();
         setupInputHandlers();
-
-        // แสดง touch hint บนมือถือ
-        if (isMobile) {
-            const hint = document.getElementById('touch-hint');
-            hint.style.display = 'block';
-            setTimeout(() => {
-                hint.style.transition = 'opacity 1s';
-                hint.style.opacity = '0';
-                setTimeout(() => hint.style.display = 'none', 1000);
-            }, 4000);
-        }
     }
+
+    // ====================== D-Pad ======================
+    function setupDPad() {
+        const map = {
+            'btn-up':    'w',
+            'btn-down':  's',
+            'btn-left':  'a',
+            'btn-right': 'd',
+        };
+
+        Object.entries(map).forEach(([id, key]) => {
+            const btn = document.getElementById(id);
+
+            const press = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                keys[key] = true;
+                targetPos = null;
+                btn.classList.add('pressed');
+            };
+            const release = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                keys[key] = false;
+                btn.classList.remove('pressed');
+            };
+
+            btn.addEventListener('touchstart',  press,   { passive: false });
+            btn.addEventListener('touchend',    release, { passive: false });
+            btn.addEventListener('touchcancel', release, { passive: false });
+            btn.addEventListener('touchleave',  release, { passive: false });
+
+            // รองรับการลาก pointer ออกนอกปุ่ม
+            btn.addEventListener('pointerdown', press,   { passive: false });
+            btn.addEventListener('pointerup',   release, { passive: false });
+            btn.addEventListener('pointerleave',release, { passive: false });
+            btn.addEventListener('pointercancel',release,{ passive: false });
+        });
+    }
+    // ====================================================
 
     async function loadAssetsAndMap() {
         const loader = new THREE.TextureLoader();
-        
+
         const [g1, g2, pTex] = await Promise.all([
             loader.loadAsync('img/map/grass1.png').catch(() => createPlaceholderTex('#3d6b3d')),
             loader.loadAsync('img/map/grass2.png').catch(() => createPlaceholderTex('#2d4d2d')),
@@ -354,7 +403,7 @@
         textures['grass2'] = g2;
 
         pTex.wrapS = pTex.wrapT = THREE.RepeatWrapping;
-        pTex.repeat.set(1/SPRITE_COLS, 1/SPRITE_ROWS);
+        pTex.repeat.set(1 / SPRITE_COLS, 1 / SPRITE_ROWS);
 
         try {
             const response = await fetch('maps/test.json');
@@ -366,7 +415,7 @@
 
         createPlayer(pTex);
         updateInventoryUI();
-        
+
         document.getElementById('loading-screen').style.display = 'none';
         isGameStarted = true;
         animate();
@@ -389,8 +438,8 @@
 
     function createDefaultMap() {
         const geometry = new THREE.PlaneGeometry(TILE_SIZE, TILE_SIZE);
-        for(let r=0; r<20; r++) {
-            for(let c=0; c<20; c++) {
+        for (let r = 0; r < 20; r++) {
+            for (let c = 0; c < 20; c++) {
                 const mat = new THREE.MeshLambertMaterial({ map: textures['grass1'] });
                 const tile = new THREE.Mesh(geometry, mat);
                 tile.position.set(c, 0, r);
@@ -402,8 +451,8 @@
 
     function createPlayer(tex) {
         const geometry = new THREE.PlaneGeometry(1.2, 1.2);
-        playerMaterial = new THREE.MeshBasicMaterial({ 
-            map: tex, transparent: true, alphaTest: 0.5, side: THREE.DoubleSide 
+        playerMaterial = new THREE.MeshBasicMaterial({
+            map: tex, transparent: true, alphaTest: 0.5, side: THREE.DoubleSide
         });
         player = new THREE.Mesh(geometry, playerMaterial);
         player.position.copy(playerWorldPos);
@@ -411,57 +460,48 @@
     }
 
     function handleMovement() {
-        let dx = 0;
-        let dz = 0;
+        let dx = 0, dz = 0;
 
         const forward = new THREE.Vector3();
         camera.getWorldDirection(forward);
         forward.y = 0;
         forward.normalize();
-        
+
         const right = new THREE.Vector3();
         right.crossVectors(forward, camera.up);
 
         if (keys.w) { dx += forward.x; dz += forward.z; }
         if (keys.s) { dx -= forward.x; dz -= forward.z; }
-        if (keys.a) { dx -= right.x; dz -= right.z; }
-        if (keys.d) { dx += right.x; dz += right.z; }
+        if (keys.a) { dx -= right.x;   dz -= right.z; }
+        if (keys.d) { dx += right.x;   dz += right.z; }
 
         if (dx !== 0 || dz !== 0) {
-            const mag = Math.sqrt(dx*dx + dz*dz);
-            player.position.x += (dx/mag) * MOVE_SPEED;
-            player.position.z += (dz/mag) * MOVE_SPEED;
-            playerMoveDir.set(dx/mag, dz/mag);
-            
+            const mag = Math.sqrt(dx * dx + dz * dz);
+            player.position.x += (dx / mag) * MOVE_SPEED;
+            player.position.z += (dz / mag) * MOVE_SPEED;
+            playerMoveDir.set(dx / mag, dz / mag);
             animTimer += 0.016;
-            if (animTimer > animSpeed) {
-                animFrame = (animFrame + 1) % SPRITE_COLS;
-                animTimer = 0;
-            }
+            if (animTimer > animSpeed) { animFrame = (animFrame + 1) % SPRITE_COLS; animTimer = 0; }
             return true;
         }
 
-        // ระบบคลิก/แตะเดิน (นิ้วเดียว)
-        if (targetPos) {
+        // PC เท่านั้น: คลิกเดิน
+        if (!isMobile && targetPos) {
             const tdx = targetPos.x - player.position.x;
             const tdz = targetPos.z - player.position.z;
-            const dist = Math.sqrt(tdx*tdx + tdz*tdz);
-
+            const dist = Math.sqrt(tdx * tdx + tdz * tdz);
             if (dist > 0.1) {
                 player.position.x += (tdx / dist) * MOVE_SPEED;
                 player.position.z += (tdz / dist) * MOVE_SPEED;
                 playerMoveDir.set(tdx / dist, tdz / dist);
                 animTimer += 0.016;
-                if (animTimer > animSpeed) {
-                    animFrame = (animFrame + 1) % SPRITE_COLS;
-                    animTimer = 0;
-                }
+                if (animTimer > animSpeed) { animFrame = (animFrame + 1) % SPRITE_COLS; animTimer = 0; }
                 return true;
             } else {
                 targetPos = null;
             }
         }
-        
+
         animFrame = 0;
         return false;
     }
@@ -469,7 +509,6 @@
     function animate() {
         requestAnimationFrame(animate);
         if (!isGameStarted) return;
-
         handleMovement();
         updatePlayerSprite();
         updateCameraPosition();
@@ -482,7 +521,7 @@
         const moveAngle = Math.atan2(playerMoveDir.x, playerMoveDir.y);
         let diff = (moveAngle - camAngle + Math.PI * 2) % (Math.PI * 2);
 
-        let row = 0; 
+        let row = 0;
         if (diff > Math.PI * 0.25 && diff <= Math.PI * 0.75) row = 2;
         else if (diff > Math.PI * 0.75 && diff <= Math.PI * 1.25) row = 3;
         else if (diff > Math.PI * 1.25 && diff <= Math.PI * 1.75) row = 1;
@@ -504,45 +543,35 @@
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
-        // --- Touch state สำหรับมือถือ ---
         let touchState = {
-            activeTouches: [],      // เก็บ touches ปัจจุบัน
-            isRotating: false,      // กำลังหมุนกล้อง (2 นิ้ว)
-            lastPinchDist: null,    // ระยะ pinch ล่าสุด
-            lastRotatePos: null,    // ตำแหน่ง rotate ล่าสุด
+            isRotating: false,
+            lastPinchDist: null,
+            lastRotatePos: null,
         };
 
         function getTouchDistance(t1, t2) {
             const dx = t1.clientX - t2.clientX;
             const dy = t1.clientY - t2.clientY;
-            return Math.sqrt(dx*dx + dy*dy);
+            return Math.sqrt(dx * dx + dy * dy);
         }
-
         function getTouchCenter(t1, t2) {
-            return {
-                x: (t1.clientX + t2.clientX) / 2,
-                y: (t1.clientY + t2.clientY) / 2
-            };
+            return { x: (t1.clientX + t2.clientX) / 2, y: (t1.clientY + t2.clientY) / 2 };
         }
 
-        // --- Mouse handlers (PC) ---
-        const handleMouseStart = (clientX, clientY, button) => {
+        // PC Mouse
+        window.addEventListener('mousedown', (e) => {
+            if (e.target.closest('#inventory-ui') || e.target.closest('#dpad')) return;
             if (!isGameStarted) return;
-            if (button === 0) {
-                mouse.x = (clientX / window.innerWidth) * 2 - 1;
-                mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+            if (e.button === 0) {
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
                 raycaster.setFromCamera(mouse, camera);
                 const intersects = raycaster.intersectObjects(groundGroup.children);
                 if (intersects.length > 0) targetPos = { x: intersects[0].point.x, z: intersects[0].point.z };
-            } else if (button === 2) {
+            } else if (e.button === 2) {
                 isRightMouseDown = true;
-                lastMousePos = { x: clientX, y: clientY };
+                lastMousePos = { x: e.clientX, y: e.clientY };
             }
-        };
-
-        window.addEventListener('mousedown', (e) => {
-            if (e.target.closest('#inventory-ui')) return;
-            handleMouseStart(e.clientX, e.clientY, e.button);
         });
 
         window.addEventListener('mouseup', (e) => { if (e.button === 2) isRightMouseDown = false; });
@@ -558,52 +587,30 @@
             cameraDistance = Math.max(5, Math.min(50, cameraDistance + e.deltaY * 0.02));
         });
 
-        // --- Touch handlers (Mobile) ---
+        // Mobile Touch: นิ้วเดียวไม่ทำอะไร, สองนิ้ว = หมุน/zoom กล้อง
         window.addEventListener('touchstart', (e) => {
-            if (e.target.closest('#inventory-ui')) return;
+            if (e.target.closest('#inventory-ui') || e.target.closest('#dpad')) return;
             e.preventDefault();
-
             const touches = e.touches;
-
-            if (touches.length === 1) {
-                // นิ้วเดียว = เดิน
-                touchState.isRotating = false;
-                touchState.lastPinchDist = null;
-                touchState.lastRotatePos = null;
-
-                if (isGameStarted) {
-                    const t = touches[0];
-                    mouse.x = (t.clientX / window.innerWidth) * 2 - 1;
-                    mouse.y = -(t.clientY / window.innerHeight) * 2 + 1;
-                    raycaster.setFromCamera(mouse, camera);
-                    const intersects = raycaster.intersectObjects(groundGroup.children);
-                    if (intersects.length > 0) targetPos = { x: intersects[0].point.x, z: intersects[0].point.z };
-                }
-            } else if (touches.length === 2) {
-                // 2 นิ้ว = หมุนกล้อง + zoom
+            if (touches.length === 2) {
                 touchState.isRotating = true;
-                targetPos = null; // หยุดเดินเมื่อหมุนกล้อง
                 touchState.lastPinchDist = getTouchDistance(touches[0], touches[1]);
                 touchState.lastRotatePos = getTouchCenter(touches[0], touches[1]);
             }
         }, { passive: false });
 
         window.addEventListener('touchmove', (e) => {
-            if (e.target.closest('#inventory-ui')) return;
+            if (e.target.closest('#inventory-ui') || e.target.closest('#dpad')) return;
             e.preventDefault();
-
             const touches = e.touches;
-
             if (touches.length === 2 && touchState.isRotating) {
-                // คำนวณ Pinch Zoom
                 const newDist = getTouchDistance(touches[0], touches[1]);
                 if (touchState.lastPinchDist !== null) {
-                    const distDelta = touchState.lastPinchDist - newDist;
-                    cameraDistance = Math.max(5, Math.min(50, cameraDistance + distDelta * 0.05));
+                    const delta = touchState.lastPinchDist - newDist;
+                    cameraDistance = Math.max(5, Math.min(50, cameraDistance + delta * 0.05));
                 }
                 touchState.lastPinchDist = newDist;
 
-                // คำนวณ Rotate จากการเลื่อน Center ของ 2 นิ้ว
                 const newCenter = getTouchCenter(touches[0], touches[1]);
                 if (touchState.lastRotatePos !== null) {
                     const dx = newCenter.x - touchState.lastRotatePos.x;
@@ -613,17 +620,6 @@
                     cameraRotation.phi = Math.max(0.1, Math.min(Math.PI / 2.1, cameraRotation.phi));
                 }
                 touchState.lastRotatePos = newCenter;
-
-            } else if (touches.length === 1 && !touchState.isRotating) {
-                // นิ้วเดียวลาก = อัปเดต targetPos ต่อเนื่อง
-                if (isGameStarted) {
-                    const t = touches[0];
-                    mouse.x = (t.clientX / window.innerWidth) * 2 - 1;
-                    mouse.y = -(t.clientY / window.innerHeight) * 2 + 1;
-                    raycaster.setFromCamera(mouse, camera);
-                    const intersects = raycaster.intersectObjects(groundGroup.children);
-                    if (intersects.length > 0) targetPos = { x: intersects[0].point.x, z: intersects[0].point.z };
-                }
             }
         }, { passive: false });
 
@@ -640,12 +636,10 @@
         for (let i = 0; i < 5; i++) {
             const slot = document.getElementById(`slot-${i}`);
             const item = inventory[i];
-            
             const oldIcon = slot.querySelector('.item-icon');
             const oldCount = slot.querySelector('.item-count');
             if (oldIcon) oldIcon.remove();
             if (oldCount) oldCount.remove();
-
             slot.classList.toggle('active', i === activeSlot);
             if (item) {
                 const icon = document.createElement('div');
@@ -663,6 +657,7 @@
     }
 
     function selectSlot(i) { activeSlot = i; updateInventoryUI(); }
+
     function onWindowResize() {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
