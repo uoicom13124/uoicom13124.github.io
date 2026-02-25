@@ -3,17 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Siriwan RPG - Sprite Version</title>
+<title>Siriwan RPG - Parallax Edition</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    background: #1a1a2e url('img/bg/sky1.jpg') no-repeat center center fixed;
-    background-size: cover;
+    background-color: #1a1a2e;
+    /* พื้นหลังหลักขยับตามผู้เล่น */
+    background-image: url('img/bg/sky1.jpg');
+    background-repeat: no-repeat;
+    background-size: 120% 120%; /* ใหญ่กว่าจอนิดหน่อยเพื่อให้มีพื้นที่ขยับ */
+    background-position: center;
     overflow: hidden;
     width: 100vw;
     height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: sans-serif;
   }
 
   #game-container {
@@ -27,9 +31,15 @@
     position: absolute;
     top: 0; left: 0;
     will-change: transform;
+    /* ป้องกันการคลิกโดนพื้นแล้วเกิดไฮไลท์ */
+    user-select: none;
   }
 
-  .tile { position: absolute; }
+  .tile { 
+    position: absolute;
+    /* ลบรอยต่อระหว่างแผ่น */
+    outline: 1px solid transparent;
+  }
 
   /* ===== CHARACTER ===== */
   #character {
@@ -96,7 +106,7 @@
   #character.walking .char-body { animation: body-bob 0.28s infinite ease-in-out; }
   #character.face-left .char-head { transform: scaleX(-1); }
 
-  /* ===== INVENTORY UI (SPRITE BASED) ===== */
+  /* ===== INVENTORY UI ===== */
   #inventory-container {
     position: fixed;
     bottom: 20px;
@@ -105,7 +115,7 @@
     display: flex;
     gap: 10px;
     z-index: 300;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.7);
     padding: 10px;
     border-radius: 15px;
     backdrop-filter: blur(10px);
@@ -113,34 +123,29 @@
   }
 
   .inv-slot {
-    width: 54px;
-    height: 54px;
-    background: rgba(255,255,255,0.05);
-    border: 2px solid #444;
+    width: 52px;
+    height: 52px;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid #555;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
 
   .inv-slot.active {
     border-color: #00d2ff;
-    background: rgba(0, 210, 255, 0.15);
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 210, 255, 0.3);
+    background: rgba(0, 210, 255, 0.2);
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
   }
 
-  /* Sprite Icon Style */
   .item-sprite {
     width: 32px;
     height: 32px;
     background-image: url('img/icons2.png');
-    background-repeat: no-repeat;
-    /* แผ่นภาพ icons2.png มี 16 คอลัมน์ (สมมติจากภาพที่ให้มา) */
-    background-size: 512px 768px; /* ปรับขนาดให้แม่นยำตามขนาดไฟล์จริง */
+    background-size: 512px 768px; /* 16 columns x 32px */
     image-rendering: pixelated;
   }
 
@@ -149,56 +154,38 @@
     bottom: 2px;
     right: 5px;
     color: white;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
     text-shadow: 1px 1px 2px black;
   }
 
-  #item-name-tag {
-    position: fixed;
-    bottom: 95px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: #fff;
-    background: rgba(0,0,0,0.8);
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 14px;
-    pointer-events: none;
-    transition: opacity 0.3s;
-    opacity: 0;
-    border: 1px solid rgba(255,255,255,0.2);
-  }
-
-  /* ===== MOBILE D-PAD ===== */
+  /* ===== MOBILE CONTROLS ===== */
   #dpad {
     position: fixed;
-    bottom: 25px;
-    left: 25px;
+    bottom: 30px;
+    left: 30px;
     z-index: 200;
     display: none;
     user-select: none;
     touch-action: none;
   }
 
-  .dpad-grid { display: grid; grid-template-columns: repeat(3, 55px); grid-template-rows: repeat(3, 55px); gap: 8px; }
+  .dpad-grid { display: grid; grid-template-columns: repeat(3, 55px); grid-template-rows: repeat(3, 55px); gap: 10px; }
   .dbtn {
-    background: rgba(255,255,255,0.1);
-    border: 2px solid rgba(255,255,255,0.2);
-    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 10px;
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    backdrop-filter: blur(5px);
-    font-size: 20px;
+    font-size: 24px;
   }
-  .dbtn.active { background: rgba(255,255,255,0.3); transform: scale(0.9); }
+  .dbtn.active { background: rgba(255,255,255,0.4); }
 
   @media (pointer: coarse), (max-width: 768px) { 
     #dpad { display: block; } 
     #inventory-container { bottom: 20px; left: auto; right: 20px; transform: none; flex-direction: column; }
-    #item-name-tag { bottom: auto; top: 20px; }
   }
 </style>
 </head>
@@ -218,14 +205,12 @@
   </div>
 </div>
 
-<div id="item-name-tag">ชื่อไอเทม</div>
-
 <div id="inventory-container">
-  <div class="inv-slot" onclick="selectSlot(0)" data-id="0"></div>
-  <div class="inv-slot" onclick="selectSlot(1)" data-id="1"></div>
-  <div class="inv-slot" onclick="selectSlot(2)" data-id="2"></div>
-  <div class="inv-slot" onclick="selectSlot(3)" data-id="3"></div>
-  <div class="inv-slot" onclick="selectSlot(4)" data-id="4"></div>
+  <div class="inv-slot" onclick="selectSlot(0)"></div>
+  <div class="inv-slot" onclick="selectSlot(1)"></div>
+  <div class="inv-slot" onclick="selectSlot(2)"></div>
+  <div class="inv-slot" onclick="selectSlot(3)"></div>
+  <div class="inv-slot" onclick="selectSlot(4)"></div>
 </div>
 
 <div id="dpad">
@@ -237,15 +222,15 @@
 </div>
 
 <script>
-/**
- * ITEM DATABASE (Sprite Mapping)
- * x, y: ตำแหน่งลำดับของไอเทมใน icons2.png (เริ่มที่ 0)
- * ขนาด icon แต่ละอันคือ 32x32px (ปรับตามขนาดจริงได้)
- */
+const TILE_SIZE = 48;
+const MOVE_SPEED = 7;
+const MAP_ROWS = 20; // กำหนดขนาดแผนที่
+const MAP_COLS = 20;
+
 const SPRITE_SIZE = 32;
 const ITEMS_DATA = {
-  hoe: { name: "จอบขุดดิน", x: 7, y: 4 },     // แถว 5 คอลัมน์ 8
-  seed: { name: "เมล็ดปริศนา", x: 1, y: 8 }  // แถว 9 คอลัมน์ 2 (ถุงเมล็ด)
+  hoe: { x: 7, y: 4 }, 
+  seed: { x: 1, y: 8 }
 };
 
 let inventory = [
@@ -255,22 +240,63 @@ let inventory = [
 ];
 let activeSlot = 0;
 
+// ตำแหน่งตัวละคร (พิกัด Tile)
+let px = 5, py = 5; 
+let tx = 5, ty = 5;
+let moving = false, moveT = 0, lastFace = 'down', lastTs = 0;
+const keys = {};
+let mobileDir = null;
+
+const mapEl = document.getElementById('map-container');
+const charEl = document.getElementById('character');
+
+// สร้างแผนที่พื้นหญ้า
+function buildMap() {
+  mapEl.innerHTML = '';
+  mapEl.style.width = (MAP_COLS * TILE_SIZE) + 'px';
+  mapEl.style.height = (MAP_ROWS * TILE_SIZE) + 'px';
+  
+  for(let r=0; r < MAP_ROWS; r++) {
+    for(let c=0; c < MAP_COLS; c++) {
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.style.left = (c * TILE_SIZE) + 'px';
+      tile.style.top = (r * TILE_SIZE) + 'px';
+      tile.style.width = TILE_SIZE + 'px';
+      tile.style.height = TILE_SIZE + 'px';
+      
+      // พื้นหลังพื้นหญ้าแบบสุ่ม 2 ลาย
+      const isAlt = (r + c) % 2 === 0;
+      const imgPath = isAlt ? 'img/map/grass1.png' : 'img/map/grass2.png';
+      
+      const img = new Image();
+      img.src = imgPath;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.imageRendering = 'pixelated';
+      // ถ้าไม่มีรูป ให้แสดงสีเขียวแทน
+      img.onerror = () => {
+        img.remove();
+        tile.style.backgroundColor = isAlt ? '#5a9940' : '#4e8d36';
+      };
+      
+      tile.appendChild(img);
+      mapEl.appendChild(tile);
+    }
+  }
+}
+
 function updateInventoryUI() {
   const slots = document.querySelectorAll('.inv-slot');
-  const nameTag = document.getElementById('item-name-tag');
-  
   slots.forEach((slot, i) => {
     slot.classList.toggle('active', i === activeSlot);
     slot.innerHTML = '';
-    
     if (inventory[i]) {
-      const itemData = ITEMS_DATA[inventory[i].id];
+      const item = ITEMS_DATA[inventory[i].id];
       const icon = document.createElement('div');
       icon.className = 'item-sprite';
-      // คำนวณ background-position: -(x * size)px -(y * size)px
-      icon.style.backgroundPosition = `-${itemData.x * SPRITE_SIZE}px -${itemData.y * SPRITE_SIZE}px`;
+      icon.style.backgroundPosition = `-${item.x * SPRITE_SIZE}px -${item.y * SPRITE_SIZE}px`;
       slot.appendChild(icon);
-      
       if (inventory[i].count > 1) {
         const count = document.createElement('div');
         count.className = 'inv-count';
@@ -279,55 +305,24 @@ function updateInventoryUI() {
       }
     }
   });
-
-  if (inventory[activeSlot]) {
-    nameTag.innerText = ITEMS_DATA[inventory[activeSlot].id].name;
-    nameTag.style.opacity = 1;
-  } else {
-    nameTag.style.opacity = 0;
-  }
 }
 
-function selectSlot(index) {
-  activeSlot = index;
-  updateInventoryUI();
-}
+function selectSlot(i) { activeSlot = i; updateInventoryUI(); }
 
-// --- แผนที่และระบบเดินเหมือนเดิม ---
-const TILE_DEFS = {
-  grass1: { walkable: true, img: 'img/map/grass1.png', color: '#5a9940' },
-  grass2: { walkable: true, img: 'img/map/grass2.png', color: '#4a8835' },
-};
-
-const TILE_SIZE = 48;
-const MOVE_SPEED = 7;
-let px = 2, py = 2, tx = 2, ty = 2, moving = false, moveT = 0, lastFace = 'down', lastTs = 0;
-const keys = {};
-let mobileDir = null;
-
-const mapEl = document.getElementById('map-container');
-const charEl = document.getElementById('character');
-
-function buildMap() {
-  mapEl.innerHTML = '';
-  const rows = 15, cols = 15;
-  mapEl.style.width = (cols * TILE_SIZE) + 'px';
-  mapEl.style.height = (rows * TILE_SIZE) + 'px';
+function updateCameraAndParallax() {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  // คำนวณตำแหน่งแผนที่ (Center character)
+  const mapX = (vw / 2) - (px * TILE_SIZE + TILE_SIZE / 2);
+  const mapY = (vh / 2) - (py * TILE_SIZE + TILE_SIZE);
   
-  for(let r=0; r<rows; r++) {
-    for(let c=0; c<cols; c++) {
-      const el = document.createElement('div');
-      el.className = 'tile';
-      el.style.cssText = `left:${c*TILE_SIZE}px;top:${r*TILE_SIZE}px;width:${TILE_SIZE}px;height:${TILE_SIZE}px;background:#5a9940;border:0.1px solid rgba(0,0,0,0.05);`;
-      mapEl.appendChild(el);
-    }
-  }
-}
+  mapEl.style.transform = `translate(${mapX}px, ${mapY}px)`;
 
-function updateCamera() {
-  const ox = (window.innerWidth / 2) - (px * TILE_SIZE + TILE_SIZE / 2);
-  const oy = (window.innerHeight / 2) - (py * TILE_SIZE + TILE_SIZE);
-  mapEl.style.transform = `translate(${ox}px, ${oy}px)`;
+  // Parallax Effect สำหรับพื้นหลัง (ขยับช้าๆ ตามผู้เล่น)
+  // ยิ่งเลขตัวหารเยอะ พื้นหลังยิ่งขยับช้า
+  const parallaxSpeed = 15; 
+  const bgX = 50 + (mapX / vw * parallaxSpeed);
+  const bgY = 50 + (mapY / vh * parallaxSpeed);
+  document.body.style.backgroundPosition = `${bgX}% ${bgY}%`;
 }
 
 function loop(ts) {
@@ -336,10 +331,14 @@ function loop(ts) {
 
   if (moving) {
     moveT += dt * MOVE_SPEED;
-    if (moveT >= 1) { px = tx; py = ty; moving = false; moveT = 0; }
-    else {
-      px += (tx - px) * (dt * MOVE_SPEED);
-      py += (ty - py) * (dt * MOVE_SPEED);
+    if (moveT >= 1) { 
+      px = tx; py = ty; 
+      moving = false; 
+      moveT = 0; 
+    } else {
+      const dx = tx - px, dy = ty - py;
+      if(Math.abs(dx) > 0.01) px += (dx > 0 ? 1 : -1) * dt * MOVE_SPEED;
+      if(Math.abs(dy) > 0.01) py += (dy > 0 ? 1 : -1) * dt * MOVE_SPEED;
     }
   }
 
@@ -352,40 +351,50 @@ function loop(ts) {
 
     if (dir) {
       lastFace = dir;
-      tx = px + (dir==='left'?-1:dir==='right'?1:0);
-      ty = py + (dir==='up'?-1:dir==='down'?1:0);
-      moving = true;
+      let nx = px + (dir === 'left' ? -1 : dir === 'right' ? 1 : 0);
+      let ny = py + (dir === 'up' ? -1 : dir === 'down' ? 1 : 0);
+      
+      // ระบบตรวจสอบขอบเขต (Map Boundary)
+      if (nx >= 0 && nx < MAP_COLS && ny >= 0 && ny < MAP_ROWS) {
+        tx = nx; ty = ny;
+        moving = true;
+      }
     }
   }
 
-  charEl.classList.toggle('walking', moving);
+  charEl.classList.toggle('walking', moving || mobileDir);
   charEl.classList.toggle('face-left', lastFace === 'left');
-  updateCamera();
+  updateCameraAndParallax();
   requestAnimationFrame(loop);
 }
 
-// Controls
+// Input Handlers
 addEventListener('keydown', e => { 
   keys[e.key] = true; 
-  if (e.key >= '1' && e.key <= '5') selectSlot(parseInt(e.key) - 1);
+  if(e.key >= '1' && e.key <= '5') selectSlot(parseInt(e.key)-1);
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) e.preventDefault();
 });
-addEventListener('keyup', e => { delete keys[e.key]; });
+addEventListener('keyup', e => delete keys[e.key]);
 
 function setupDpad() {
   ['up','down','left','right'].forEach(dir => {
     const btn = document.getElementById('d-'+dir);
-    btn.ontouchstart = (e) => { e.preventDefault(); mobileDir = dir; btn.classList.add('active'); };
-    btn.ontouchend = () => { mobileDir = null; btn.classList.remove('active'); };
+    const start = (e) => { e.preventDefault(); mobileDir = dir; btn.classList.add('active'); };
+    const end = () => { mobileDir = null; btn.classList.remove('active'); };
+    btn.addEventListener('touchstart', start);
+    btn.addEventListener('touchend', end);
+    btn.addEventListener('mousedown', start);
+    btn.addEventListener('mouseup', end);
+    btn.addEventListener('mouseleave', end);
   });
 }
 
-// Init
+// Start
 buildMap();
 setupDpad();
 updateInventoryUI();
 requestAnimationFrame(ts => { lastTs = ts; loop(ts); });
-
-window.addEventListener('resize', updateCamera);
+window.onresize = updateCameraAndParallax;
 </script>
 </body>
 </html>
