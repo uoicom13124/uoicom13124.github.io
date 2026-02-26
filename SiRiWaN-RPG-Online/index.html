@@ -52,23 +52,6 @@
         #rotate-overlay h2 { font-size: 22px; margin-bottom: 10px; letter-spacing: 1px; }
         #rotate-overlay p { font-size: 14px; color: rgba(255,255,255,0.6); }
 
-        /* UI Overlay */
-        #startup-overlay {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: radial-gradient(circle, #1a1a2e 0%, #000 100%);
-            z-index: 2000;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: white;
-        }
-
-        .start-btn {
-            padding: 15px 50px;
-            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
-            color: #fff; border: none; border-radius: 30px;
-            font-weight: bold; font-size: 22px; cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 210, 255, 0.4);
-        }
 
         /* Inventory */
         #inventory-ui {
@@ -199,10 +182,6 @@
     <p style="margin-top:8px; font-size:12px; color:#00d2ff;">Please rotate your device to landscape mode</p>
 </div>
 
-<div id="startup-overlay">
-    <h1 style="margin-bottom: 20px; letter-spacing: 2px;">SIRIVAN RPG</h1>
-    <button class="start-btn" onclick="startGame()">START GAME</button>
-</div>
 
 <div id="loading-screen">CONNECTING...</div>
 
@@ -259,16 +238,9 @@
     // ---- ตรวจแนวหน้าจอ ----
     function checkOrientation() {
         const rotateOverlay = document.getElementById('rotate-overlay');
-        const startupOverlay = document.getElementById('startup-overlay');
         if (!isMobile) { rotateOverlay.style.display = 'none'; return; }
         const isLandscape = window.innerWidth > window.innerHeight;
-        if (!isLandscape) {
-            rotateOverlay.style.display = 'flex';
-            if (!isGameStarted) startupOverlay.style.display = 'none';
-        } else {
-            rotateOverlay.style.display = 'none';
-            if (!isGameStarted) startupOverlay.style.display = 'flex';
-        }
+        rotateOverlay.style.display = isLandscape ? 'none' : 'flex';
     }
 
     // ---- บังคับ Fullscreen เมื่อหมุนเป็นแนวนอนบนมือถือ ----
@@ -304,14 +276,15 @@
     checkOrientation();
 
     function startGame() {
-        // ขอ Fullscreen ตอนกดปุ่ม START (ต้องเป็น user gesture)
         if (isMobile) requestFullscreen();
-        document.getElementById('startup-overlay').style.display = 'none';
         document.getElementById('loading-screen').style.display = 'block';
         if (isMobile) document.getElementById('dpad').style.display = 'block';
         init3D();
         loadAssetsAndMap();
     }
+
+    // เริ่มเกมอัตโนมัติทันทีที่โหลดหน้าเสร็จ
+    window.addEventListener('load', () => startGame());
 
     function init3D() {
         scene = new THREE.Scene();
