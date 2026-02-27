@@ -22,7 +22,6 @@
 
         canvas { display: block; }
 
-        /* หน้าจอแจ้งให้หมุนโทรศัพท์ */
         #rotate-overlay {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
@@ -51,7 +50,6 @@
 
         #rotate-overlay h2 { font-size: 22px; margin-bottom: 10px; letter-spacing: 1px; }
         #rotate-overlay p { font-size: 14px; color: rgba(255,255,255,0.6); }
-
 
         /* Inventory */
         #inventory-ui {
@@ -165,11 +163,232 @@
         #btn-down  { bottom: 4px; left: 50%; transform: translateX(-50%); }
         #btn-left  { left: 4px;   top: 50%;  transform: translateY(-50%); }
         #btn-right { right: 4px;  top: 50%;  transform: translateY(-50%); }
-        /* ============================================= */
+
+        /* =================== NPC Dialog =================== */
+        #dialog-box {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            width: min(680px, 90vw);
+            background: linear-gradient(135deg, rgba(10,15,30,0.97) 0%, rgba(20,30,60,0.97) 100%);
+            border: 2px solid rgba(0, 210, 255, 0.6);
+            border-radius: 16px;
+            padding: 20px 24px 16px;
+            z-index: 800;
+            display: none;
+            box-shadow:
+                0 0 30px rgba(0, 210, 255, 0.25),
+                0 8px 40px rgba(0,0,0,0.7),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+            opacity: 0;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        #dialog-box.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0px);
+        }
+
+        /* Corner decoration */
+        #dialog-box::before,
+        #dialog-box::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-color: #00d2ff;
+            border-style: solid;
+        }
+        #dialog-box::before {
+            top: -2px; left: -2px;
+            border-width: 3px 0 0 3px;
+            border-radius: 4px 0 0 0;
+        }
+        #dialog-box::after {
+            bottom: -2px; right: -2px;
+            border-width: 0 3px 3px 0;
+            border-radius: 0 0 4px 0;
+        }
+
+        #dialog-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(0, 210, 255, 0.2);
+        }
+
+        #dialog-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid rgba(0,210,255,0.5);
+            overflow: hidden;
+            background: rgba(0,210,255,0.1);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        #dialog-avatar canvas {
+            width: 48px !important;
+            height: 48px !important;
+            image-rendering: pixelated;
+        }
+
+        #dialog-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #00d2ff;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0,210,255,0.5);
+        }
+
+        #dialog-name-sub {
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+
+        #dialog-text {
+            font-size: 14px;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.9);
+            min-height: 44px;
+            letter-spacing: 0.3px;
+        }
+
+        /* Typewriter cursor */
+        #dialog-text .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 14px;
+            background: #00d2ff;
+            margin-left: 2px;
+            vertical-align: middle;
+            animation: blink 0.7s step-end infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        #dialog-choices {
+            margin-top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .choice-btn {
+            background: rgba(0, 210, 255, 0.08);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 8px;
+            padding: 9px 14px;
+            color: rgba(255,255,255,0.85);
+            font-size: 13px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.15s ease;
+            letter-spacing: 0.2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .choice-btn::before {
+            content: '▶';
+            margin-right: 8px;
+            font-size: 9px;
+            color: #00d2ff;
+            opacity: 0.7;
+        }
+
+        .choice-btn:hover, .choice-btn:active {
+            background: rgba(0, 210, 255, 0.2);
+            border-color: rgba(0, 210, 255, 0.7);
+            color: #fff;
+            box-shadow: 0 0 12px rgba(0,210,255,0.2);
+        }
+
+        #dialog-continue {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 12px;
+            gap: 8px;
+        }
+
+        #dialog-continue-hint {
+            font-size: 11px;
+            color: rgba(0,210,255,0.5);
+            letter-spacing: 0.5px;
+            animation: blink 1.2s ease-in-out infinite;
+        }
+
+        /* NPC interact hint */
+        #npc-interact-hint {
+            position: fixed;
+            bottom: 200px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            border: 1px solid rgba(0,210,255,0.4);
+            border-radius: 20px;
+            padding: 6px 18px;
+            color: rgba(255,255,255,0.8);
+            font-size: 12px;
+            z-index: 700;
+            display: none;
+            pointer-events: none;
+            letter-spacing: 0.5px;
+        }
+
+        /* Mobile interact button */
+        #interact-btn {
+            position: fixed;
+            right: 24px;
+            bottom: 100px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(0,210,255,0.15);
+            border: 2px solid rgba(0,210,255,0.5);
+            color: #00d2ff;
+            font-size: 11px;
+            font-weight: bold;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 700;
+            cursor: pointer;
+            touch-action: none;
+            box-shadow: 0 0 20px rgba(0,210,255,0.2);
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+
+        #interact-btn.active-npc {
+            background: rgba(0,210,255,0.3);
+            box-shadow: 0 0 25px rgba(0,210,255,0.5);
+            animation: pulseBtn 1s ease-in-out infinite;
+        }
+
+        @keyframes pulseBtn {
+            0%,100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
 
         @media (max-width: 900px) {
             :root { --slot-size: 50px; }
             #inventory-ui { bottom: 14px; gap: 5px; padding: 8px; }
+            #dialog-box { bottom: 80px; }
         }
     </style>
 </head>
@@ -182,7 +401,6 @@
     <p style="margin-top:8px; font-size:12px; color:#00d2ff;">Please rotate your device to landscape mode</p>
 </div>
 
-
 <div id="loading-screen">CONNECTING...</div>
 
 <div id="inventory-ui">
@@ -193,7 +411,7 @@
     <div class="slot" id="slot-4" onclick="selectSlot(4)"><span class="slot-key">5</span></div>
 </div>
 
-<!-- D-Pad (แสดงเฉพาะมือถือ) -->
+<!-- D-Pad -->
 <div id="dpad">
     <div id="dpad-bg"></div>
     <div class="dpad-btn" id="btn-up">▲</div>
@@ -202,11 +420,96 @@
     <div class="dpad-btn" id="btn-right">▶</div>
 </div>
 
+<!-- NPC hint -->
+<div id="npc-interact-hint">กด [E] หรือ [Space] เพื่อพูดคุย</div>
+
+<!-- Mobile interact button -->
+<div id="interact-btn" onclick="tryInteractNPC()">💬<br>พูด</div>
+
+<!-- Dialog UI -->
+<div id="dialog-box">
+    <div id="dialog-header">
+        <div id="dialog-avatar">🧑</div>
+        <div>
+            <div id="dialog-name">NPC</div>
+            <div id="dialog-name-sub">ชาวบ้าน</div>
+        </div>
+    </div>
+    <div id="dialog-text"></div>
+    <div id="dialog-choices"></div>
+    <div id="dialog-continue">
+        <span id="dialog-continue-hint">[ กด E หรือ Space เพื่อดำเนินต่อ ]</span>
+    </div>
+</div>
+
 <script>
+/*
+============================================================
+  NPC SYSTEM — ตัวอย่างตั้งค่าใน maps/test.json
+
+  ฟอร์แมตแมพเพิ่ม "npcs" array:
+
+  {
+    "tiles": [
+      "[grass1][grass1][grass1]",
+      ...
+    ],
+    "npcs": [
+      {
+        "id": "npc_farmer",
+        "name": "ลุงมานะ",
+        "title": "ชาวนา",
+        "sprite": "img/npc/farmer.png",   // ถ้าไม่มีจะใช้ sprite ผู้เล่น
+        "spriteRows": 4,
+        "spriteCols": 4,
+        "x": 5,                           // ตำแหน่ง tile
+        "z": 5,
+        "emoji": "👨‍🌾",                 // แสดงในกรอบถ้าไม่มี sprite
+        "dialog": [
+          {
+            "id": "start",
+            "text": "สวัสดีนะหนู วันนี้อากาศดีจัง",
+            "choices": [
+              { "text": "สวัสดีครับ มีอะไรให้ช่วยไหม?", "next": "help" },
+              { "text": "ลาก่อนครับ", "next": "bye" }
+            ]
+          },
+          {
+            "id": "help",
+            "text": "ขอบคุณนะ ช่วยเก็บแครอทให้หน่อยได้ไหม?",
+            "choices": [
+              { "text": "ได้เลยครับ!", "next": "accept" },
+              { "text": "ขอโทษนะครับ ยังไม่ว่าง", "next": "bye" }
+            ]
+          },
+          {
+            "id": "accept",
+            "text": "ขอบคุณมากเลย! เก็บแครอทบริเวณแปลงด้านซ้ายนั้นนะ",
+            "choices": []
+          },
+          {
+            "id": "bye",
+            "text": "โอเค แล้วพบกันใหม่นะ!",
+            "choices": []
+          }
+        ]
+      }
+    ]
+  }
+
+  หมายเหตุ:
+  - ถ้าแมพเป็น format เดิม (array of strings) ระบบจะอ่าน tiles จาก array นั้นโดยตรง
+  - "dialog" เป็น array ของ node แต่ละ node มี id, text, choices
+  - choices มี text และ next (id ของ node ถัดไป)
+  - ถ้า choices เป็น [] ระบบจะแสดงปุ่ม "จบการสนทนา"
+============================================================
+*/
+
     const TILE_SIZE = 1;
     const MOVE_SPEED = 0.12;
     const SPRITE_ROWS = 4;
     const SPRITE_COLS = 4;
+    const NPC_INTERACT_DIST = 2.2;
 
     let scene, camera, renderer, player, groundGroup, playerMaterial;
     let textures = {};
@@ -232,6 +535,12 @@
 
     const keys = { w: false, a: false, s: false, d: false };
 
+    // ===================== NPC System =====================
+    let npcList = [];       // { data, mesh, material, animFrame, animTimer, moveDir }
+    let nearbyNPC = null;   // NPC ที่อยู่ใกล้ผู้เล่น
+    let dialogState = null; // { npc, nodeId, typing, textBuffer, fullText, charIdx, typingTimer }
+    let dialogOpen = false;
+
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
         || (navigator.maxTouchPoints > 1);
 
@@ -243,7 +552,6 @@
         rotateOverlay.style.display = isLandscape ? 'none' : 'flex';
     }
 
-    // ---- บังคับ Fullscreen เมื่อหมุนเป็นแนวนอนบนมือถือ ----
     function requestFullscreen() {
         const el = document.documentElement;
         if (el.requestFullscreen) el.requestFullscreen();
@@ -255,10 +563,7 @@
     window.addEventListener('resize', () => {
         checkOrientation();
         if (isMobile && window.innerWidth > window.innerHeight) {
-            // ขอ fullscreen ทันทีที่เป็น landscape
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                requestFullscreen();
-            }
+            if (!document.fullscreenElement && !document.webkitFullscreenElement) requestFullscreen();
         }
         if (isGameStarted) onWindowResize();
     });
@@ -266,9 +571,7 @@
         setTimeout(() => {
             checkOrientation();
             if (isMobile && window.innerWidth > window.innerHeight) {
-                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                    requestFullscreen();
-                }
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) requestFullscreen();
             }
             if (isGameStarted) onWindowResize();
         }, 200);
@@ -278,12 +581,14 @@
     function startGame() {
         if (isMobile) requestFullscreen();
         document.getElementById('loading-screen').style.display = 'block';
-        if (isMobile) document.getElementById('dpad').style.display = 'block';
+        if (isMobile) {
+            document.getElementById('dpad').style.display = 'block';
+            document.getElementById('interact-btn').style.display = 'flex';
+        }
         init3D();
         loadAssetsAndMap();
     }
 
-    // เริ่มเกมอัตโนมัติทันทีที่โหลดหน้าเสร็จ
     window.addEventListener('load', () => startGame());
 
     function init3D() {
@@ -308,6 +613,12 @@
             const k = e.key.toLowerCase();
             if (k >= '1' && k <= '5') selectSlot(parseInt(k) - 1);
             if (k in keys) { keys[k] = true; targetPos = null; }
+
+            // interact key
+            if (k === 'e' || k === ' ') {
+                e.preventDefault();
+                tryInteractNPC();
+            }
         });
         window.addEventListener('keyup', (e) => {
             const k = e.key.toLowerCase();
@@ -321,66 +632,62 @@
     // ====================== D-Pad ======================
     function setupDPad() {
         const map = {
-            'btn-up':    'w',
-            'btn-down':  's',
-            'btn-left':  'a',
-            'btn-right': 'd',
+            'btn-up': 'w', 'btn-down': 's',
+            'btn-left': 'a', 'btn-right': 'd',
         };
-
         Object.entries(map).forEach(([id, key]) => {
             const btn = document.getElementById(id);
-
             const press = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                keys[key] = true;
-                targetPos = null;
+                e.preventDefault(); e.stopPropagation();
+                keys[key] = true; targetPos = null;
                 btn.classList.add('pressed');
             };
             const release = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+                e.preventDefault(); e.stopPropagation();
                 keys[key] = false;
                 btn.classList.remove('pressed');
             };
-
-            btn.addEventListener('touchstart',  press,   { passive: false });
-            btn.addEventListener('touchend',    release, { passive: false });
-            btn.addEventListener('touchcancel', release, { passive: false });
-            btn.addEventListener('touchleave',  release, { passive: false });
-
-            // รองรับการลาก pointer ออกนอกปุ่ม
-            btn.addEventListener('pointerdown', press,   { passive: false });
-            btn.addEventListener('pointerup',   release, { passive: false });
-            btn.addEventListener('pointerleave',release, { passive: false });
-            btn.addEventListener('pointercancel',release,{ passive: false });
+            btn.addEventListener('touchstart',   press,   { passive: false });
+            btn.addEventListener('touchend',     release, { passive: false });
+            btn.addEventListener('touchcancel',  release, { passive: false });
+            btn.addEventListener('touchleave',   release, { passive: false });
+            btn.addEventListener('pointerdown',  press,   { passive: false });
+            btn.addEventListener('pointerup',    release, { passive: false });
+            btn.addEventListener('pointerleave', release, { passive: false });
+            btn.addEventListener('pointercancel',release, { passive: false });
         });
     }
-    // ====================================================
 
     async function loadAssetsAndMap() {
         const loader = new THREE.TextureLoader();
 
-        // โหลด player texture ก่อน
-        const pTex = await loader.loadAsync('img/1000203940-removebg-preview.png').catch(() => loader.loadAsync('image_093b0c.png'));
+        const pTex = await loader.loadAsync('img/player.png').catch(() => createColorTex('#4488ff'));
         pTex.magFilter = THREE.NearestFilter;
         pTex.minFilter = THREE.NearestFilter;
         pTex.wrapS = pTex.wrapT = THREE.RepeatWrapping;
         pTex.repeat.set(1 / SPRITE_COLS, 1 / SPRITE_ROWS);
 
-        // โหลดแมพก่อน เพื่อรู้ว่าต้องใช้ tile อะไรบ้าง
-        let rawMap = null;
+        let rawMapData = null;
+        let npcDefs = [];
+        let tileRows = null;
+
         try {
             const response = await fetch('maps/test.json');
-            rawMap = await response.json();
+            const parsed = await response.json();
+            // รองรับ 2 format: array of strings (เดิม) หรือ object { tiles, npcs }
+            if (Array.isArray(parsed)) {
+                tileRows = parsed;
+            } else {
+                tileRows = parsed.tiles || [];
+                npcDefs  = parsed.npcs  || [];
+            }
         } catch (e) {
-            rawMap = null;
+            tileRows = null;
         }
 
-        // รวบรวม tile keys ทั้งหมดจากแมพ (ตัด .height ออก)
-        const tileKeys = new Set(['grass1', 'grass2']); // default fallback
-        if (rawMap) {
-            rawMap.forEach(rowString => {
+        const tileKeys = new Set(['grass1', 'grass2']);
+        if (tileRows) {
+            tileRows.forEach(rowString => {
                 const matches = rowString.match(/\[(.*?)\]/g);
                 if (matches) matches.forEach(t => {
                     const token = t.replace(/[\[\]]/g, '');
@@ -389,67 +696,312 @@
             });
         }
 
-        // โหลดรูป tile ทุกชนิดที่ใช้งานในแมพ
         await Promise.all([...tileKeys].map(async (key) => {
-            const tex = await loader.loadAsync(`img/map/${key}.png`).catch(() => createPlaceholderTex('#3d6b3d'));
+            const tex = await loader.loadAsync(`img/map/${key}.png`).catch(() => createColorTex('#3d6b3d'));
             tex.magFilter = THREE.NearestFilter;
             tex.minFilter = THREE.NearestFilter;
             textures[key] = tex;
         }));
 
-        if (rawMap) {
-            parseAndCreateMap(rawMap);
+        if (tileRows) {
+            parseAndCreateMap(tileRows);
         } else {
             createDefaultMap();
         }
 
         createPlayer(pTex);
-        updateInventoryUI();
 
+        // สร้าง NPC จาก definitions
+        await spawnNPCs(npcDefs, loader, pTex);
+
+        updateInventoryUI();
         document.getElementById('loading-screen').style.display = 'none';
         isGameStarted = true;
         animate();
     }
 
-    // =================== Height Map System ===================
-    // heightMap[r][c] = ความสูงของ tile นั้น (0, 1, 2, ...)
+    // ===================== NPC Spawning =====================
+
+    async function spawnNPCs(npcDefs, loader, fallbackTex) {
+        for (const def of npcDefs) {
+            let npcTex = fallbackTex;
+
+            // โหลด sprite เฉพาะของ NPC ถ้ามี
+            if (def.sprite) {
+                try {
+                    npcTex = await loader.loadAsync(def.sprite);
+                    npcTex.magFilter = THREE.NearestFilter;
+                    npcTex.minFilter = THREE.NearestFilter;
+                    npcTex.wrapS = npcTex.wrapT = THREE.RepeatWrapping;
+                } catch (e) {
+                    npcTex = fallbackTex;
+                }
+            }
+
+            const cols = def.spriteCols || SPRITE_COLS;
+            const rows = def.spriteRows || SPRITE_ROWS;
+
+            // clone texture เพื่อให้ offset เป็นอิสระ
+            const clonedTex = npcTex.clone();
+            clonedTex.needsUpdate = true;
+            clonedTex.repeat.set(1 / cols, 1 / rows);
+            clonedTex.offset.set(0, (rows - 1) / rows);
+
+            const mat = new THREE.MeshBasicMaterial({
+                map: clonedTex,
+                transparent: true,
+                alphaTest: 0.5,
+                side: THREE.DoubleSide,
+            });
+
+            const geo = new THREE.PlaneGeometry(1.2, 1.2);
+            const mesh = new THREE.Mesh(geo, mat);
+
+            // คำนวณตำแหน่งจาก tile coordinate
+            const wx = (def.x || 0) * TILE_SIZE;
+            const wz = (def.z || 0) * TILE_SIZE;
+            const wy = getTerrainHeight(wx, wz) + 0.6;
+            mesh.position.set(wx, wy, wz);
+
+            scene.add(mesh);
+
+            // สร้าง name tag
+            const nameTag = createNPCNameTag(def.name || 'NPC');
+            nameTag.position.set(wx, wy + 0.9, wz);
+            scene.add(nameTag);
+
+            npcList.push({
+                data: def,
+                mesh,
+                material: mat,
+                nameTag,
+                animFrame: 0,
+                animTimer: 0,
+                moveDir: new THREE.Vector2(0, 1),
+                spriteCols: cols,
+                spriteRows: rows,
+                dialogNodeId: 'start',
+            });
+        }
+    }
+
+    // สร้าง name tag เป็น sprite canvas
+    function createNPCNameTag(name) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256; canvas.height = 48;
+        const ctx = canvas.getContext('2d');
+
+        // background
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        const rr = 10;
+        ctx.beginPath();
+        ctx.moveTo(rr, 0);
+        ctx.lineTo(256 - rr, 0);
+        ctx.quadraticCurveTo(256, 0, 256, rr);
+        ctx.lineTo(256, 48 - rr);
+        ctx.quadraticCurveTo(256, 48, 256 - rr, 48);
+        ctx.lineTo(rr, 48);
+        ctx.quadraticCurveTo(0, 48, 0, 48 - rr);
+        ctx.lineTo(0, rr);
+        ctx.quadraticCurveTo(0, 0, rr, 0);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.font = 'bold 22px "Segoe UI", sans-serif';
+        ctx.fillStyle = '#00d2ff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(name, 128, 24);
+
+        const tex = new THREE.CanvasTexture(canvas);
+        const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+        const sprite = new THREE.Sprite(mat);
+        sprite.scale.set(2.0, 0.38, 1);
+        return sprite;
+    }
+
+    // ===================== Dialog System =====================
+
+    function tryInteractNPC() {
+        if (dialogOpen) {
+            // ถ้า dialog กำลัง typing ให้แสดงข้อความทันที
+            if (dialogState && dialogState.typing) {
+                finishTyping();
+                return;
+            }
+            // ถ้า choices ว่าง = จบ dialog
+            const node = getCurrentDialogNode();
+            if (node && (!node.choices || node.choices.length === 0)) {
+                closeDialog();
+                return;
+            }
+            return;
+        }
+        if (nearbyNPC) {
+            openDialog(nearbyNPC);
+        }
+    }
+
+    function openDialog(npc) {
+        dialogOpen = true;
+        npc.dialogNodeId = 'start';
+        dialogState = { npc, typing: false, charIdx: 0 };
+        renderDialogNode(npc, npc.dialogNodeId);
+
+        const box = document.getElementById('dialog-box');
+        box.style.display = 'block';
+        requestAnimationFrame(() => box.classList.add('visible'));
+
+        // หยุดเดิน
+        Object.keys(keys).forEach(k => keys[k] = false);
+        targetPos = null;
+    }
+
+    function closeDialog() {
+        dialogOpen = false;
+        dialogState = null;
+
+        const box = document.getElementById('dialog-box');
+        box.classList.remove('visible');
+        setTimeout(() => { box.style.display = 'none'; }, 250);
+    }
+
+    function getCurrentDialogNode() {
+        if (!dialogState) return null;
+        const npc = dialogState.npc;
+        return (npc.data.dialog || []).find(n => n.id === npc.dialogNodeId) || null;
+    }
+
+    function renderDialogNode(npc, nodeId) {
+        const def = npc.data;
+        const node = (def.dialog || []).find(n => n.id === nodeId);
+        if (!node) { closeDialog(); return; }
+
+        npc.dialogNodeId = nodeId;
+
+        // Header
+        document.getElementById('dialog-name').textContent = def.name || 'NPC';
+        document.getElementById('dialog-name-sub').textContent = def.title || 'ชาวบ้าน';
+
+        // Avatar
+        const avatarEl = document.getElementById('dialog-avatar');
+        avatarEl.textContent = def.emoji || '🧑';
+
+        // Choices (ซ่อนก่อน)
+        const choicesEl = document.getElementById('dialog-choices');
+        choicesEl.innerHTML = '';
+        choicesEl.style.display = 'none';
+
+        const continueHint = document.getElementById('dialog-continue-hint');
+        continueHint.style.display = 'none';
+
+        // Typewriter effect
+        startTypewriter(node.text || '', () => {
+            // เสร็จแล้วแสดง choices หรือ continue
+            if (node.choices && node.choices.length > 0) {
+                buildChoices(npc, node.choices);
+                continueHint.style.display = 'none';
+            } else {
+                continueHint.style.display = 'block';
+                continueHint.textContent = npc.data._isEnd ? '[ กด E หรือ Space เพื่อปิด ]' : '[ กด E หรือ Space เพื่อจบการสนทนา ]';
+            }
+        });
+    }
+
+    function startTypewriter(text, onDone) {
+        const textEl = document.getElementById('dialog-text');
+        textEl.innerHTML = '';
+        let i = 0;
+        dialogState.typing = true;
+        dialogState.fullText = text;
+        dialogState.charIdx = 0;
+
+        // เพิ่ม cursor
+        const cursor = document.createElement('span');
+        cursor.className = 'cursor';
+
+        const interval = setInterval(() => {
+            if (!dialogState) { clearInterval(interval); return; }
+            i++;
+            textEl.textContent = text.slice(0, i);
+            textEl.appendChild(cursor);
+            dialogState.charIdx = i;
+
+            if (i >= text.length) {
+                clearInterval(interval);
+                dialogState.typing = false;
+                cursor.remove();
+                textEl.textContent = text;
+                if (onDone) onDone();
+            }
+        }, 28);
+
+        dialogState._typeInterval = interval;
+    }
+
+    function finishTyping() {
+        if (!dialogState) return;
+        clearInterval(dialogState._typeInterval);
+        dialogState.typing = false;
+        const textEl = document.getElementById('dialog-text');
+        textEl.textContent = dialogState.fullText;
+
+        const node = getCurrentDialogNode();
+        if (!node) return;
+        if (node.choices && node.choices.length > 0) {
+            buildChoices(dialogState.npc, node.choices);
+            document.getElementById('dialog-continue-hint').style.display = 'none';
+        } else {
+            document.getElementById('dialog-continue-hint').style.display = 'block';
+        }
+    }
+
+    function buildChoices(npc, choices) {
+        const el = document.getElementById('dialog-choices');
+        el.innerHTML = '';
+        el.style.display = 'flex';
+        choices.forEach(ch => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.textContent = ch.text;
+            btn.addEventListener('click', () => {
+                el.innerHTML = '';
+                el.style.display = 'none';
+                if (ch.next) {
+                    renderDialogNode(npc, ch.next);
+                } else {
+                    closeDialog();
+                }
+            });
+            el.appendChild(btn);
+        });
+    }
+
+    // ===================== Height Map System =====================
     let heightMap = [];
     let mapCols = 0, mapRows = 0;
-    const HEIGHT_UNIT = 0.5; // 1 level = 0.5 หน่วย
+    const HEIGHT_UNIT = 0.5;
 
-    // แยก "grass1.2" → { texKey: "grass1", height: 2 }
     function parseTileToken(token) {
         const dotIdx = token.lastIndexOf('.');
         if (dotIdx !== -1) {
             const maybeNum = parseFloat(token.slice(dotIdx + 1));
-            if (!isNaN(maybeNum)) {
-                return { texKey: token.slice(0, dotIdx), height: maybeNum };
-            }
+            if (!isNaN(maybeNum)) return { texKey: token.slice(0, dotIdx), height: maybeNum };
         }
         return { texKey: token, height: 0 };
     }
 
-    // สร้าง BufferGeometry สี่เหลี่ยมที่มีความสูงต่างกันในแต่ละมุม
-    // corner heights: [NW, NE, SW, SE]  (N=row-1 side, S=row+1 side)
     function createTileGeometry(hNW, hNE, hSW, hSE) {
         const hs = HEIGHT_UNIT;
-        // positions: สี่จุดมุมของ tile (local space, centered at origin)
         const h = 0.5 * TILE_SIZE;
         const positions = new Float32Array([
-            -h, hSW * hs,  h,   // SW (front-left)
-             h, hSE * hs,  h,   // SE (front-right)
-            -h, hNW * hs, -h,   // NW (back-left)
-             h, hNE * hs, -h,   // NE (back-right)
+            -h, hSW * hs,  h,
+             h, hSE * hs,  h,
+            -h, hNW * hs, -h,
+             h, hNE * hs, -h,
         ]);
-        const uvs = new Float32Array([
-            0, 0,
-            1, 0,
-            0, 1,
-            1, 1,
-        ]);
-        // สองสามเหลี่ยม: SW-SE-NW และ SE-NE-NW
-        const indices = new Uint16Array([0, 1, 2,  1, 3, 2]);
-
+        const uvs = new Float32Array([0,0, 1,0, 0,1, 1,1]);
+        const indices = new Uint16Array([0,1,2, 1,3,2]);
         const geo = new THREE.BufferGeometry();
         geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         geo.setAttribute('uv',       new THREE.BufferAttribute(uvs, 2));
@@ -461,33 +1013,25 @@
     function parseAndCreateMap(rawMap) {
         mapRows = rawMap.length;
         mapCols = 0;
-        // สร้าง heightMap 2D จาก rawMap
         const parsedTiles = rawMap.map(rowString => {
             const tokens = rowString.match(/\[(.*?)\]/g).map(t => t.replace(/[\[\]]/g, ''));
             if (tokens.length > mapCols) mapCols = tokens.length;
             return tokens.map(parseTileToken);
         });
 
-        // เติม heightMap
         heightMap = Array.from({ length: mapRows }, (_, r) =>
             Array.from({ length: mapCols }, (_, c) =>
                 (parsedTiles[r] && parsedTiles[r][c]) ? parsedTiles[r][c].height : 0
             )
         );
 
-        // helper: ดึง height ปลอดภัย
         const H = (r, c) => {
             if (r < 0 || r >= mapRows || c < 0 || c >= mapCols) return 0;
             return heightMap[r][c];
         };
 
-        // สร้าง tile mesh โดยใช้ corner averaging
         parsedTiles.forEach((row, r) => {
             row.forEach(({ texKey, height }, c) => {
-                // ความสูงของมุมแต่ละจุด = เฉลี่ยจาก tile รอบข้าง
-                // NW corner = avg(r,c), (r-1,c), (r,c-1), (r-1,c-1)
-                const cornerH = (dr, dc) => (H(r+dr, c+dc) + H(r+dr-1, c+dc) + H(r+dr, c+dc-1) + H(r+dr-1, c+dc-1)) / 4;
-                // ใช้ smooth corner จาก tile ข้างเคียง
                 const hNW = (H(r,c) + H(r-1,c) + H(r,c-1) + H(r-1,c-1)) / 4;
                 const hNE = (H(r,c) + H(r-1,c) + H(r,c+1) + H(r-1,c+1)) / 4;
                 const hSW = (H(r,c) + H(r+1,c) + H(r,c-1) + H(r+1,c-1)) / 4;
@@ -499,14 +1043,11 @@
                 const tile = new THREE.Mesh(geo, material);
                 tile.position.set(c * TILE_SIZE, 0, r * TILE_SIZE);
                 groundGroup.add(tile);
-
-                // ถ้า tile นี้สูงกว่า tile ด้านข้าง สร้าง "ผนังด้านข้าง" กัน gap
                 buildSideWalls(r, c, texKey, hNW, hNE, hSW, hSE);
             });
         });
     }
 
-    // สร้างผนังด้านข้างเพื่อป้องกัน gap ระหว่าง tile ที่ต่างความสูง
     function buildSideWalls(r, c, texKey, hNW, hNE, hSW, hSE) {
         const H = (rr, cc) => {
             if (rr < 0 || rr >= mapRows || cc < 0 || cc >= mapCols) return 0;
@@ -518,62 +1059,33 @@
         const x = c * TILE_SIZE;
         const z = r * TILE_SIZE;
 
-        // ตรวจ 4 ด้าน: ถ้า neighbor ต่ำกว่า ให้สร้างผนัง
-        // South wall (z+h)
         const rS = r + 1;
         if (rS < mapRows) {
-            const hSnW = (H(rS,c) + H(rS-1,c) + H(rS,c-1) + H(rS-1,c-1)) / 4;
-            const hSnE = (H(rS,c) + H(rS-1,c) + H(rS,c+1) + H(rS-1,c+1)) / 4;
-            if (hSW > hSnW + 0.001 || hSE > hSnE + 0.001) {
-                buildWallQuad(tex,
-                    x - h, hSnW * hs, z + h,
-                    x + h, hSnE * hs, z + h,
-                    x - h, hSW  * hs, z + h,
-                    x + h, hSE  * hs, z + h
-                );
-            }
+            const hSnW = (H(rS,c)+H(rS-1,c)+H(rS,c-1)+H(rS-1,c-1))/4;
+            const hSnE = (H(rS,c)+H(rS-1,c)+H(rS,c+1)+H(rS-1,c+1))/4;
+            if (hSW > hSnW+0.001 || hSE > hSnE+0.001)
+                buildWallQuad(tex, x-h,hSnW*hs,z+h, x+h,hSnE*hs,z+h, x-h,hSW*hs,z+h, x+h,hSE*hs,z+h);
         }
-        // North wall (z-h)
         const rN = r - 1;
         if (rN >= 0) {
-            const hNnW = (H(rN,c) + H(rN+1,c) + H(rN,c-1) + H(rN+1,c-1)) / 4;
-            const hNnE = (H(rN,c) + H(rN+1,c) + H(rN,c+1) + H(rN+1,c+1)) / 4;
-            if (hNW > hNnW + 0.001 || hNE > hNnE + 0.001) {
-                buildWallQuad(tex,
-                    x + h, hNnE * hs, z - h,
-                    x - h, hNnW * hs, z - h,
-                    x + h, hNE  * hs, z - h,
-                    x - h, hNW  * hs, z - h
-                );
-            }
+            const hNnW = (H(rN,c)+H(rN+1,c)+H(rN,c-1)+H(rN+1,c-1))/4;
+            const hNnE = (H(rN,c)+H(rN+1,c)+H(rN,c+1)+H(rN+1,c+1))/4;
+            if (hNW > hNnW+0.001 || hNE > hNnE+0.001)
+                buildWallQuad(tex, x+h,hNnE*hs,z-h, x-h,hNnW*hs,z-h, x+h,hNE*hs,z-h, x-h,hNW*hs,z-h);
         }
-        // East wall (x+h)
         const cE = c + 1;
         if (cE < mapCols) {
-            const hEnS = (H(r,cE) + H(r+1,cE) + H(r,cE-1) + H(r+1,cE-1)) / 4;
-            const hEnN = (H(r,cE) + H(r-1,cE) + H(r,cE-1) + H(r-1,cE-1)) / 4;
-            if (hSE > hEnS + 0.001 || hNE > hEnN + 0.001) {
-                buildWallQuad(tex,
-                    x + h, hEnS * hs, z + h,
-                    x + h, hEnN * hs, z - h,
-                    x + h, hSE  * hs, z + h,
-                    x + h, hNE  * hs, z - h
-                );
-            }
+            const hEnS = (H(r,cE)+H(r+1,cE)+H(r,cE-1)+H(r+1,cE-1))/4;
+            const hEnN = (H(r,cE)+H(r-1,cE)+H(r,cE-1)+H(r-1,cE-1))/4;
+            if (hSE > hEnS+0.001 || hNE > hEnN+0.001)
+                buildWallQuad(tex, x+h,hEnS*hs,z+h, x+h,hEnN*hs,z-h, x+h,hSE*hs,z+h, x+h,hNE*hs,z-h);
         }
-        // West wall (x-h)
         const cW = c - 1;
         if (cW >= 0) {
-            const hWnS = (H(r,cW) + H(r+1,cW) + H(r,cW+1) + H(r+1,cW+1)) / 4;
-            const hWnN = (H(r,cW) + H(r-1,cW) + H(r,cW+1) + H(r-1,cW+1)) / 4;
-            if (hSW > hWnS + 0.001 || hNW > hWnN + 0.001) {
-                buildWallQuad(tex,
-                    x - h, hWnN * hs, z - h,
-                    x - h, hWnS * hs, z + h,
-                    x - h, hNW  * hs, z - h,
-                    x - h, hSW  * hs, z + h
-                );
-            }
+            const hWnS = (H(r,cW)+H(r+1,cW)+H(r,cW+1)+H(r+1,cW+1))/4;
+            const hWnN = (H(r,cW)+H(r-1,cW)+H(r,cW+1)+H(r-1,cW+1))/4;
+            if (hSW > hWnS+0.001 || hNW > hWnN+0.001)
+                buildWallQuad(tex, x-h,hWnN*hs,z-h, x-h,hWnS*hs,z+h, x-h,hNW*hs,z-h, x-h,hSW*hs,z+h);
         }
     }
 
@@ -587,29 +1099,23 @@
         geo.setIndex(new THREE.BufferAttribute(indices, 1));
         geo.computeVertexNormals();
         const mat = new THREE.MeshLambertMaterial({ map: tex, side: THREE.DoubleSide });
-        const mesh = new THREE.Mesh(geo, mat);
-        groundGroup.add(mesh);
+        groundGroup.add(new THREE.Mesh(geo, mat));
     }
 
-    // หาความสูงของพื้นที่ตำแหน่ง (worldX, worldZ) โดย bilinear interpolation
     function getTerrainHeight(worldX, worldZ) {
         const c = worldX / TILE_SIZE;
         const r = worldZ / TILE_SIZE;
         const c0 = Math.floor(c), r0 = Math.floor(r);
         const fc = c - c0, fr = r - r0;
-
         const H = (rr, cc) => {
             const rC = Math.max(0, Math.min(mapRows - 1, rr));
             const cC = Math.max(0, Math.min(mapCols - 1, cc));
             return (heightMap[rC] && heightMap[rC][cC] != null) ? heightMap[rC][cC] : 0;
         };
-
-        // bilinear interpolation ของ smooth corner heights
-        const hNW = (H(r0,c0) + H(r0-1,c0) + H(r0,c0-1) + H(r0-1,c0-1)) / 4;
-        const hNE = (H(r0,c0) + H(r0-1,c0) + H(r0,c0+1) + H(r0-1,c0+1)) / 4;
-        const hSW = (H(r0,c0) + H(r0+1,c0) + H(r0,c0-1) + H(r0+1,c0-1)) / 4;
-        const hSE = (H(r0,c0) + H(r0+1,c0) + H(r0,c0+1) + H(r0+1,c0+1)) / 4;
-
+        const hNW = (H(r0,c0)+H(r0-1,c0)+H(r0,c0-1)+H(r0-1,c0-1))/4;
+        const hNE = (H(r0,c0)+H(r0-1,c0)+H(r0,c0+1)+H(r0-1,c0+1))/4;
+        const hSW = (H(r0,c0)+H(r0+1,c0)+H(r0,c0-1)+H(r0+1,c0-1))/4;
+        const hSE = (H(r0,c0)+H(r0+1,c0)+H(r0,c0+1)+H(r0+1,c0+1))/4;
         const hN = hNW + (hNE - hNW) * fc;
         const hS = hSW + (hSE - hSW) * fc;
         return (hN + (hS - hN) * fr) * HEIGHT_UNIT;
@@ -640,14 +1146,89 @@
         scene.add(player);
     }
 
-    function handleMovement() {
-        let dx = 0, dz = 0;
+    // ===================== NPC Update =====================
 
+    function updateNPCs() {
+        let closestNPC = null;
+        let closestDist = Infinity;
+
+        npcList.forEach(npc => {
+            const mesh = npc.mesh;
+
+            // อัปเดต Y ตามพื้น
+            if (mapRows > 0) {
+                const targetY = getTerrainHeight(mesh.position.x, mesh.position.z) + 0.6;
+                mesh.position.y += (targetY - mesh.position.y) * 0.25;
+                npc.nameTag.position.set(mesh.position.x, mesh.position.y + 0.9, mesh.position.z);
+            }
+
+            // billboard: หันหน้าเข้ากล้องเสมอ
+            mesh.quaternion.copy(camera.quaternion);
+            npc.nameTag.quaternion.copy(camera.quaternion);
+
+            // คำนวณทิศที่ NPC "มองผู้เล่น" (เพื่อเลือก row ของ sprite)
+            const dx = player.position.x - mesh.position.x;
+            const dz = player.position.z - mesh.position.z;
+            npc.moveDir.set(dx, dz).normalize();
+
+            // sprite row เหมือนผู้เล่น
+            updateNPCSprite(npc);
+
+            // ตรวจระยะ
+            const dist = Math.sqrt(dx*dx + dz*dz);
+            if (dist < closestDist) {
+                closestDist = dist;
+                closestNPC = npc;
+            }
+        });
+
+        // แสดง hint ถ้าอยู่ใกล้
+        const hintEl = document.getElementById('npc-interact-hint');
+        const interactBtn = document.getElementById('interact-btn');
+
+        if (!dialogOpen && closestNPC && closestDist <= NPC_INTERACT_DIST) {
+            nearbyNPC = closestNPC;
+            hintEl.style.display = 'block';
+            if (isMobile) {
+                interactBtn.style.display = 'flex';
+                interactBtn.classList.add('active-npc');
+            }
+        } else if (!dialogOpen) {
+            nearbyNPC = null;
+            hintEl.style.display = 'none';
+            if (isMobile) interactBtn.classList.remove('active-npc');
+        }
+    }
+
+    function updateNPCSprite(npc) {
+        const cols = npc.spriteCols;
+        const rows = npc.spriteRows;
+
+        // ใช้ logic เดียวกับผู้เล่น: เทียบทิศกับกล้อง
+        const camAngle  = Math.atan2(camera.position.x - npc.mesh.position.x, camera.position.z - npc.mesh.position.z);
+        const moveAngle = Math.atan2(npc.moveDir.x, npc.moveDir.y);
+        let diff = (moveAngle - camAngle + Math.PI * 2) % (Math.PI * 2);
+
+        let row = 0;
+        if      (diff > Math.PI * 0.25 && diff <= Math.PI * 0.75) row = 2;
+        else if (diff > Math.PI * 0.75 && diff <= Math.PI * 1.25) row = 3;
+        else if (diff > Math.PI * 1.25 && diff <= Math.PI * 1.75) row = 1;
+        else row = 0;
+
+        // NPC ยืนนิ่ง frame = 0
+        npc.material.map.offset.x = 0;
+        npc.material.map.offset.y = (rows - 1 - row) / rows;
+    }
+
+    // ===================== Player =====================
+
+    function handleMovement() {
+        if (dialogOpen) return false; // ห้ามเดินตอน dialog เปิด
+
+        let dx = 0, dz = 0;
         const forward = new THREE.Vector3();
         camera.getWorldDirection(forward);
-        forward.y = 0;
-        forward.normalize();
-
+        forward.y = 0; forward.normalize();
         const right = new THREE.Vector3();
         right.crossVectors(forward, camera.up);
 
@@ -659,24 +1240,23 @@
         let moved = false;
 
         if (dx !== 0 || dz !== 0) {
-            const mag = Math.sqrt(dx * dx + dz * dz);
-            player.position.x += (dx / mag) * MOVE_SPEED;
-            player.position.z += (dz / mag) * MOVE_SPEED;
-            playerMoveDir.set(dx / mag, dz / mag);
+            const mag = Math.sqrt(dx*dx + dz*dz);
+            player.position.x += (dx/mag) * MOVE_SPEED;
+            player.position.z += (dz/mag) * MOVE_SPEED;
+            playerMoveDir.set(dx/mag, dz/mag);
             animTimer += 0.016;
             if (animTimer > animSpeed) { animFrame = (animFrame + 1) % SPRITE_COLS; animTimer = 0; }
             moved = true;
         }
 
-        // PC เท่านั้น: คลิกเดิน
         if (!isMobile && targetPos) {
             const tdx = targetPos.x - player.position.x;
             const tdz = targetPos.z - player.position.z;
-            const dist = Math.sqrt(tdx * tdx + tdz * tdz);
+            const dist = Math.sqrt(tdx*tdx + tdz*tdz);
             if (dist > 0.1) {
-                player.position.x += (tdx / dist) * MOVE_SPEED;
-                player.position.z += (tdz / dist) * MOVE_SPEED;
-                playerMoveDir.set(tdx / dist, tdz / dist);
+                player.position.x += (tdx/dist) * MOVE_SPEED;
+                player.position.z += (tdz/dist) * MOVE_SPEED;
+                playerMoveDir.set(tdx/dist, tdz/dist);
                 animTimer += 0.016;
                 if (animTimer > animSpeed) { animFrame = (animFrame + 1) % SPRITE_COLS; animTimer = 0; }
                 moved = true;
@@ -685,7 +1265,6 @@
             }
         }
 
-        // อัปเดต Y ตามความสูงพื้น (smooth lerp)
         if (mapRows > 0) {
             const targetY = getTerrainHeight(player.position.x, player.position.z) + 0.6;
             player.position.y += (targetY - player.position.y) * 0.25;
@@ -701,17 +1280,18 @@
         handleMovement();
         updatePlayerSprite();
         updateCameraPosition();
+        updateNPCs();
         renderer.render(scene, camera);
     }
 
     function updatePlayerSprite() {
         player.quaternion.copy(camera.quaternion);
-        const camAngle = Math.atan2(camera.position.x - player.position.x, camera.position.z - player.position.z);
+        const camAngle  = Math.atan2(camera.position.x - player.position.x, camera.position.z - player.position.z);
         const moveAngle = Math.atan2(playerMoveDir.x, playerMoveDir.y);
         let diff = (moveAngle - camAngle + Math.PI * 2) % (Math.PI * 2);
 
         let row = 0;
-        if (diff > Math.PI * 0.25 && diff <= Math.PI * 0.75) row = 2;
+        if      (diff > Math.PI * 0.25 && diff <= Math.PI * 0.75) row = 2;
         else if (diff > Math.PI * 0.75 && diff <= Math.PI * 1.25) row = 3;
         else if (diff > Math.PI * 1.25 && diff <= Math.PI * 1.75) row = 1;
         else row = 0;
@@ -728,30 +1308,23 @@
         camera.lookAt(player.position.x, player.position.y, player.position.z);
     }
 
+    // ===================== Input =====================
+
     function setupInputHandlers() {
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
-
-        // ---- สถานะ touch ----
-        let touchState = {
-            // นิ้วเดียว: หมุนกล้อง
-            singleId: null,
-            singleLast: null,
-            // สองนิ้ว: zoom
-            lastPinchDist: null,
-        };
+        let touchState = { singleId: null, singleLast: null, lastPinchDist: null };
 
         function getTouchDistance(t1, t2) {
-            const dx = t1.clientX - t2.clientX;
-            const dy = t1.clientY - t2.clientY;
-            return Math.sqrt(dx * dx + dy * dy);
+            const dx = t1.clientX - t2.clientX; const dy = t1.clientY - t2.clientY;
+            return Math.sqrt(dx*dx + dy*dy);
         }
 
-        // ================ PC Mouse ================
         window.addEventListener('mousedown', (e) => {
-            if (e.target.closest('#inventory-ui') || e.target.closest('#dpad')) return;
+            if (e.target.closest('#inventory-ui') || e.target.closest('#dpad') || e.target.closest('#dialog-box')) return;
             if (!isGameStarted) return;
             if (e.button === 0) {
+                if (dialogOpen) return;
                 mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
                 raycaster.setFromCamera(mouse, camera);
@@ -767,7 +1340,7 @@
         window.addEventListener('mousemove', (e) => {
             if (isRightMouseDown) {
                 cameraRotation.theta -= (e.clientX - lastMousePos.x) * 0.01;
-                cameraRotation.phi -= (e.clientY - lastMousePos.y) * 0.01;
+                cameraRotation.phi   -= (e.clientY - lastMousePos.y) * 0.01;
                 cameraRotation.phi = Math.max(0.1, Math.min(Math.PI / 2.1, cameraRotation.phi));
                 lastMousePos = { x: e.clientX, y: e.clientY };
             }
@@ -776,38 +1349,27 @@
             cameraDistance = Math.max(5, Math.min(50, cameraDistance + e.deltaY * 0.02));
         });
 
-        // ================ Mobile Touch ================
-        // นิ้วเดียว = หมุนกล้อง, สองนิ้ว = zoom
-
         window.addEventListener('touchstart', (e) => {
-            if (e.target.closest('#inventory-ui') || e.target.closest('#dpad')) return;
+            if (e.target.closest('#inventory-ui') || e.target.closest('#dpad') || e.target.closest('#dialog-box') || e.target.closest('#interact-btn')) return;
             if (!isGameStarted) return;
             e.preventDefault();
-
             const touches = e.touches;
-
             if (touches.length === 1) {
-                // นิ้วเดียว: เริ่มหมุนกล้อง
                 touchState.singleId = touches[0].identifier;
                 touchState.singleLast = { x: touches[0].clientX, y: touches[0].clientY };
                 touchState.lastPinchDist = null;
             } else if (touches.length === 2) {
-                // สองนิ้ว: เริ่ม zoom
-                touchState.singleId = null;
-                touchState.singleLast = null;
+                touchState.singleId = null; touchState.singleLast = null;
                 touchState.lastPinchDist = getTouchDistance(touches[0], touches[1]);
             }
         }, { passive: false });
 
         window.addEventListener('touchmove', (e) => {
-            if (e.target.closest('#inventory-ui') || e.target.closest('#dpad')) return;
+            if (e.target.closest('#inventory-ui') || e.target.closest('#dpad') || e.target.closest('#dialog-box')) return;
             if (!isGameStarted) return;
             e.preventDefault();
-
             const touches = e.touches;
-
             if (touches.length === 1 && touchState.singleId !== null) {
-                // นิ้วเดียว: หมุนกล้อง (ใช้ได้ทั้งตอนหยุดและตอนกำลังเดิน)
                 const t = touches[0];
                 if (touchState.singleLast) {
                     const dx = t.clientX - touchState.singleLast.x;
@@ -817,9 +1379,7 @@
                     cameraRotation.phi = Math.max(0.1, Math.min(Math.PI / 2.1, cameraRotation.phi));
                 }
                 touchState.singleLast = { x: t.clientX, y: t.clientY };
-
             } else if (touches.length === 2) {
-                // สองนิ้ว: zoom
                 const newDist = getTouchDistance(touches[0], touches[1]);
                 if (touchState.lastPinchDist !== null) {
                     const delta = touchState.lastPinchDist - newDist;
@@ -833,24 +1393,20 @@
             if (!isGameStarted) return;
             const touches = e.touches;
             if (touches.length === 0) {
-                // ปล่อยทุกนิ้ว
-                touchState.singleId = null;
-                touchState.singleLast = null;
-                touchState.lastPinchDist = null;
+                touchState.singleId = null; touchState.singleLast = null; touchState.lastPinchDist = null;
             } else if (touches.length === 1) {
-                // เหลือนิ้วเดียว: เปลี่ยนกลับเป็น single touch rotate
                 touchState.singleId = touches[0].identifier;
                 touchState.singleLast = { x: touches[0].clientX, y: touches[0].clientY };
                 touchState.lastPinchDist = null;
             }
         }, { passive: false });
 
-        window.addEventListener('touchcancel', (e) => {
-            touchState.singleId = null;
-            touchState.singleLast = null;
-            touchState.lastPinchDist = null;
+        window.addEventListener('touchcancel', () => {
+            touchState.singleId = null; touchState.singleLast = null; touchState.lastPinchDist = null;
         }, { passive: false });
     }
+
+    // ===================== UI =====================
 
     function updateInventoryUI() {
         for (let i = 0; i < 5; i++) {
@@ -884,7 +1440,7 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
-    function createPlaceholderTex(color) {
+    function createColorTex(color) {
         const canvas = document.createElement('canvas');
         canvas.width = 32; canvas.height = 32;
         const ctx = canvas.getContext('2d');
