@@ -56,11 +56,11 @@
         .main-content {
             position: relative;
             z-index: 2;
-            margin-top: -60px;
+            margin-top: -40px;
         }
 
         @media (max-width: 768px) {
-            .main-content { margin-top: -35px; }
+            .main-content { margin-top: -25px; }
         }
 
         .floating-shapes {
@@ -68,6 +68,38 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
+        }
+
+        /* Snowfall */
+        .snow-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1500;
+        }
+
+        .snowflake {
+            position: absolute;
+            top: -10px;
+            color: #fff;
+            user-select: none;
+            animation-name: snow-fall, snow-sway;
+            animation-timing-function: linear, ease-in-out;
+            animation-iteration-count: infinite, infinite;
+        }
+
+        @keyframes snow-fall {
+            0% { transform: translateY(-10vh); }
+            100% { transform: translateY(110vh); }
+        }
+
+        @keyframes snow-sway {
+            0%, 100% { margin-left: 0; }
+            50% { margin-left: 20px; }
         }
 
         .shape {
@@ -773,6 +805,8 @@
         </div>
     </div>
 
+    <div class="snow-container" id="snowContainer"></div>
+
     <a href="admin.html" class="admin-float-btn" title="จัดการ Admin">
         <i class="fas fa-cog"></i>
     </a>
@@ -1255,7 +1289,39 @@
             if (document.getElementById('portfolio').classList.contains('active')) {
                 loadPortfolioPosts();
             }
+            startSnowfall();
         });
+
+        // Snowfall effect - falls continuously, a little at a time
+        function startSnowfall() {
+            const container = document.getElementById('snowContainer');
+            if (!container) return;
+
+            function createSnowflake() {
+                const flake = document.createElement('div');
+                flake.className = 'snowflake';
+                flake.textContent = '❄';
+
+                const size = Math.random() * 14 + 8; // 8px - 22px
+                const startLeft = Math.random() * 100; // vw
+                const fallDuration = Math.random() * 8 + 8; // 8s - 16s
+                const swayDuration = Math.random() * 3 + 2; // 2s - 5s
+                const opacity = Math.random() * 0.5 + 0.4; // 0.4 - 0.9
+
+                flake.style.left = startLeft + 'vw';
+                flake.style.fontSize = size + 'px';
+                flake.style.opacity = opacity;
+                flake.style.animationDuration = `${fallDuration}s, ${swayDuration}s`;
+
+                container.appendChild(flake);
+
+                // Remove after it finishes falling to avoid piling up DOM nodes
+                setTimeout(() => flake.remove(), fallDuration * 1000);
+            }
+
+            // Spawn a snowflake every so often - gentle, not too much at once
+            setInterval(createSnowflake, 400);
+        }
 
         // Parallax effect
         if (window.innerWidth > 768) {
