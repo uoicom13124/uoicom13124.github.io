@@ -7,6 +7,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+        @font-face {
+            font-family: 'KBS';
+            src: url('https://db.onlinewebfonts.com/t/6f7ae5abb3fd0c9c30a1b0f2e1d0c0b5.woff2') format('woff2'),
+                 url('https://db.onlinewebfonts.com/t/6f7ae5abb3fd0c9c30a1b0f2e1d0c0b5.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         :root {
             --primary: #2C5AA0;
             --primary-dark: #1E3A60;
@@ -17,6 +25,7 @@
             --bg: #E0F2F1;
             --shadow: rgba(0, 0, 0, 0.15);
             --shadow-lg: rgba(0, 0, 0, 0.25);
+            --font-family: 'KBS', sans-serif;
         }
 
         * { 
@@ -26,7 +35,7 @@
         }
 
         body {
-            font-family: 'Kanit', sans-serif;
+            font-family: var(--font-family);
             line-height: 1.6;
             color: var(--text);
             background: linear-gradient(135deg, #2C5282 0%, #1E3A60 50%, #0F3460 100%);
@@ -106,6 +115,30 @@
 
         .nav-brand:hover {
             transform: scale(1.05);
+        }
+
+        .font-toggle-btn {
+            background: rgba(77, 208, 225, 0.2);
+            border: 1px solid #4DD0E1;
+            color: #4DD0E1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font-family);
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .font-toggle-btn:hover {
+            background: #4DD0E1;
+            color: #0F3460;
+        }
+
+        .font-toggle-btn.kbs-active {
+            background: #4DD0E1;
+            color: #0F3460;
+            font-weight: 700;
         }
 
         .menu-toggle {
@@ -791,15 +824,20 @@
     <nav>
         <div class="container">
             <div class="nav-brand" onclick="navigateTo('home')">📊 เมก้า Portfolio</div>
-            <button class="menu-toggle" onclick="toggleMenu()">
-                <i class="fas fa-bars"></i>
-            </button>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button class="font-toggle-btn" id="fontToggleBtn" onclick="toggleFont()" title="เปลี่ยนฟ้อต">
+                    <i class="fas fa-font"></i> KBS
+                </button>
+                <button class="menu-toggle" onclick="toggleMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
             <ul class="nav-links" id="navLinks">
                 <li><a onclick="navigateTo('home')" data-page="home" class="active">หน้าหลัก</a></li>
                 <li><a onclick="navigateTo('about')" data-page="about">เกี่ยวกับ</a></li>
                 <li><a onclick="navigateTo('skills')" data-page="skills">ทักษะ</a></li>
                 <li><a onclick="navigateTo('portfolio')" data-page="portfolio">ผลงาน</a></li>
-                <li><a onclick="navigateTo('search')" data-page="search">🔍 ค้นชื่อสอบ</a></li>
+                <li><a onclick="navigateTo('search')" data-page="search">🔍 เช็คโกงข้อสอบ</a></li>
                 <li><a onclick="navigateTo('comments')" data-page="comments">ความคิดเห็น</a></li>
                 <li><a onclick="navigateTo('contact')" data-page="contact">ติดต่อ</a></li>
             </ul>
@@ -1242,6 +1280,41 @@
             const menuToggle = document.querySelector('.menu-toggle');
             if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
                 navLinks.classList.remove('active');
+            }
+        });
+
+        // Font Toggle
+        let isKBSFont = true;
+
+        function toggleFont() {
+            isKBSFont = !isKBSFont;
+            const btn = document.getElementById('fontToggleBtn');
+            const root = document.documentElement;
+
+            if (isKBSFont) {
+                root.style.setProperty('--font-family', "'KBS', sans-serif");
+                btn.classList.add('kbs-active');
+                btn.innerHTML = '<i class="fas fa-font"></i> KBS ✓';
+                localStorage.setItem('fontPreference', 'kbs');
+            } else {
+                root.style.setProperty('--font-family', "'Kanit', sans-serif");
+                btn.classList.remove('kbs-active');
+                btn.innerHTML = '<i class="fas fa-font"></i> ฟ้อนปกติ';
+                localStorage.setItem('fontPreference', 'kanit');
+            }
+        }
+
+        // Load font preference on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const preference = localStorage.getItem('fontPreference');
+            const btn = document.getElementById('fontToggleBtn');
+            if (preference === 'kanit') {
+                isKBSFont = false;
+                toggleFont();
+            } else {
+                // ค่าเริ่มต้น KBS
+                btn.classList.add('kbs-active');
+                btn.innerHTML = '<i class="fas fa-font"></i> KBS ✓';
             }
         });
     </script>
